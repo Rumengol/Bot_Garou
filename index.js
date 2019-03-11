@@ -3,6 +3,8 @@ const Discord = require('discord.js');
 const bot = new Discord.Client();
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync')
+const PORT = process.env.PORT || 5000
+bot.listen(PORT, ()=> console.log(`Listening on port ${ PORT }`))
 
 const adapter = new FileSync('adminrole.json')
 const db = low(adapter);
