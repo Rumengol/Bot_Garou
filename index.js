@@ -119,6 +119,15 @@ bot.login('NDYzOTcwNzg4NjI2NjYxMzc3.Dh4KCA._RieY0iR58-lgHhwFZLtQUakPl4');
     }
   }
 
+  //fait durer le bot 
+  else if(spliteMessage[0] === prefix + 'durable'){
+    if(adminlist.includes(message.author) || mini === true){
+      message.delete();
+      message.channel.send("Bot durable activé.").then(mess =>(setTimeout(function(){mess.delete()},4000)))
+      setInterval(function(){message.guild.channels.get('554786165664776232').send("ping")},1680000);
+    }
+  }
+
     //initialistion des rôles
     else if(spliteMessage[0] == prefix + 'addrole'){
       if(adminlist.includes(message.author) || mini === true){
@@ -626,8 +635,8 @@ else {
       clearInterval(x);
       clearInterval(y);
       clearInterval(z);
-      var tempo = message.channel.send("Tous les décomptes ont été interrompus.")
-      setTimeout(tempo.delete,5000);
+      let tempo = message.channel.send("Tous les décomptes ont été interrompus.")
+      setTimeout(tempo.delete(),5000);
     }
   }
 
@@ -1059,9 +1068,12 @@ else{
 
 bot.on('messageReactionAdd', (reac,lui) => {
   if(reac.message === inscr){
-    var prerole = db.get(`roles`).map("id").value().indexOf("vivants")
-    var role = db.get(`roles[${prerole}].story_value`).value()
+    var prerole = [];
+    getRoleInDb("vivants",prerole,reac.message)
+    console.log(getRoleInDb("vivants",prerole,reac.message))
+    role = bidule;
     if(gameOn === false){
+      //Si on a atteint le maximum d'inscriptions
       if(reac.count > maxP+1){
           reac.remove(lui);
           lui.createDM().then(channel =>{
@@ -1099,8 +1111,8 @@ bot.on('messageReactionAdd', (reac,lui) => {
 
 bot.on('messageReactionRemove', (reac,lui) => {
   if(reac.message === inscr){
-    var prerole= [];
-          getRoleInDb("vivants",prerole,message)
+          var prerole= [];
+          getRoleInDb("vivants",prerole,reac.message)
           role= bidule;
 
         inscrits.splice(inscrits.indexOf(lui),1);
@@ -1170,7 +1182,8 @@ function getRoleInDb(machin,junk,message){
     }
       junk.forEach(minijunk => {
         if(db.get(`roles[${minijunk}].guild`).value() === message.guild.id){
-          bidule = db.get(`roles[${minijunk}].story_value`).value();
+          bidule = db.get(`roles[${minijunk}].story_value`).value()
+          return(db.get(`roles[${minijunk}].story_value`).value())
         } else {return false}
       });
 }
