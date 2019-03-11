@@ -215,14 +215,7 @@ bot.login('NDYzOTcwNzg4NjI2NjYxMzc3.Dh4KCA._RieY0iR58-lgHhwFZLtQUakPl4');
         message.reply("commande refusée. Seuls les administrateurs peuvent lancer les parties.")
       }
 }
-    //désinscription (still bugged) - public
-   else if (spliteMessage[0] === prefix + 'désinscription') {
-  let role = message.guild.roles.find("name","Joueurs vivants");
-      message.member.removeRole(role);
-      message.member.addRole(Vrole);
-      message.reply(` tu n'es plus inscrit(e) !`);
     
-}
     //lancer la partie
    else if(spliteMessage[0] == prefix + 'gamestart'){
     message.delete();
@@ -626,11 +619,23 @@ else {
   }
   }
 
+  //arrête toutes les actions en cours
+  else if(spliteMessage[0] === prefix + 'stop'){
+    if(adminlist.includes(message.author) || mini === true){
+      message.delete();
+      clearInterval(x);
+      clearInterval(y);
+      clearInterval(z);
+      var tempo = message.channel.send("Tous les décomptes ont été interrompus.")
+      setTimeout(tempo.delete,5000);
+    }
+  }
+
   //Casse le bot
    else if(spliteMessage[0] === prefix + 'break'){
     if(adminlist.includes(message.author) || mini === true){
     message.delete();
-    message.guild.members.removeRole('27');
+  //  message.guild.members.removeRole('27');
   }
   
   else {
@@ -657,6 +662,7 @@ else {
                     .addField("► ``/gamend`` ","Termine la partie, ressuscitant tous les joueurs.")
                     .addField("► ``/allend`` ","Termine la session, réinitialisant les rôles.")
                     .addField("► ``/charme @membre`` ","Charme le joueur mentionné, le faisant rejoindre le salon #le-cercle-des-charmes.")
+                    .addField("► ``/stop`` ","Interrompt tous les décomptes en cours.")
                     .setColor("OxFF0000")
                   
                 message.channel.send(embed)
@@ -1098,6 +1104,7 @@ bot.on('messageReactionRemove', (reac,lui) => {
           role= bidule;
 
         inscrits.splice(inscrits.indexOf(lui),1);
+        console.log(inscrits);
         reac.message.guild.members.get(lui.id).removeRole(role);
         reac.message.edit(new Discord.RichEmbed()
         .setTitle("Inscriptions pour les parties de loup Garou")
