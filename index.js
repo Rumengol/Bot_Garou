@@ -124,7 +124,7 @@ bot.login('NDYzOTcwNzg4NjI2NjYxMzc3.Dh4KCA._RieY0iR58-lgHhwFZLtQUakPl4');
     if(adminlist.includes(message.author) || mini === true){
       message.delete();
       message.channel.send("Bot durable activé.").then(mess =>(setTimeout(function(){mess.delete()},4000)))
-      setInterval(function(){message.guild.channels.get('554786165664776232').send("ping")},1680000);
+      setInterval(function(){message.guild.channels.get('554786165664776232').send("ping")},540000);
     }
   }
 
