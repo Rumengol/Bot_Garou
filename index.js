@@ -39,6 +39,7 @@ db.defaults({roles : []}).write();
 
 bot.on('ready', () => {
     console.log('GRAOU est prêt!');
+    Activity();
   });
 
 bot.login('NDYzOTcwNzg4NjI2NjYxMzc3.Dh4KCA._RieY0iR58-lgHhwFZLtQUakPl4');
@@ -120,11 +121,11 @@ bot.login('NDYzOTcwNzg4NjI2NjYxMzc3.Dh4KCA._RieY0iR58-lgHhwFZLtQUakPl4');
   }
 
   //fait durer le bot 
-  else if(spliteMessage[0] === prefix + 'durable'){
+  else if(spliteMessage[0] === prefix + 'eco'){
     if(adminlist.includes(message.author) || mini === true){
       message.delete();
-      message.channel.send("Bot durable activé.").then(mess =>(setTimeout(function(){mess.delete()},4000)))
-      setInterval(function(){message.guild.channels.get('554786165664776232').send("ping")},540000);
+      message.channel.send("Le bot s'endormira après 30 minutes d'inactivité.").then(mess =>(setTimeout(function(){mess.delete()},4000)))
+      clearInterval(actif)
     }
   }
 
@@ -1213,4 +1214,9 @@ function checkmin(message){
      mini = true;; 
    }
   }
+}
+
+function Activity(){
+  actif = setInterval(function(){console.log('ping')},540000);
+  //setInterval(function(){message.guild.channels.get('554786165664776232').send("ping")},540000);
 }
