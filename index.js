@@ -385,7 +385,7 @@ bot.login(token);
 
     var prelieu = []
     getPlaceInDb("loups",prelieu,message)
-    lieu = mesage.guild.channels.get(lieuDB)
+    lieu = message.guild.channels.get(lieuDB)
 
     distribRoles.forEach(joueur => {
       if(joueur[1] === LG){
@@ -455,10 +455,12 @@ bot.login(token);
     blep = setTimeout(function(){
       eux.forEach(lui => {
         lui.setVoiceChannel(lieu2);
-        lui.removeRole(role);
         });
-    })
+    },3000)
   }
+  eux.forEach(lui =>{
+    lui.removeRole(role);
+  })
 } else {
   message.reply("commande refusée. Seuls les administrateurs peuvent terminer les sessions.")
 }
