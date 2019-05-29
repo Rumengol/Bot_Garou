@@ -807,9 +807,10 @@ else {
           .setDescription("La liste des rôles qui n'ont pas encore agi apparaît ci-dessous. Citez-en un pour déclencher son tour.")
           distribRoles.forEach(role => {
             if(rolesDeNuit.includes(role[1])){
-              if(roles[1] === LG && !rolajouer.includes(LG))
+              if(role[1] === LG && !rolajouer.includes(LG)){
               embed.addField(role[1],"N'a pas encore agi")
               rolajouer.push(role[1])
+              }
             }
           });
           message.channel.send(embed).then(function(message){
