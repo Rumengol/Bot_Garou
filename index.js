@@ -807,6 +807,7 @@ else {
           .setDescription("La liste des rôles qui n'ont pas encore agi apparaît ci-dessous. Citez-en un pour déclencher son tour.")
           distribRoles.forEach(role => {
             if(rolesDeNuit.includes(role[1])){
+              if(roles[1] === LG && !rolajouer.includes(LG))
               embed.addField(role[1],"N'a pas encore agi")
               rolajouer.push(role[1])
             }
@@ -892,6 +893,8 @@ else {
 
             //Action nocturne de la Voyante
             else if(IDvovo.includes(contenu) && rolajouer.includes(Vovo)){
+              
+              rolajouer.splice(rolajouer.indexOf(Vovo),1)
               var item = distribRoles[findItemInList(distribRoles,Vovo)]
               var chan = item[2].dmChannel
               chan.send("Réveille toi, Voyante ! De quel joueur veux-tu connaître le rôle cette nuit ? \n" + vivants + " ?");
@@ -908,7 +911,6 @@ else {
                     message.channel.send("Ce joueur est invisible, choisis-en un autre")
                   } else {
                   mess.channel.send(mess + " est " + lui[1])
-                  rolajouer.splice(rolajouer.indexOf(Vovo),1)
                   collector2.stop();
                   }
                 }
@@ -918,7 +920,8 @@ else {
 
             //Action nocture de la Sorcière
             else if(IDsoso.includes(spliteMessage[0]) && rolajouer.includes(Soso)){
-              
+
+              rolajouer.splice(rolajouer.indexOf(Soso),1)
               var victime = "";
               if(spliteMessage.length != 2){
                 message.reply("Quel est la victime de la nuit ?")
@@ -946,7 +949,7 @@ else {
               pots = "la potion de mort"
             }
               chan.send("Réveille toi, Sorcière ! " + info + " Il te reste " + pots + ".");
-              rolajouer.splice(rolajouer.indexOf(Soso),1)
+              
               collectorVie = chan.createCollector(filter2)
               collectorVie.on('collect', mess => {
                 var contenu = mess.content.toLowerCase()
@@ -998,6 +1001,7 @@ else {
            else if(IDsalva.includes(contenu) && rolajouer.includes(Salva)){
             var item = distribRoles[findItemInList(distribRoles,Salva)]
             var chan = item[2].dmChannel
+            rolajouer.splice(rolajouer.indexOf(Salva),1)
 
             chan.send("Réveille toi, Salvateur ! Qui vas-tu protéger cette nuit ? \n" + vivants + " ?");
             collector2 = chan.createCollector(filter2)
@@ -1015,7 +1019,7 @@ else {
                   if(protect != mess.content.toLowerCase()){
                     protect = lui[2].username.toLowerCase();
                     mess.channel.send(mess.content + " est protégé pour cette nuit. Il ne mourra pas si les  loups-garous décident de l'attaquer.")
-                    rolajouer.splice(rolajouer.indexOf(Salva),1)
+                    
                     collector2.stop();
                   } else {
                     mess.channel.send("Impossible de protéger de nuit de suite la même personne !")
