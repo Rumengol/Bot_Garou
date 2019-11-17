@@ -1,10 +1,6 @@
-//to do : retirer des inscrits ceux qui se désinscrivent : check
-//Remanier le rôle Sorcière, qu'il propose potion de vie puis de mort : check !
+//to do : 
 //Le collecteur de la nuit derp : on est au courant
-//Les joueurs ne sont pas muets la nuit ni les morts : POULOULOU CHECK MAGGLE
-//Cupidon wtf : check et JDF aussi
-//Feedback discord pour les rôles de nuit : check
-//phrase du JDF pas convaincante : check
+//Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos
 
 const Discord = require('discord.js');
 const bot = new Discord.Client();
@@ -12,9 +8,11 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync')
 const express = require('express')
 const PORT = process.env.PORT || 5000
-
 const adapter = new FileSync('adminrole.json')
 const db = low(adapter);
+
+const adeupter =new FileSync('composition.json')
+const comp = low(adeupter);
 
 express().listen(PORT)
 
@@ -31,6 +29,7 @@ var DMLG;
 
 var maxP;
 var inscr;
+
 var nbRole = 0;
 var inscrits = [];
 var inscrep = [];
@@ -39,6 +38,8 @@ var charmes = [];
 var votes = [];
 var avote = [];
 var joueursLG = []
+var Listvivants;
+var vivants = "";
 
 var distribution = [];
 var valides = [];
@@ -78,12 +79,23 @@ let IDsv = ["Paysan","paysan","paysans","simple villageois","simples villageois"
 let SV = "Paysan"
 let emoteSV = ":man:‍:ear_of_rice:"
 
-var rolesDeNuit = [Cupi,Salva,LG,Soso,Vovo,JDF,]
+var rolesDeNuit = [Cupi,Salva,LG,Soso,Vovo,JDF]
 var potVie = true;
 var potMort = true;
 var protect = "";
+var Lovers = []
 
 var compo = [];
+
+//Cupidon messages
+let eux = []
+var ask = true;
+var ConfCupi;
+
+//Sorcière messages
+var ConfSoso;
+var victime = "";
+var salonLog;
 
 var roleDB;
 var lieuDB;
@@ -92,7 +104,7 @@ var y;
 var z;
 var pouet;
 
-token = 'NDYzOTcwNzg4NjI2NjYxMzc3.Dh4KCA._RieY0iR58-lgHhwFZLtQUakPl4';
+token = 'NDYzOTcwNzg4NjI2NjYxMzc3.XQkoaQ.4j6ANKXYMfwvoFvC1LWtgMnislQ';
 
 var adminlist = db.get('administrateurs').map("story_value").value().toString()
 
@@ -100,6 +112,8 @@ db.defaults({administrateurs : []}).write();
 db.defaults({ministrateurs : []}).write();
 db.defaults({salons : []}).write();
 db.defaults({roles : []}).write();
+
+comp.defaults({composition : []}).write();
 
 bot.on('ready', () => {
     console.log('GRAOU est prêt!');
@@ -428,6 +442,22 @@ bot.login(token);
      protect = "";
      potVie = true;
      potMort = true;
+     compo = []
+     Listvivants = [];
+     vivants = "";
+     Lovers = []
+     //Cupidon messages
+     eux = []
+     ask = true;
+     ConfCupi = null;
+
+    //Sorcière messages
+     ConfSoso = null;
+     victime = "";
+     salonLog = null;
+
+     rolesDeNuit = [Cupi,Salva,LG,Soso,Vovo,JDF]
+     
     message.channel.send("Partie terminée, merci d'avoir joué !")
 } else {
   message.reply("commande refusée. Seuls les administrateurs peuvent terminer les parties.")
@@ -547,34 +577,7 @@ bot.login(token);
           message.reply("Formulation incorrecte. La bonne syntaxe est : /kill @[utilisateur].")
         }
         else{
-
-          getRoleInDb("vivants",message)
-          role= roleDB;
-         lui.removeRole(role);
-              getRoleInDb("morts",message)
-          role2= roleDB;
-         lui.addRole(role2);
-               getPlaceInDb("village",message)
-          lieu = lieuDB;
-
-          getPlaceInDb("vocal",message)
-          lieu3 = lieuDB
-
-          var item = distribRoles[findItemInList(distribRoles,lui)]
-          if(item != undefined){
-            rolmort = ", il/elle était " + item[1];
-            distribRoles.splice(distribRoles.indexOf(item),1)
-          }
-
-        lui.setMute(true)
-         message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
-
-
-            getPlaceInDb("charmed",message)
-        lieu2 = lieuDB;
-
-        message.guild.channels.get(lieu2).overwritePermissions(lui,{'VIEW_CHANNEL':false, 'SEND_MESSAGES':false});
-        charmes.splice(charmes.indexOf(lui),1);
+          Kill(message,lui);
         }
     }
      else{
@@ -794,23 +797,30 @@ else {
 
        getPlaceInDb("logs",message)
        logs = message.guild.channels.get(lieuDB)
+       salonLog = logs
 
        getRoleInDb("vivants",message)
-       var Listvivants = message.guild.roles.get(roleDB).members.map(m=>m.user.username)
-       var vivants = Listvivants.join(', ')
+       Listvivants = message.guild.roles.get(roleDB).members.map(m=>m.user.username)
+
+       vivants = "";
+       for(var i =0; i < Listvivants.length; i++){
+         vivants += "**" + (i+1) + "**. " + Listvivants[i] + "\n";
+       }
 
        var rolajouer = []
        var messNuit;
+
+       if(!potMort && !potVie && rolesDeNuit.indexOf(Soso) != -1){
+         rolesDeNuit.splice(rolesDeNuit.indexOf(Soso),1)
+       }
 
        var embed = new Discord.RichEmbed()
           .setTitle("La nuit")
           .setDescription("La liste des rôles qui n'ont pas encore agi apparaît ci-dessous. Citez-en un pour déclencher son tour.")
           distribRoles.forEach(role => {
             if(rolesDeNuit.includes(role[1])){
-              if(role[1] === LG && !rolajouer.includes(LG)){
               embed.addField(role[1],"N'a pas encore agi")
               rolajouer.push(role[1])
-              }
             }
           });
           message.channel.send(embed).then(function(message){
@@ -843,51 +853,40 @@ else {
             else if(IDcupi.includes(contenu) && rolajouer.includes(Cupi)){
               var item = distribRoles[findItemInList(distribRoles,Cupi)]
               var chan = item[2].dmChannel
-              chan.send("Réveille toi, Cupidon ! Quels joueurs vas-tu unir par les liens indestructibles de l'amour ? \n" + vivants + " ?");
+              
+              chan.send("Réveille toi, Cupidon ! Quels joueurs vas-tu unir par les liens indestructibles de l'amour ? \n" + vivants + " \n *N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-3`` pour unir " + Listvivants[0] + " et " + Listvivants[2] +".*");
               var collectorLove = chan.createCollector(filter2)
-              var eux = []
-              var ask = true
+              var lui;
+              eux = []
 
               collectorLove.on('collect', mess => {
-                logs.send(item[2].username + ", " + item[1] + " : " + mess.content)
-                var splitemess = mess.content.toLowerCase().split(" ");
+                var splitemess = mess.content.toLowerCase().split("-");
 
-                splitemess.forEach(mess => {
-                  distribRoles.forEach(role => {
-                    if(role[2].username.toLowerCase() === mess){
-                      eux.push(role);
-                    }
-                  });
-                });
+                if(splitemess.length === 2){
+                var Amoureux1 = parseInt(splitemess[0]);
+                var Amoureux2 = parseInt(splitemess[1]);
+
+                if(!isNaN(Amoureux1) && !isNaN(Amoureux2) && 0 < Amoureux1 && Amoureux1 <= Listvivants.length && 0 < Amoureux2 && Amoureux2 <= Listvivants.length){
+                  eux.push(distribRoles[Amoureux1-1]);
+                  eux.push(distribRoles[Amoureux2-1]);
+                  Lovers = eux;
+                }
+                else{
+                  mess.channel.send("Woof ! Je ne  comprends pas ``" + mess + "``. Il faut écrire par exemple ``1-3``.")
+                }
+              }
+              else{
+                mess.channel.send("Woof ! Je ne  comprends pas ``" + mess + "``. Il faut écrire par exemple ``1-3``, sans autre caractère.")
+              }
                 if(eux.length === 2 && ask){
                   ask = false;
-                  mess.channel.send("**" + eux[0][2].username + "** et **" + eux[1][2].username + "** ? (Oui/Non)")
-                  var collectorConf = mess.channel.createCollector(filter2)
-                  collectorConf.on('collect', message => {
-                    if(message.content.toLowerCase() === "non" || message.content.toLowerCase() === "n"){
-                      eux = []
-                      ask = true
-                      collectorConf.stop()
-                    }
-                    else if(message.content.toLowerCase() === "oui" || message.content.toLowerCase === "o"){
-                        collectorConf.stop();
-                        collectorLove.stop();  
-                        mess.channel.send("Flèches envoyées.")
-                        var chan2 = eux[0][2].dmChannel
-                        chan2.send("Tu es amoureux(se) de **" + eux[1][2].username + "** ! Si l'un de vous meurt, l'autre ira de le rejoindre de tristesse.")
-                        var chan3 = eux[1][2].dmChannel
-                        chan3.send("Tu es amoureux(se) de **" + eux[0][2].username + "** ! Si l'un de vous meurt, l'autre ira de le rejoindre de tristesse.")
-                        eux = []
-                      }
-                      else {
-                        message.channel.send("Il faut répondre par oui ou par non !")
-                      }
+                  mess.channel.send("**" + eux[0][2].username + "** et **" + eux[1][2].username + "** ?").then(function(message){
+                    ConfCupi = message;
+                    message.react("✅");
+                    message.react("❌");
                   })
                 }
-                else if(ask && eux.length != 2){
-                  mess.channel.send("Il faut 2 amoureux !")
-                }
-              })
+              });
               rolesDeNuit.splice(rolesDeNuit.indexOf(Cupi),1)
               rolajouer.splice(rolajouer.indexOf(Cupi),1)
             }
@@ -898,39 +897,39 @@ else {
               rolajouer.splice(rolajouer.indexOf(Vovo),1)
               var item = distribRoles[findItemInList(distribRoles,Vovo)]
               var chan = item[2].dmChannel
-              chan.send("Réveille toi, Voyante ! De quel joueur veux-tu connaître le rôle cette nuit ? \n" + vivants + " ?");
+              chan.send("Réveille toi, Voyante ! De quel joueur veux-tu connaître le rôle cette nuit ? \n" + vivants + "*N'indiquez que le numéro du joueur, par exemple ``1`` pour voir le rôle de " + Listvivants[0] + ".*");
               collector2 = chan.createCollector(filter2)
               collector2.on('collect', mess => {
-                if(vivants.includes(mess.content)){
-                  var lui = [];
-                  distribRoles.forEach(role => {
-                    if(role[2].username.toLowerCase() === mess.content.toLowerCase()){
-                      lui = role
-                    }
-                  });
-                  if(lui === undefined){
-                    message.channel.send("Ce joueur est invisible, choisis-en un autre")
-                  } else {
-                  mess.channel.send(mess + " est " + lui[1])
+                var cible = parseInt(mess);
+                var lui = [];
+                if(!isNaN(cible) && 0 < cible && cible <= Listvivants.length){
+                  lui.push(distribRoles[cible-1])
+                  mess.channel.send(lui[0][2].username + " est **" + lui[0][1] + "**!")
+                  logs.send(item[2] + " a observé le joueur " + lui[0][2] + ", qui est " + lui[0][1])
                   collector2.stop();
-                  }
                 }
-                logs.send(item[2].username + ", " + item[1] + " : " + mess.content)
+                else{
+                  mess.channel.send("Woof ! Merci d'indiquer un chiffre parmi ceux proposés ! ")
+                }
               })
             }
 
             //Action nocture de la Sorcière
             else if(IDsoso.includes(spliteMessage[0]) && rolajouer.includes(Soso)){
-
-              rolajouer.splice(rolajouer.indexOf(Soso),1)
-              var victime = "";
+              //On s'attend à ce que le MJ indique en plus la victime des loups garous
               if(spliteMessage.length != 2){
+                //S'il ne l'a pas fait, on l'invite à le faire
                 message.reply("Quel est la victime de la nuit ?")
               } else {
+                //Sinon, tout va bien, on prend comme victime le membre mentionné
+                rolajouer.splice(rolajouer.indexOf(Soso),1)
                 var previct = message.guild.member(message.mentions.users.first())
+                //Si previct contient une valeur et non pas "personne"
                 if(spliteMessage[1] != "personne" && previct != null){
+                  //La victime est désignée par son nom d'utilisateur
                   victime = previct.user.username;
                 } else{
+                  //Sinon, c'est personne
                   victime = " personne !"
                 }
               var item = distribRoles[findItemInList(distribRoles,Soso)]
@@ -938,7 +937,7 @@ else {
               var pots = ""
               var info = ""
               if(potVie){
-                info = "La victime des loups-garous ce soir est **" + victime + "**, veux tu la sauver ? (Oui/Non)"
+                info = "La victime des loups-garous ce soir est **" + victime + "**, _veux tu la sauver ?_"
                 if(potMort){
                 pots = "la potion de vie et la potion de mort" 
 
@@ -949,52 +948,15 @@ else {
             else if(potMort && !potVie){
               pots = "la potion de mort"
             }
-              chan.send("Réveille toi, Sorcière ! " + info + " Il te reste " + pots + ".");
-              
-              collectorVie = chan.createCollector(filter2)
-              collectorVie.on('collect', mess => {
-                var contenu = mess.content.toLowerCase()
-                if(contenu === "oui" || contenu === "o" || contenu === victime.toLowerCase()){
-                  mess.channel.send(victime + " ne mourra pas ce soir.")
-                  collectorVie.stop();
+              chan.send("Réveille toi, Sorcière ! " + info + "\n Il te reste " + pots + ".").then(function(message){
+                if(potVie){
+                  ConfSoso = message;
+                message.react('✅');
+                message.react('❌');
                 }
-                else if(contenu === "non" || contenu === "n"){
-                  mess.channel.send("Quelqu'un d'autre sauvera " + victime + ". Peut être.")
-                  collectorVie.stop();
-                }
-                else{
-                  mess.channel.send("Veux-tu utiliser la potion de vie ? (Oui/Non)");
-                }
-                logs.send(item[2].username + ", " + item[1] + " : " + mess.content)
+                else
+                  UsePotMort(message);
               })
-              collectorVie.on('end', collected => {
-                if(potMort){
-                  chan.send("Sur qui souhaites-tu utiliser la potion de mort ? \n"+ vivants + ", personne ?")
-                collectorMort = chan.createCollector(filter2)
-                collectorMort.on('collect', mess => {
-                if(vivants.includes(mess.content)){
-                  var lui = [];
-                  distribRoles.forEach(role => {
-                    if(role[2].username === mess.content){
-                      lui = role
-                    }
-                  });
-                  if(lui === undefined){
-                    message.channel.send("Ce joueur est invisible, choisis-en un autre")
-                  } else {
-                  mess.channel.send("Tu as tué " + mess)
-                  collectorMort.stop();
-                  }
-                }
-                else if(mess.content.toLowerCase() ===  "personne" || mess.content.toLowerCase() === "non"){
-                  mess.channel.send("Tu as décidé de ne tuer personne cette nuit.")
-                  collectorMort.stop()
-                }
-                logs.send(item[2].username + ", " + item[1] + " : " + mess.content)
-              })
-            }
-              });
-              
             }
           }
 
@@ -1004,39 +966,29 @@ else {
             var chan = item[2].dmChannel
             rolajouer.splice(rolajouer.indexOf(Salva),1)
 
-            chan.send("Réveille toi, Salvateur ! Qui vas-tu protéger cette nuit ? \n" + vivants + " ?");
+            chan.send("Réveille toi, Salvateur ! Qui vas-tu protéger cette nuit ? \n" + vivants + "*N'indiquez que le numéro du joueur, par exemple ``1`` pour protéger " + Listvivants[0] + ".*");
             collector2 = chan.createCollector(filter2)
-            collector2.on('collect', mess => {
-              if(vivants.includes(mess.content)){
+              collector2.on('collect', mess => {
+                var cible = parseInt(mess);
                 var lui = [];
-                distribRoles.forEach(role => {
-                  if(role[2].username.toLowerCase() === mess.content.toLowerCase()){
-                    lui = role
-                  }
-                });
-                if(lui[2] === undefined){
-                  mess.channel.send("Ce joueur est invisible, choisis-en un autre")
-                } else {
-                  if(protect != mess.content.toLowerCase()){
-                    protect = lui[2].username.toLowerCase();
-                    mess.channel.send(mess.content + " est protégé pour cette nuit. Il ne mourra pas si les  loups-garous décident de l'attaquer.")
-                    
-                    collector2.stop();
-                  } else {
-                    mess.channel.send("Impossible de protéger de nuit de suite la même personne !")
-                  }
+                if(!isNaN(cible) && 0 < cible && cible <= Listvivants.length){
+                  lui.push(distribRoles[cible-1])
+                  mess.channel.send("**" + lui[0][2].username + "** est protégé cette nuit. Aucun loup ne pourra lui faire du mal.")
+                  logs.send(item[2] + " a protégé le joueur " + lui[0][2]);
+                  collector2.stop();
                 }
-              }
-              logs.send(item[2].username + ", " + item[1] + " : " + mess.content)
-            })
-          }
+                else{
+                  mess.channel.send("Woof ! Merci d'indiquer un chiffre parmi ceux proposés ! ")
+                }
+              })
+            }
 
           //Action nocturne du Joueur de flûte
             else if(IDjdf.includes(contenu) && rolajouer.includes(JDF)){
-            var ask = true;
             var item = distribRoles[findItemInList(distribRoles,JDF)]
             var chan = item[2].dmChannel
             var acharme = [];
+            var acharmer = "";
             charmes.forEach(charme => {
               Listvivants.forEach(vivant => {
                 if(vivant != charme.user.username){
@@ -1047,81 +999,37 @@ else {
             if(acharme[0] === undefined){
               acharme = Listvivants
             }
-            chan.send("Réveille toi, Joueur de flûte ! Quels joueurs vas-tu charmer cette nuit ? \n" + acharme.join(',  ') + " ?");
-            acharme = []
+            for(var i = 0; i < acharme.length; i++){
+              acharmer += "**" + (i+1) + "**. " + acharme[i] + "\n";
+            }
+
+            chan.send("Réveille toi, Joueur de flûte ! Quels joueurs vas-tu charmer cette nuit ? \n" + acharmer + "*N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-2`` pour unir " + acharmer[0] + " et " + acharmer[1] +". Si vous ne souhaitez charmer qu'une personne, écrivez sous la forme ``X-0``. Si vous ne souhaitez charmer personne, écrivez ``0``. \n (Attention, si jamais vous écrivez ``0-X`` par exemple, personne ne sera charmé.)*");
+            
             collector2 = chan.createCollector(filter2)
-            var eux = []
-
             collector2.on('collect', mess => {
-              logs.send(item[2].username + ", " + item[1] + " : " + mess.content)
-              var splitemess = mess.content.toLowerCase().split(" ");
-
-              splitemess.forEach(mess => {
-                distribRoles.forEach(role => {
-                  if(role[2].username.toLowerCase() === mess){
-                    eux.push(role);
-                  }
-                });
-              });
-              if(eux.length === 2 && ask){
-                ask = false
-                mess.channel.send("**" + eux[0][2].username + "** et **" + eux[1][2].username + "** ? (Oui/Non)")
-                collector3 = mess.channel.createCollector(filter2)
-                collector3.on('collect', message =>{
-                  if(message.content.toLowerCase() === "non" || message.content.toLowerCase() === "n"){
-                    eux = []
-                    ask = true
-                    collector3.stop()
-                  }
-                  else if(message.content.toLowerCase() === "oui" || message.content.toLowerCase === "o"){
-                    
-                    collector3.stop();
-                    collector2.stop();  
-                    mess.channel.send("Les voilà charmés..")
-
-                      eux.forEach(lui => {
-                        lieu2.overwritePermissions(lui[0],{'VIEW_CHANNEL':true, 'SEND_MESSAGES':false});
-                        lieu2.send(lui[0] + " vient de se faire charmer !");
-                        charmes.push(lui[0]);
-                      });
-
-                    }
-                    else{
-                      message.channel.send("Il faut répondre par oui ou par non !")
-                    }
-                })
+              if(mess[0] == "0"){
+                mess.channel.send("Personne ne  sera charmé cette nuit. Le manque d'inspiration, sans doute.");
+                salonLog.send(item[2] + " n'a charmé personne cette nuit.")
+                collector2.stop();
               }
-              else if(eux.length === 1 && ask){
-                ask = false;
-                mess.channel.send("**" + eux[0][2].username + "** ? (Oui/Non)")
-                collector4 = mess.channel.createCollector(filter2)
-                collector4.on('collect', message =>{
-                  if(message.content.toLowerCase() === "non" || message.content.toLowerCase() === "n"){
-                    eux = []
-                    ask = true;
-                    collector4.stop()
-                  }
-                  else if(message.content.toLowerCase() === "oui" || message.content.toLowerCase === "o"){
-                      mess.channel.send("Le voilà charmé...")
-                      ask = false
-                      lui = eux[0][0]
-
-                      lieu2.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':false});
-                      lieu2.send(lui + " vient de se faire charmer !");
-                      charmes.push(lui);
-
-                      collector4.stop();
-                      collector2.stop();
-                    }
-                    else{
-                      message.channel.send("Il faut répondre par oui ou par non !")
-                    }
-                  });
+              var splitemess = mess.content.split('-');
+              var cible1 = parseInt(splitemess[0]);
+              var cible2 = parseInt(splitemess[1]);
+              var eux = [];
+              if(!isNaN(cible1) && !isNaN(cible2) && 0 < cible1 && cible1 <= acharme.length && 0 <= cible2 && cible2 <= acharme.length){
+                eux.push(distribRoles[cible1-1])
+                var eux2 = "c'est tout"
+                if(cible2 != 0)
+                  eux2 = distribRoles[cible2-1]
+                mess.channel.send("**" + eux[0][2].username + "** et **" + eux2[2] +"** sont touchés par l'extase de ta flûte..")
+                logs.send(item[2] + " a charmé les joueurs " + eux[0][2] + " et " + eux2[2]);
+                Charme(message,eux[0][0])
+                if(cible2 != 0)
+                  Charme(message,eux2[0])
+                collector2.stop();
               }
-              else if(mess.content === "personne" && ask){
-                ask = false
-                message.channel.send("Personne ne sera charmé cette nuit")
-                collector2.stop()
+              else{
+                mess.channel.send("Woof ! Merci d'indiquer un chiffre parmi ceux proposés ! ")
               }
             })
             rolajouer.splice(rolajouer.indexOf(JDF),1)
@@ -1177,12 +1085,16 @@ else {
         var lieuLG = lieuDB;
 
         var mess = message;
+        var number = comp.get('composition').map("id").value().length;
 
             var distribText = "";
             compo.forEach(role => {
               for (let i = 0; i < compo[compo.indexOf(role)][1]; i++) {
                 distribution.push(compo[compo.indexOf(role)][0])
               }
+              comp.get('composition')
+              .push({guild : message.guild.id, id: number, compo : distribution})
+              .write();
             });
             inscrits.forEach(inscrit => {
               var rnd = Math.floor((Math.random() * (distribution.length )) + 0);
@@ -1401,360 +1313,6 @@ else {
                   
                 message.channel.send(embed)
   }
-
-
-
-//Attribution des rôles
-  //Loup-garou
-  else if(spliteMessage[0] === prefix + 'lg'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','taniere');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Graou mon ami, " + lui + ", tu es **Loup-garou** !");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/lg @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Cupidon
-  else if(spliteMessage[0] === prefix + 'cupi'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','nuage');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Félicitations, " + lui + " tu es **Cupidon**, diffuseur d'amour et de suicide collectifs !");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/cupi @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Voyante
-  else if(spliteMessage[0] === prefix + 'vovo'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','roulotte');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Félicitations, " + lui + "tu es **Voyante**, mais tu le savais déjà, n'est-ce pas ?");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/vovo @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Salvateur
-  else if(spliteMessage[0] === prefix + 'salva'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','croix');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Félicitations, " + lui + " tu es **Salvateur**, protecteur de la veuve et de l'orphelin ! Et bientôt les deux !");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/salva @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Sorcière
-  else if(spliteMessage[0] === prefix + 'soso'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','antre');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Félicitations, " + lui + "tu es **Sorcière**. Au bûcher.");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/soso @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Corbeau
-  else if(spliteMessage[0] === prefix + 'corbac'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','nid');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Crôa, " + lui + " tu es **Corbeau**, signe de malheur et de pendaison !");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/corbac @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Joueur de flûte
-  else if(spliteMessage[0] === prefix + 'jdf'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','theatre');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Félicitations, " + lui + " tu es **Joueur de flûte**, envoûteur du village et musicien au talent incontesté !");
-      message.channel.send(lui + ' Validé');
-      }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/jdf @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Soeurs
-  else if(spliteMessage[0] === prefix + 'soeur'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      SalLg = message.guild.channels.find('name','cachette');
-      SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-      SalLg.send("Félicitations, " + lui + " tu es l'un des **jumeaux**, va vite parler avec l'autre avant qu'il ne... ah bah, trop tard  !");
-      message.channel.send(lui + ' Validé');  
-    }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/soeur @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Chasseur
-  else if(spliteMessage[0] === prefix + 'chassou'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      lui.createDM().then(channel => {
-      channel.send("Félicitations, " + lui + " tu es **Chasseur** ! Ce bon vieux jeu du chasseur chassé...");
-      })
-     }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/chassou @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Idiot du village
-  else if(spliteMessage[0] === prefix + 'idv'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      lui.createDM().then(channel => {
-      channel.send("Félicitations, " + lui + " tu es **Idiot du village** ! C'est moins pire qu'il n'y parait, je t'assure.");
-      })
-    }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/idv @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Ancien
-  else if(spliteMessage[0] === prefix + 'ancien'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      lui.createDM().then(channel => {
-      channel.send("Félicitations, " + lui + " tu es l'**Ancien** ! Gare à la sénilité !");
-      })
-    }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/ancien @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Bouc émissaire
-  else if(spliteMessage[0] === prefix + 'be'){
-    if(adminlist.includes(message.author) || mini === true){
-    if(spliteMessage.length <= 2){
-      message.delete();
-      let lui = message.guild.member(message.mentions.users.first());
-      if(lui === null){
-        message.reply("Veuillez mentionner un utilisateur valide.");
-      }
-      else{
-      lui.createDM().then(channel => {
-      channel.send("Félicitations, " + lui + " tu es **Bouc émissaire** ! T'as jamais été très aimé...");
-      })
-    }
-    }
-    else {
-      message.delete();
-      message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/be @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-  //Loup-garou blanc
-  else if(spliteMessage[0] === prefix + 'lgb'){
-    if(adminlist.includes(message.author) || mini === true){
-      if(spliteMessage.length <= 2){
-        message.delete();
-        let lui = message.guild.member(message.mentions.users.first());
-        if(lui === null){
-          message.reply("Veuillez mentionner un utilisateur valide.");
-        }
-        else{
-        SalLg = message.guild.channels.find('name','taniere_recoin');
-        SalLg.overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':true});
-        SalLg.send("Félicitations, " + lui + " tu es le **Loup-garou blanc** ! Ce bon vieux jeu du chasseur doublement chassé...");
-        message.channel.send(lui + ' Validé');
-       }
-    }
-      else {
-        message.delete();
-        message.channel.send("Formulation incorrecte. La bonne syntaxe est ``/lgb @[utilisateur]``");
-    }
-  }
-  
-  else {
-    message.delete();
-    message.reply("Désolé, cette commande est réservée aux maîtres du jeu.")
-  }
-  }
-else{
-  message.reply("Commande inconnue. Veuillez utiliser ``/help`` pour avoir une liste des commandes.")
-}
 }});
 
 bot.on('messageReactionAdd', (reac,lui) => {
@@ -1773,8 +1331,8 @@ bot.on('messageReactionAdd', (reac,lui) => {
       if(reac.count > 1){
         inscrits.push(lui.id);
         reac.message.guild.members.get(lui.id).addRole(role);
-
         inscrep.push(lui)
+
         reac.message.edit(new Discord.RichEmbed()
         .setTitle("Inscriptions pour les parties de loup Garou")
         .setDescription("Inscrivez-vous en appuyant sur la réaction ci-dessous. Inscriptions limitées à **" + maxP + "** et impossibles lorsque la partie est lancée. \n Attention. Si vous retirez votre réaction, cela sera pris comme une désinscription.")
@@ -1800,6 +1358,53 @@ bot.on('messageReactionAdd', (reac,lui) => {
       console.log(lui.username + " déréacté.");
     }
   }
+
+  else if(reac.message === ConfCupi){
+    if(!lui.bot){
+      if(reac.emoji.name === "❌"){
+        eux = []
+        ask = true
+        reac.message.channel.send("Attention, tu n'as que deux flèches !")
+      }
+      else if(reac.emoji.name === "✅"){
+          reac.message.channel.send("Flèches envoyées.");
+          salonLog.send("Les amoureux sont : " + eux[1][2].username + " et " + eux[0][2].username + ".");
+          var chan2 = eux[0][2].dmChannel
+          chan2.send("Tu es amoureux(se) de **" + eux[1][2].username + "** ! Si l'un de vous meurt, l'autre ira de le rejoindre de tristesse.")
+          var chan3 = eux[1][2].dmChannel
+          chan3.send("Tu es amoureux(se) de **" + eux[0][2].username + "** ! Si l'un de vous meurt, l'autre ira de le rejoindre de tristesse.")
+          eux = []
+      }
+      else{
+        console.log(reac.emoji.name);
+      }
+  }
+  }
+
+  else if(reac.message === ConfSoso){
+    var next = false;
+    if(!lui.bot){
+      if(potVie && !next){
+      if(reac.emoji.name === "❌"){
+        reac.message.channel.send("Très bien. **" + victime + "** mourra.")
+        salonLog.send("La sorcière n'a protégé personne.")
+        next = true;
+      }
+      else if(reac.emoji.name === "✅"){
+        console.log("validé")
+          reac.message.channel.send("Le liquide olive coule entre les lèvres de **" + victime + "**, soignant ses blessures.");
+          salonLog.send("La sorcière a protégé **" + victime +"**, qui ne mourra pas cette nuit.");
+          next = true
+          potVie = false
+      }
+      
+      else{
+        console.log(reac.emoji.name);
+      }
+      UsePotMort(reac.message)
+    }
+  }
+}
 })
 
 bot.on('messageReactionRemove', (reac,lui) => {
@@ -1825,6 +1430,34 @@ bot.on('messageReactionRemove', (reac,lui) => {
   }
 })
 
+function UsePotMort(message){
+  if(potMort){
+  message.channel.send("Sur qui souhaite-tu utiliser la potion de mort ? \n **0** Personne\n" + vivants + "*N'indiquez que le numéro du joueur, par exemple ``0`` pour ne tuer personne.*");
+  var filter = m=>inscrits.includes(m.author.id);
+  var collector2 = message.channel.createCollector(filter)
+    collector2.on('collect', mess => {
+      var cible = parseInt(mess);
+      var lui = [];
+      if(!isNaN(cible) && 0 < cible && cible <= Listvivants.length){
+        lui.push(distribRoles[cible-1])
+        if(lui[0] === undefined){
+          console.log("erreur avec cible = " + cible)
+        }
+        else{
+        mess.channel.send("Le poison fera vite effet, **" + lui[0][2] + "** ne se réveillera pas demain...")
+        salonLog.send("La sorcière a décidé de tuer **" + lui[0][2] + "**.")
+        potMort = false;
+        collector2.stop();
+        }
+      }
+      else if(cible == 0){
+        mess.channel.send("Tu décides que ce n'est pas encore le moment. Peut être une prochaine fois.")
+        salonLog.send("La sorcière n'a voulu tuer personne.")
+        collector2.stop();
+      }
+    })
+  }
+}
 
 function prepCompo(collector){
 
@@ -2058,6 +1691,7 @@ function prepCompo(collector){
       collector.stop();
       annonceCompo(message);
     }
+
     function annonceCompo(message){
        //Préparation du message final
        var embed = new Discord.RichEmbed()
@@ -2101,6 +1735,7 @@ function prepCompo(collector){
     message.channel.send("Commande non reconnue. Veuillez réessayer, ou ``annuler`` pour quitter.")
   }
 
+
   function onAddRole(role,emote){
     if(compo.length === 0){
       compo.push([role,qte,emote]);
@@ -2126,6 +1761,14 @@ function prepCompo(collector){
   })
 }
 
+function Charme(message,lui){
+  getPlaceInDb("charmed",message)
+  lieu = lieuDB
+
+  message.guild.channels.get(lieu).overwritePermissions(lui,{'VIEW_CHANNEL':true, 'SEND_MESSAGES':false});
+  message.guild.channels.get(lieu).send(lui + " vient de se faire charmer !");
+  charmes.push(lui);
+}
 
 function reviveAll(message){
 
@@ -2155,6 +1798,43 @@ function unmute(role,message){
   message.guild.roles.get(role).members.forEach(membre => {
     membre.setMute(false);
   })
+}
+
+function Kill(message,lui){
+    getRoleInDb("vivants",message)
+    role= roleDB;
+  lui.removeRole(role);
+        getRoleInDb("morts",message)
+    role2= roleDB;
+  lui.addRole(role2);
+        getPlaceInDb("village",message)
+    lieu = lieuDB;
+
+    getPlaceInDb("vocal",message)
+    lieu3 = lieuDB
+
+    var item = distribRoles[findItemInList(distribRoles,lui)]
+    if(item != undefined){
+      rolmort = ", il/elle était " + item[1];
+      distribRoles.splice(distribRoles.indexOf(item),1)
+    }
+
+    lui.setMute(true)
+    message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
+
+    getPlaceInDb("charmed",message)
+    lieu2 = lieuDB;
+
+    message.guild.channels.get(lieu2).overwritePermissions(lui,{'VIEW_CHANNEL':false, 'SEND_MESSAGES':false});
+    charmes.splice(charmes.indexOf(lui),1);
+
+    if(Lovers.includes(item)){
+      Lovers.splice(Lovers.indexOf(item),1)
+      message.guild.channels.get(lieu).send("Fou de douleur en voyant son amoureux décédé, **" + Lovers[0][2] + "** se suicide de chagrin.")
+      var amorreux = Lovers[0][0];
+      Lovers = []
+      Kill(message,amorreux)
+    }
 }
 
 function voteJour(message){
