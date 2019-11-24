@@ -1,6 +1,7 @@
 //to do : 
 //Le collecteur de la nuit derp : on est au courant
-//Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos
+//Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos : c'pas demain la veille
+
 
 const Discord = require('discord.js');
 const bot = new Discord.Client();
@@ -97,6 +98,9 @@ var ConfSoso;
 var victime = "";
 var salonLog;
 
+var once = true;
+var votedejour = false;
+
 var roleDB;
 var lieuDB;
 var x;
@@ -123,7 +127,7 @@ bot.on('ready', () => {
 bot.login(token);
 
   bot.on('message', message => {
-
+  try{
   if (message.content[0] === prefix){
     
       const filter = m=>m.author === message.author || adminlist.includes(m.author);
@@ -131,6 +135,9 @@ bot.login(token);
       var lowercase = message.content.toLowerCase();
       let spliteMessage = lowercase.split(" ");
       
+      getPlaceInDb("logs",message)
+       logs = message.guild.channels.get(lieuDB)
+       salonLog = logs
 
       mini = false;
       checkmin(message);
@@ -404,24 +411,25 @@ bot.login(token);
     getPlaceInDb("loups",message)
     lieu = message.guild.channels.get(lieuDB)
 
-    distribRoles.forEach(joueur => {
-      if(joueur[1] === LG){
-        lieu.overwritePermissions(joueur[0],{'VIEW_CHANNEL':false, 'SEND_MESSAGES':false})
-      }
-    });
-
     getRoleInDb("vivants",message)
-    role = roleDB
+    var role = message.guild.roles.get(roleDB)
+
+    getPlaceInDb("charmed",message)
+    lieu2 = message.guild.channels.get(lieuDB);
 
     reviveAll(message);
-    unmute(role,message)
+    unmute(role.id,message)
 
-    charmes.forEach(charme => {
-          getPlaceInDb("charmed",message)
-          lieu = lieuDB;
-      var lui = message.guild.members.get(charme.id);
-      message.guild.channels.get(lieu).overwritePermissions(lui,{'VIEW_CHANNEL':false, 'SEND_MESSAGES':false});
-    });
+
+ setTimeout(() => {
+   getRoleInDb("vivants",message)
+   var role2 = message.guild.roles.get(roleDB).members.map(m => m.user)
+  role2.forEach(vivant => {
+  lieu.overwritePermissions(vivant,{'VIEW_CHANNEL':false, 'SEND_MESSAGES':false})
+  lieu2.overwritePermissions(vivant,{'VIEW_CHANNEL':false, 'SEND_MESSAGES':false});
+})
+    }, 3000);
+
     charmes = [];
     if(messCompo != null){
     messCompo.unpin();
@@ -456,6 +464,12 @@ bot.login(token);
      victime = "";
      salonLog = null;
 
+     once = true;
+
+     clearInterval(x)
+     clearTimeout(y)
+     clearTimeout(z)
+
      rolesDeNuit = [Cupi,Salva,LG,Soso,Vovo,JDF]
      
     message.channel.send("Partie terminée, merci d'avoir joué !")
@@ -470,6 +484,7 @@ bot.login(token);
   if(adminlist.includes(message.author) || mini === true){
 
     reviveAll(message)
+
 
     gameOn = false;
     getRoleInDb("vivants",message)
@@ -601,13 +616,16 @@ if (spliteMessage.length === 2){
     else{
         getRoleInDb("morts",message)
       role= roleDB;
-     lui.removeRole(role);
       getRoleInDb("vivants",message)
       role2= roleDB;
      lui.addRole(role2);
-           getPlaceInDb("village",message)
+     setTimeout(() => {
+     lui.removeRole(role);
+     }, 1000);
+      getPlaceInDb("village",message)
           lieu = lieuDB;
      message.guild.channels.get(lieu).send(lui + " a ressuscité !");
+     lui.setMute(false);
     }
 }
  else{
@@ -636,10 +654,11 @@ if (spliteMessage.length === 2){
       avote = [];
       if(adminlist.includes(message.author) || mini === true){
       if(spliteMessage.length === 2){
-        if(spliteMessage[1] === "jour"){
+        if(spliteMessage[1] === 'jour'){
           message.delete();
           voteJour(message);
         }else {
+        votedejour = false;
         message.delete();
         let votelist = spliteMessage[1].split(",");
         for (var i = 0; i < votelist.length; i++){
@@ -688,7 +707,9 @@ if (spliteMessage.length === 2){
       message.delete();
             getRoleInDb("vivants",message)
           role= roleDB;
+
     message.channel.overwritePermissions(role,{'SEND_MESSAGES':true});
+    unmute(role,message)
     message.channel.send("Une nouvelle journée commence."); 
           getPlaceInDb("votes",message)
           lieu = lieuDB;
@@ -795,16 +816,24 @@ else {
           getPlaceInDb("charmed",message)
        lieu2 = message.guild.channels.get(lieuDB)
 
-       getPlaceInDb("logs",message)
-       logs = message.guild.channels.get(lieuDB)
-       salonLog = logs
+       getPlaceInDb("vocal",message)
+       vocal = message.guild.channels.get(lieuDB)
+
+       getPlaceInDb("village",message)
+       village = message.guild.channels.get(lieuDB)
 
        getRoleInDb("vivants",message)
+       var amute = message.guild.roles.get(roleDB)
        Listvivants = message.guild.roles.get(roleDB).members.map(m=>m.user.username)
 
+      village.overwritePermissions(amute, {"SEND_MESSAGE":false})
+      amute.members.forEach(mute=>{
+        mute.setMute(true)
+      })
+
        vivants = "";
-       for(var i =0; i < Listvivants.length; i++){
-         vivants += "**" + (i+1) + "**. " + Listvivants[i] + "\n";
+       for(var i = 0; i < distribRoles.length; i++){
+         vivants += "**" + (i+1) + "**. " + distribRoles[i][2].username + "\n";
        }
 
        var rolajouer = []
@@ -817,11 +846,13 @@ else {
        var embed = new Discord.RichEmbed()
           .setTitle("La nuit")
           .setDescription("La liste des rôles qui n'ont pas encore agi apparaît ci-dessous. Citez-en un pour déclencher son tour.")
-          distribRoles.forEach(role => {
-            if(rolesDeNuit.includes(role[1])){
-              embed.addField(role[1],"N'a pas encore agi")
-              rolajouer.push(role[1])
-            }
+          rolesDeNuit.forEach(role => {
+            distribRoles.forEach(gens => {
+              if(role === gens[1]){
+                embed.addField(gens[1],"N'a pas encore agi")
+                rolajouer.push(gens[1])
+              }
+            })
           });
           message.channel.send(embed).then(function(message){
             messNuit = message;
@@ -854,7 +885,7 @@ else {
               var item = distribRoles[findItemInList(distribRoles,Cupi)]
               var chan = item[2].dmChannel
               
-              chan.send("Réveille toi, Cupidon ! Quels joueurs vas-tu unir par les liens indestructibles de l'amour ? \n" + vivants + " \n *N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-3`` pour unir " + Listvivants[0] + " et " + Listvivants[2] +".*");
+              chan.send("Réveille toi, Cupidon ! Quels joueurs vas-tu unir par les liens indestructibles de l'amour ? \n" + vivants + " \n *N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-3`` pour unir " + distribRoles[0][2].username + " et " + distribRoles[2][2].username +".*");
               var collectorLove = chan.createCollector(filter2)
               var lui;
               eux = []
@@ -870,6 +901,13 @@ else {
                   eux.push(distribRoles[Amoureux1-1]);
                   eux.push(distribRoles[Amoureux2-1]);
                   Lovers = eux;
+                  chan.send("Flèches envoyées. "  + eux[0][2].username + " et " +  eux[1][2].username + " sont désormais amoureux pour la vie... et la mort.");
+                  salonLog.send("Les amoureux sont : " + eux[1][2].username + " et " + eux[0][2].username + ".");
+                  var chan2 = eux[0][2].dmChannel
+                  chan2.send("Tu es amoureux(se) de **" + eux[1][2].username + "** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse.")
+                  var chan3 = eux[1][2].dmChannel
+                  chan3.send("Tu es amoureux(se) de **" + eux[0][2].username + "** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse.")
+                  eux = []
                 }
                 else{
                   mess.channel.send("Woof ! Je ne  comprends pas ``" + mess + "``. Il faut écrire par exemple ``1-3``.")
@@ -878,14 +916,14 @@ else {
               else{
                 mess.channel.send("Woof ! Je ne  comprends pas ``" + mess + "``. Il faut écrire par exemple ``1-3``, sans autre caractère.")
               }
-                if(eux.length === 2 && ask){
+             /*   if(eux.length === 2 && ask){
                   ask = false;
                   mess.channel.send("**" + eux[0][2].username + "** et **" + eux[1][2].username + "** ?").then(function(message){
                     ConfCupi = message;
                     message.react("✅");
                     message.react("❌");
                   })
-                }
+                }*/
               });
               rolesDeNuit.splice(rolesDeNuit.indexOf(Cupi),1)
               rolajouer.splice(rolajouer.indexOf(Cupi),1)
@@ -973,6 +1011,9 @@ else {
                 var lui = [];
                 if(!isNaN(cible) && 0 < cible && cible <= Listvivants.length){
                   lui.push(distribRoles[cible-1])
+                  console.log(lui)
+                  console.log(distribRoles)
+                  console.log(cible-1)
                   mess.channel.send("**" + lui[0][2].username + "** est protégé cette nuit. Aucun loup ne pourra lui faire du mal.")
                   logs.send(item[2] + " a protégé le joueur " + lui[0][2]);
                   collector2.stop();
@@ -990,20 +1031,22 @@ else {
             var acharme = [];
             var acharmer = "";
             charmes.forEach(charme => {
-              Listvivants.forEach(vivant => {
+              distribRoles.forEach(vivant => {
                 if(vivant != charme.user.username){
-                  acharme.push(vivant)
+                  acharme.push(vivant[2].username)
                 }
               });
             });
             if(acharme[0] === undefined){
-              acharme = Listvivants
+              for(var i = 0; i < distribRoles.length; i++){
+                acharme.push(distribRoles[i][2].username)
+              }
             }
             for(var i = 0; i < acharme.length; i++){
               acharmer += "**" + (i+1) + "**. " + acharme[i] + "\n";
             }
 
-            chan.send("Réveille toi, Joueur de flûte ! Quels joueurs vas-tu charmer cette nuit ? \n" + acharmer + "*N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-2`` pour unir " + acharmer[0] + " et " + acharmer[1] +". Si vous ne souhaitez charmer qu'une personne, écrivez sous la forme ``X-0``. Si vous ne souhaitez charmer personne, écrivez ``0``. \n (Attention, si jamais vous écrivez ``0-X`` par exemple, personne ne sera charmé.)*");
+            chan.send("Réveille toi, Joueur de flûte ! Quels joueurs vas-tu charmer cette nuit ? \n" + acharmer + "*N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-2`` pour unir " + acharme[0] + " et " + acharme[1] +". Si vous ne souhaitez charmer qu'une personne, écrivez sous la forme ``X-0``. Si vous ne souhaitez charmer personne, écrivez ``0``. \n (Attention, si jamais vous écrivez ``0-X`` par exemple, personne ne sera charmé.)*");
             
             collector2 = chan.createCollector(filter2)
             collector2.on('collect', mess => {
@@ -1021,7 +1064,7 @@ else {
                 var eux2 = "c'est tout"
                 if(cible2 != 0)
                   eux2 = distribRoles[cible2-1]
-                mess.channel.send("**" + eux[0][2].username + "** et **" + eux2[2] +"** sont touchés par l'extase de ta flûte..")
+                mess.channel.send("**" + eux[0][2].username + "** et **" + eux2[2].username +"** sont touchés par l'extase de ta flûte..")
                 logs.send(item[2] + " a charmé les joueurs " + eux[0][2] + " et " + eux2[2]);
                 Charme(message,eux[0][0])
                 if(cible2 != 0)
@@ -1116,8 +1159,9 @@ else {
                     logs.send(item[2].username + ", " + item[1] + " validé.")
                    
                   }
-                  if(valides.length === inscrits.length){
+                  if(valides.length === inscrits.length && once){
                     collector.stop()
+                    once = false;
                     mess.guild.channels.get(lieuLG).send("Ce salon est destiné aux discussions nocturnes entre loups garous. Bon festin !")
                   }
                 });
@@ -1197,8 +1241,8 @@ else {
     if(adminlist.includes(message.author) || mini === true){
       message.delete();
       clearInterval(x);
-      clearInterval(y);
-      clearInterval(z);
+      clearTimeout(y);
+      clearTimeout(z);
       let tempo = message.channel.send("Tous les décomptes ont été interrompus.")
       setTimeout(tempo.delete(),5000);
     }
@@ -1313,12 +1357,21 @@ else {
                   
                 message.channel.send(embed)
   }
-}});
+}
+  }
+  catch(e){
+    message.reply(e.message)
+    console.error(e)
+  }
+});
 
 bot.on('messageReactionAdd', (reac,lui) => {
+  try{
+
   if(reac.message === inscr){
-    getRoleInDb("vivants",reac.message)
-    role = roleDB;
+    
+  getRoleInDb("vivants",reac.message)
+  rolevivant = roleDB;
     if(gameOn === false){
       //Si on a atteint le maximum d'inscriptions
       if(reac.count > maxP+1){
@@ -1330,7 +1383,7 @@ bot.on('messageReactionAdd', (reac,lui) => {
       //Sinon, et en ignorant la première réaction (celle du bot)
       if(reac.count > 1){
         inscrits.push(lui.id);
-        reac.message.guild.members.get(lui.id).addRole(role);
+        reac.message.guild.members.get(lui.id).addRole(rolevivant);
         inscrep.push(lui)
 
         reac.message.edit(new Discord.RichEmbed()
@@ -1348,16 +1401,27 @@ bot.on('messageReactionAdd', (reac,lui) => {
   }
 
   else if(votes.includes(reac.message)){
+    //Vérifie que celui qui vote est bien vivant et que c'est un vote du jour
+    
+  getRoleInDb("vivants",reac.message)
+  rolevivant = roleDB;
+    if(!lui.bot){
+      var luiroles = reac.message.guild.members.get(lui.id).roles.map(r => r.id);
+      
+    if(luiroles.includes(rolevivant) && votedejour){
     if(!avote.includes(lui)){
-      if(!lui.bot){
       avote.push(lui);
-      }
     } else {
       avote.push(lui);
       reac.remove(lui);
-      console.log(lui.username + " déréacté.");
+    }
+  } else{
+    if(votedejour){
+      reac.remove(lui);
     }
   }
+  }
+}
 
   else if(reac.message === ConfCupi){
     if(!lui.bot){
@@ -1367,7 +1431,7 @@ bot.on('messageReactionAdd', (reac,lui) => {
         reac.message.channel.send("Attention, tu n'as que deux flèches !")
       }
       else if(reac.emoji.name === "✅"){
-          reac.message.channel.send("Flèches envoyées.");
+          message.channel.send("Flèches envoyées.");
           salonLog.send("Les amoureux sont : " + eux[1][2].username + " et " + eux[0][2].username + ".");
           var chan2 = eux[0][2].dmChannel
           chan2.send("Tu es amoureux(se) de **" + eux[1][2].username + "** ! Si l'un de vous meurt, l'autre ira de le rejoindre de tristesse.")
@@ -1405,20 +1469,26 @@ bot.on('messageReactionAdd', (reac,lui) => {
     }
   }
 }
+  }
+  catch(e){
+    salonLog.send(e.message + "\n ```" + reac.message.content + "```.")
+    console.log(e)
+  }
 })
 
 bot.on('messageReactionRemove', (reac,lui) => {
+  try{
   if(reac.message === inscr){
 
           getRoleInDb("vivants",reac.message)
           role= roleDB;
         if(inscrep.includes(lui)){
         inscrep.splice(inscrep.indexOf(lui),1);
-        inscrits.splice(inscrits.indexOf(lui),1)
+        inscrits.splice(inscrits.indexOf(lui.id),1);
         reac.message.guild.members.get(lui.id).removeRole(role);
         reac.message.edit(new Discord.RichEmbed()
         .setTitle("Inscriptions pour les parties de loup Garou")
-        .setDescription("Inscrivez-vous en appuyant sur la réaction ci-dessous. Inscriptions limitées à **" + maxP + "** et impossibles lorsque la partie est lancée. \n Attention. Si vous retirez votre réaction, cela sera pris comme une désinscription.")
+        .setDescription("Inscrivez  -vous en appuyant sur la réaction ci-dessous. Inscriptions limitées à **" + maxP + "** et impossibles lorsque la partie est lancée. \n Attention. Si vous retirez votre réaction, cela sera pris comme une désinscription.")
         .addField("Joueurs inscrits :", "." + inscrep));
         }
   }
@@ -1428,6 +1498,11 @@ bot.on('messageReactionRemove', (reac,lui) => {
       avote.splice(avote.indexOf(lui),1);
     } 
   }
+  
+}
+catch(e){
+  salonLog.send(e.message + "\n A ```" + reac.message.content + "```.")
+}
 })
 
 function UsePotMort(message){
@@ -1774,15 +1849,20 @@ function reviveAll(message){
 
   getRoleInDb("morts",message)
   role= roleDB;
-
-  getRoleInDb("vivants",message)
-  role2= roleDB;
  
   eux = message.guild.roles.get(role).members;
   eux.forEach(lui => {
-  lui.removeRole(role);
-  lui.addRole(role2);
-  });
+    setTimeout(() => {
+      getRoleInDb("vivants",message)
+      role2= roleDB;
+      lui.addRole(role2);
+    }, 500);
+    lui.setMute(false)
+    //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
+    setTimeout(() => {
+      lui.removeRole(role);
+    }, 1000);
+    });
   console.log("Réussite du reviveall");
 }
 
@@ -1803,10 +1883,13 @@ function unmute(role,message){
 function Kill(message,lui){
     getRoleInDb("vivants",message)
     role= roleDB;
-  lui.removeRole(role);
-        getRoleInDb("morts",message)
-    role2= roleDB;
-  lui.addRole(role2);
+    setTimeout(() => {
+      getRoleInDb("morts",message)
+      role2= roleDB;
+      lui.addRole(role2);
+    }, 500);
+
+  setTimeout(() => {lui.removeRole(role)},3000)
         getPlaceInDb("village",message)
     lieu = lieuDB;
 
@@ -1815,8 +1898,11 @@ function Kill(message,lui){
 
     var item = distribRoles[findItemInList(distribRoles,lui)]
     if(item != undefined){
-      rolmort = ", il/elle était " + item[1];
+      rolmort = ", il/elle était " + item[1] + ".";
       distribRoles.splice(distribRoles.indexOf(item),1)
+    }
+    else{
+      rolmort = ".";
     }
 
     lui.setMute(true)
@@ -1840,9 +1926,9 @@ function Kill(message,lui){
 function voteJour(message){
           votes = [];
           avote = [];
-          var previvant = [];
-              
-          getRoleInDb("vivants",previvant,message)
+          votedejour = true;    
+
+          getRoleInDb("vivants",message)
           Jvivants = roleDB;
           
           getPlaceInDb("votes",message)
@@ -1855,6 +1941,7 @@ function voteJour(message){
             votes.push(message);
             });
           }
+        
 }
 
 function getRoleInDb(role,message){
