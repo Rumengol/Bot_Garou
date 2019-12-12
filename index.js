@@ -27,7 +27,7 @@ function Activity() {
   }, 540000);
 }
 
-token = "NDYzOTcwNzg4NjI2NjYxMzc3.XQkoaQ.4j6ANKXYMfwvoFvC1LWtgMnislQ";
+token = "NDYzOTcwNzg4NjI2NjYxMzc3.XfKmHg.ubxXW20RVbFYX1QuVtuNPYlVDu0";
 
 var adminlist = db
   .get("administrateurs")
@@ -253,6 +253,20 @@ function init(id) {
 
   votedejour[id] = false;
 }
+
+bot.on("guildCreate", guild => {
+  admin = "<@" + guild.owner.id +">";
+  var number = db
+            .get("ministrateurs")
+            .map("id")
+            .value().length;
+          db.get("ministrateurs")
+            .push({ guild: guild.id, id: number, story_value: admin })
+            .write();
+  guild.owner.createDM().then(channel => {
+    channel.send("Bonjour et merci de m'avoir ajouté à " + guild.name + " ! Vous pouvez utiliser la configuration automatique avec `/config auto` ou configurer les salons et rôles nécessaires en suivant _le manuel d'utilisation_. \n Vous pouvez également ajouter d'autres utilisateurs afin qu'ils puissent masteriser des parties en utilisant `/defadminhere [@user]`. \n Pour connaître la liste des commandes disponibles, utilisez la commande `/help` (vous ne verrez l'intégralité des commandes que sur votre serveur).")
+  })
+});
 
 bot.on("message", message => {
   try {
