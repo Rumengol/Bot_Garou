@@ -8,6 +8,8 @@
 //- Le rajouter dans RolesDeNuit s'il agit la nuit
 
 const Discord = require("discord.js");
+const Embed = require("./commands/embeds");
+const Embeds = new Embed();
 const bot = new Discord.Client();
 const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
@@ -288,13 +290,14 @@ bot.on("message", message => {
       }
 
       if (spliteMessage[0] === prefix + "ping") {
-        if (
-          mini[message.guild.id] === true ||
-          adminlist.includes(message.author)
-        ) {
-          message.reply("pong. ");
-        } else {
-          message.reply("ping failed");
+        if (adminlist.includes(message.author)){
+          message.reply("Je suis là, ô maître");
+        }
+        else if(mini[message.guild.id]){
+          message.reply("Pong patron !")
+        }
+        else{
+          message.reply("pong");
         }
       }
 
@@ -2035,31 +2038,45 @@ bot.on("message", message => {
         spliteMessage.splice(0, 1);
         var contenu = spliteMessage.join(" ");
         if (IDlg.includes(contenu)) {
-          message.channel.send(embedLG);
+          message.channel.send(Embeds.embedLG);
         } else if (IDcupi.includes(contenu)) {
-          message.channel.send(embedCupi);
+          message.channel.send(Embeds.embedCupi);
         } else if (IDancien.includes(contenu)) {
-          message.channel.send(embedAncien);
+          message.channel.send(Embeds.embedAncien);
         } else if (IDchassou.includes(contenu)) {
-          message.channel.send(embedChass);
+          message.channel.send(Embeds.embedChass);
         } else if (IDsoso.includes(contenu)) {
-          message.channel.send(embedSoso);
+          message.channel.send(Embeds.embedSoso);
         } else if (IDsalva.includes(contenu)) {
-          message.channel.send(embedSalva);
+          message.channel.send(Embeds.embedSalva);
         } else if (IDidv.includes(contenu)) {
-          message.channel.send(embedIDV);
+          message.channel.send(Embeds.embedIDV);
         } else if (IDjdf.includes(contenu)) {
-          message.channel.send(embedJDF);
+          message.channel.send(Embeds.embedJDF);
         } else if (IDsv.includes(contenu)) {
-          message.channel.send(embedSV);
+          message.channel.send(Embeds.embedSV);
         } else if (IDvovo.includes(contenu)) {
-          message.channel.send(embedVovo);
+          message.channel.send(Embeds.embedVovo);
         } else {
           message.channel.send("Je n'ai pas compris votre demande.");
         }
       }
       //aide générale
       else if (spliteMessage[0] === prefix + "help") {
+        if(mini[message.guild.id] || adminlist.includes(message.author)){
+          var embed = new Discord.Richembed()
+            .setTitle("Aide des commandes")
+            .setDescription("Commandes accessibles pour **" + message.author.username + "**.")
+            .addField("Préfixe","``/``")
+            .addField("Quel type de commandes souhaitez-vous connaître ?",":video_game: pour les commandes en jeu, :desktop: pour les commandes d'administration, :tools: pour les commandes de configuration.")
+            .setColor("#f1c40f");
+            message.channel.send(embed).then(message =>{
+              message.react(":video_game");
+              message.react(":desktop");
+              message.react(":tools:");
+            })
+        }
+
         var embed = new Discord.RichEmbed()
           .setTitle("Aide pour les différentes commandes en jeu :")
           .setDescription(
@@ -3062,219 +3079,7 @@ function checkmin(message) {
   }
 }
 
-embedLG = new Discord.RichEmbed()
-  .setTitle("Le Loup-Garou")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=2&name=Loup-Garou)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png"
-  )
-  .setColor("#FF0000")
-  .addField(
-    "Son but",
-    "Dévorer tous les innocents, ceux qui ne sont pas Loup-Garou."
-  )
-  .addField(
-    "Comment ?",
-    "Chaque nuit, il se réunit avec les autres Loup-Garou dans un salon privé pour dévorer un joueur."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les innocents sont morts, il obtient une victoire de Loup-Garou."
-  );
 
-var embedSV = new Discord.RichEmbed()
-  .setTitle("Le Simple Villageois [Innocent]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=1&name=Simple%20Villageois)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte1.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField("Pouvoir", "Aucun.");
-
-var embedSoso = new Discord.RichEmbed()
-  .setTitle("La Sorcière [Innocente]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=5&name=Sorci%C3%A8re  )"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte5.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "Elle dispose de deux potions à usage unique : 1 potion de vie, pour sauver la victime[message.guild.id] des Loups-Garous la nuit, et 1 potion de mort, pour tuer un joueur, sans qu'il puisse être sauvé"
-  );
-
-var embedSalva = new Discord.RichEmbed()
-  .setTitle("Le Salvateur [Innocent]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=4&name=Salvateur)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte4.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "Chaque nuit, il peut protéger un joueur de l'attaque des Loups-Garous. Si ce joueur est désigné par les Loups-Garous, il ne mourra pas. Il peut se protéger lui-même, mais pas deux nuits de suite la même personne."
-  );
-
-var embedChass = new Discord.RichEmbed()
-  .setTitle("Le Chasseur [Innocent]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=6&name=Chasseur)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte6.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "A sa mort, il dispose d'un dernier souffle pour tuer la personne de son choix."
-  );
-
-var embedCupi = new Discord.RichEmbed()
-  .setTitle("Le Cupidon [Innocent]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=7&name=Cupidon)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte7.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "Au début de la partie, il doit désigner deux joueurs qui seront dès lors amoureux : Si l'un des deux vient à mourir, l'autre se suicide de tristesse dans la foulée."
-  );
-
-var embedVovo = new Discord.RichEmbed()
-  .setTitle("La Voyante [Innocente]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=3&name=Voyante)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte3.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "Chaque nuit, elle peut désigner un joueur dont elle verra le rôle."
-  );
-
-var embedAncien = new Discord.RichEmbed()
-  .setTitle("L'Ancien [Innocent]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=8&name=Ancien)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte8.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "Il survit à la première attaque des Loups-Garous, mais s'il est pendu par le village, tous les innocents perdent leurs pouvoirs"
-  );
-
-var embedIDV = new Discord.RichEmbed()
-  .setTitle("L'Idiot Du Village [Innocent]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=13&name=Idiot%20du%20Village)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte13.png"
-  )
-  .setColor("#FFFFFF")
-  .addField(
-    "Son but",
-    "Déterminer qui sont les **Loups-Garous** et les éliminer."
-  )
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village."
-  )
-  .addField(
-    "Pouvoir",
-    "Si le village tente de pendre l'Idiot, il se retient au dernier instant, devant sa bêtise. L'Idiot du village est gracié, mais en échange, il ne peut plus voter."
-  );
-
-var embedJDF = new Discord.RichEmbed()
-  .setTitle("Le Joueur De Flûte [Solitaire]")
-  .setDescription(
-    "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=15&name=Joueur%20de%20Fl%C3%BBte)"
-  )
-  .setThumbnail(
-    "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte15.png"
-  )
-  .setColor("#8B008B")
-  .addField("Son but", "Charmer tous les habitants du village.")
-  .addField(
-    "Quand gagne-t-il ?",
-    "Lorsque l'intégralité des joueurs vivants est charmée, il remporte une victoire de Flûtiste."
-  )
-  .addField(
-    "Pouvoir",
-    "Chaque nuit, il peut charmer jusqu'à 2 joueurs. Ces joueurs sont informés de leurs enchantement, et savent qui sont les autres personnes charmées. Le charme n'a aucun impact sur les personnages ou la façon de jouer."
-  );
 
 let poem =
   "Quand la lune blanche \nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir,\nFol alors qui livre\nA la nuit son livre\nSavant,\nSon pied aux collines,\nEt ses mandolines\nAu vent ;\nFol qui dit un conte,\nCar minuit qui compte\nLe temps,\nPasse avec le prince\nDes sabbats qui grince\nDes dents.\nL’amant qui compare\nQuelque beauté rare\nAu jour,\nTire une ballade\nDe son coeur malade\nD’amour.\nMais voici dans l’ombre\nQu’une ronde sombre\nSe fait,\nL’enfer autour danse,\nTous dans un silence\nParfait.\nTout pendu de Grève,\nTout Juif mort soulève\nSon front,\nTous noyés des havres\nPressent leurs cadavres\nEn rond.\nEt les âmes feues\nJoignent leurs mains bleues\nSans os ;\nLui tranquille chante\nD’une voix touchante\nSes maux.\nMais lorsque sa harpe,\nOù flotte une écharpe,\nSe tait,\nIl veut fuir… La danse\nL’entoure en silence\nParfait.\nLe cercle l’embrasse,\nSon pied s’entrelace\nAux morts,\nSa tête se brise\nSur la terre grise !\nAlors\nLa ronde contente,\nEn ris éclatante,\nLe prend ;\nTout mort sans rancune\nTrouve au clair de lune\nSon rang.\nCar la lune blanche\nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir.\nAlfred de Musset, Poésies posthumes";
