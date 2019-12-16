@@ -1812,7 +1812,6 @@ bot.on("message", message => {
       }
 
       //Envoie les rôles à tous les inscrits
-      //ON EN ETAIT LA, ne pas oublier de check les doubles [message.guild.id]
       else if (spliteMessage[0] === prefix + "distribution") {
         if (
           adminlist.includes(message.author) ||
@@ -2064,74 +2063,12 @@ bot.on("message", message => {
       //aide générale
       else if (spliteMessage[0] === prefix + "help") {
         if(mini[message.guild.id] || adminlist.includes(message.author)){
-          var embed = new Discord.Richembed()
-            .setTitle("Aide des commandes")
-            .setDescription("Commandes accessibles pour **" + message.author.username + "**.")
-            .addField("Préfixe","``/``")
-            .addField("Quel type de commandes souhaitez-vous connaître ?",":video_game: pour les commandes en jeu, :desktop: pour les commandes d'administration, :tools: pour les commandes de configuration.")
-            .setColor("#f1c40f");
-            message.channel.send(embed).then(message =>{
-              message.react(":video_game");
-              message.react(":desktop");
-              message.react(":tools:");
-            })
+          var lui = message.author;
+          helpGen(message,lui)
         }
-
-        var embed = new Discord.RichEmbed()
-          .setTitle("Aide pour les différentes commandes en jeu :")
-          .setDescription(
-            "La plupart de ces commandes ne sont accessibles qu'aux maîtres du jeu."
-          )
-          .addField(
-            "► ``/clear X`` ",
-            "Supprime les X messages au dessus de la commande effectuée."
-          )
-          .addField(
-            "► ``/kill @membre`` ",
-            "Tue le membre mentionné, lui donnant le rôle de joueur mort."
-          )
-          .addField(
-            "► ``/revive @membre``",
-            "Ressuscite le joueur mentionné, lui donnant le rôle de joueur vivant."
-          )
-          .addField("► ``/reviveall`` ", "Ressuscite tous les joueurs morts.")
-          .addField(
-            "► ``/daystart X`` ",
-            "Commence la journée, qui dure X minutes, ou 5 si non précisé."
-          )
-          .addField(
-            "► ``/vote vote1,vote2,vote3,...`` ",
-            "Crée un vote avec les paramètres annoncés, ou"
-          )
-          .addField(
-            "► ``/vote jour`` ",
-            "Crée un vote avec comme paramètres les joueurs vivants."
-          )
-          .addField(
-            "► ``/prolong X`` ",
-            "Prolonge la journée de X secondes, ou 1 minute 30 si non précisé."
-          )
-          .addField(
-            "► ``/dayend`` ",
-            "Termine de façon anticipée la journée. A éviter si possible."
-          )
-          .addField(
-            "► ``/inscription X`` ",
-            "Envoie le message d'inscription, jusqu'à un maximum de X inscriptions."
-          )
-          .addField(
-            "► ``/gamend`` ",
-            "Termine la partie, ressuscitant tous les joueurs."
-          )
-          .addField(
-            "► ``/allend`` ",
-            "Termine la session, réinitialisant les rôles."
-          )
-          .addField("► ``/stop`` ", "Interrompt tous les décomptes en cours.")
-          .setColor("OxFF0000");
-
-        message.channel.send(embed);
       }
+
+
     }
   } catch (e) {
     message.reply(e.message);
@@ -3079,7 +3016,228 @@ function checkmin(message) {
   }
 }
 
+function helpGen(message,lui){
 
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
+  var embed = new Discord.RichEmbed()
+  .setTitle("Aide des commandes")
+  .setDescription("Commandes accessibles pour **" + lui.username + "**.")
+  .addField("Préfixe","``/``")
+  .addField("► ``help``","Affiche cette interface")
+  .addField("► ``ask [rôle]``","Affiche les informations sur un rôle.")
+  .addField("► ``ping``","Vérifie l'activité du bot.")
+  .addField("Quel type de commandes souhaitez-vous connaître ?",":video_game: pour les commandes en jeu\n :desktop: pour les commandes d'administration\n :tools: pour les commandes de configuration.")
+  .setColor("#f1c40f");
+  if(message.author != bot.user){
+    message.channel.send(embed).then(message =>{
+    message.react("🎮");
+    message.react("🖥️");
+    message.react("🛠️");
+    var collectorHelp = message.createReactionCollector(filter);
+    collectorHelp.on("collect", reac => {
+      switch (reac.emoji.name) {
+        case "🖥️":
+          helpAdmin(message,lui)
+          break;
+        case "🎮":
+          helpGameGen(message,lui);
+          break;
+        case "🛠️":
+          helpTools(message,lui);
+          break;
+      
+        default:
+          break;
+      }
+    })
+  })
+  }
+  else{
+    message.clearReactions();
+    message.edit(embed).then(message =>{
+      message.react("🎮");
+      message.react("🖥️");
+      message.react("🛠️");
+      var collectorHelp = message.createReactionCollector(filter);
+      collectorHelp.on("collect", reac => {
+        switch (reac.emoji.name) {
+          case "🖥️":
+            helpAdmin(message,lui)
+            break;
+          case "🎮":
+            helpGameGen(message,lui);
+            break;
+          case "🛠️":
+            helpTools(message,lui);
+            break;
+        
+          default:
+            break;
+        }
+      })
+    })
+  }
+  
+}
+
+function helpAdmin(message,lui){
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
+  message.clearReactions();
+  message.edit(Embeds.helpAdmin1).then(message =>{
+    message.react("◀️")
+    var collectorHadmin = message.createReactionCollector(filter)
+    collectorHadmin.on("collect", reac =>{
+      if(reac.emoji.name === "◀️"){
+        helpGen(message,lui)
+      }
+    })
+  })
+}
+
+function helpGameGen(message,lui){
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
+  message.clearReactions();
+    message.edit(Embeds.helpGameGen).then(message =>{
+    message.react("1️⃣")
+    message.react("2️⃣")
+    message.react("3️⃣")
+    message.react("◀️")
+    var collectorGG = message.createReactionCollector(filter)
+    collectorGG.on("collect", reac => {
+      switch (reac.emoji.name) {
+        case "1️⃣":
+          helpGameOne(message,lui);
+          break;
+        case "2️⃣":
+          helpGameTwo(message,lui);
+          break;
+        case "3️⃣":
+          helpGameThree(message,lui);
+          break;
+        case "◀️":
+          helpGen(message,lui);
+          break;
+      
+        default:
+          break;
+      }
+    })
+  })
+}
+
+function helpGameOne(message,lui){
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+  message.clearReactions();
+    message.edit(Embeds.helpGame1).then(message => {
+    message.react("◀️")
+    message.react("2️⃣")
+    message.react("3️⃣")
+    var collectorG1 = message.createReactionCollector(filter)
+    collectorG1.on("collect", reac =>{
+      switch (reac.emoji.name) {
+        case "◀️":
+          helpGameGen(message,lui);
+          break;
+        case"2️⃣":
+          helpGameTwo(message,lui);
+          break;
+        case "3️⃣":
+          helpGameThree(message,lui);
+          break;
+      
+        default:
+          break;
+      }
+    });
+  })
+}
+
+function helpGameTwo(message,lui){
+  
+var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+message.clearReactions();
+    message.edit(Embeds.helpGame2).then(message => {
+  message.react("◀️")
+  message.react("1️⃣")
+  message.react("3️⃣")
+  message.react("⚠️")
+  var collectorG2 = message.createReactionCollector(filter)
+  collectorG2.on("collect", reac =>{
+    switch (reac.emoji.name) {
+      case "◀️":
+        helpGameGen(message,lui);
+        break;
+      case "1️⃣":
+        helpGameOne(message,lui);
+        break;
+      case "3️⃣":
+        helpGameThree(message,lui);
+        break;
+      case "⚠️":
+        helpGameWeird(message,lui);
+        break;
+
+      default:
+        break;
+    }
+  });
+})
+}
+
+function helpGameWeird(message,lui){
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+  message.clearReactions();
+    message.edit(Embeds.helpGame2Chelou).then(message => {
+    message.react("◀️")
+    var collectorGW = message.createReactionCollector(filter)
+    collectorGW.on("collect", reac =>{
+      if(reac.emoji.name === "◀️"){
+        helpGameTwo(message,lui);
+      }
+    });
+  })
+}
+
+function helpGameThree(message,lui){
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+  message.clearReactions();
+    message.edit(Embeds.helpGame3).then(message => {
+    message.react("◀️")
+    message.react("1️⃣")
+    message.react("2️⃣")
+    var collectorG3 = message.createReactionCollector(filter)
+    collectorG3.on("collect", reac =>{
+      switch (reac.emoji.name) {
+        case "◀️":
+          helpGameGen(message,lui);
+          break;
+        case "1️⃣":
+          helpGameOne(message,lui);
+          break;
+        case "2️⃣":
+          helpGameTwo(message,lui);
+          break;
+      
+        default:
+          break;
+      }
+    });
+  })
+}
+
+function helpTools(message,lui){
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+  message.clearReactions();
+    message.edit(Embeds.helpTools).then(message => {
+    message.react("◀️")
+    var collectorT = message.createReactionCollector(filter)
+    collectorT.on("collect", reac =>{
+      if(reac.emoji.name === "◀️"){
+        helpGen(message,lui);
+      }
+    });
+  })
+}
 
 let poem =
   "Quand la lune blanche \nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir,\nFol alors qui livre\nA la nuit son livre\nSavant,\nSon pied aux collines,\nEt ses mandolines\nAu vent ;\nFol qui dit un conte,\nCar minuit qui compte\nLe temps,\nPasse avec le prince\nDes sabbats qui grince\nDes dents.\nL’amant qui compare\nQuelque beauté rare\nAu jour,\nTire une ballade\nDe son coeur malade\nD’amour.\nMais voici dans l’ombre\nQu’une ronde sombre\nSe fait,\nL’enfer autour danse,\nTous dans un silence\nParfait.\nTout pendu de Grève,\nTout Juif mort soulève\nSon front,\nTous noyés des havres\nPressent leurs cadavres\nEn rond.\nEt les âmes feues\nJoignent leurs mains bleues\nSans os ;\nLui tranquille chante\nD’une voix touchante\nSes maux.\nMais lorsque sa harpe,\nOù flotte une écharpe,\nSe tait,\nIl veut fuir… La danse\nL’entoure en silence\nParfait.\nLe cercle l’embrasse,\nSon pied s’entrelace\nAux morts,\nSa tête se brise\nSur la terre grise !\nAlors\nLa ronde contente,\nEn ris éclatante,\nLe prend ;\nTout mort sans rancune\nTrouve au clair de lune\nSon rang.\nCar la lune blanche\nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir.\nAlfred de Musset, Poésies posthumes";

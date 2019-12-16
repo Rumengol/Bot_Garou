@@ -19,17 +19,19 @@ class Embeds {
         "► ``clear X``",
         "Supprime les X messages au dessus de la commande."
       )
-      .setColor("OxFF0000");
+      .setColor("OxFF0000")
+      .setFooter("◀️ : Revenir au menu");
 
     this.helpGameGen = new Discord.RichEmbed()
       .setTitle("Commande de jeu")
       .setDescription(
         "Liste des commandes du jeu. Seuls les administrateurs peuvent les utiliser."
       )
-      .addField(":one:", "Voir les commandes pour débuter une partie")
-      .addField(":two:", "Voir les commandes en cours de partie")
-      .addField(":three:", "Voir les commandes de fin de partie")
-      .setColor("OxFF0000");
+      .addField("1️⃣ :", "Voir les commandes pour débuter une partie")
+      .addField("2️⃣", "Voir les commandes en cours de partie")
+      .addField("3️⃣", "Voir les commandes de fin de partie")
+      .setColor("OxFF0000")
+      .setFooter("◀️ : Revenir au menu.");
 
     this.helpGame1 = new Discord.RichEmbed()
       .setTitle("Commandes de début de jeu")
@@ -50,7 +52,10 @@ class Embeds {
         "► ``nuit``",
         "Déclenche la nuit, mute les joueurs présents en vocal et affiche l'assistant de la nuit, permettant d'appeler les rôles actifs de nuit."
       )
-      .setColor("OxF0000");
+      .setColor("OxF0000")
+      .setFooter(
+        "◀️ : Revenir au menu précédent. 2️⃣ : Voir l'aide pour les commandes en jeu. 3️⃣ Voir l'aide pour les commandes de fin de partie."
+      );
 
     this.helpGame2 = new Discord.RichEmbed()
       .setTitle("Commandes en cours de jeu")
@@ -73,7 +78,7 @@ class Embeds {
       )
       .addField("► ``dayend``", "Achève prématurément la journée.")
       .setFooter(
-        ":arrow_backward: : revenir au menu précédent. :three: : voir l'aide concernant les commandes de fin de partie. :warning: : voir les commandes inhabituelles."
+        "◀️ : Revenir au menu précédent. 1️⃣ : Voir l'aide pour les commandes de début de partie. 3️⃣ : Voir l'aide pour les commandes de fin de partie. ⚠️ : Roir les commandes inhabituelles."
       );
 
     this.helpGame2Chelou = new Discord.RichEmbed()
@@ -86,6 +91,10 @@ class Embeds {
         "Ressuscite le joueur mentionné. Fortement déconseillé en cours de partie car il n'aura plus son rôle."
       )
       .addField(
+        "► ``reviveall``",
+        "Ressuscite tous les joueurs. En théorie inutile, mêmes inconvénients qu'au dessus."
+      )
+      .addField(
         "► ``charme @membre``",
         "Charme manuellement le joueur mentionné. En théorie inutile."
       )
@@ -94,15 +103,33 @@ class Embeds {
         "Retire le charme manuellement sur le joueur mentionné. En théorie inutile."
       )
       .setFooter(
-        ":arrow_backward: : revenir à l'aide concernant les commandes en cours de partie."
+        "◀️ : revenir à l'aide concernant les commandes en cours de partie."
       );
 
     this.helpGame3 = new Discord.RichEmbed()
       .setTitle("Commandes de fin de jeu")
       .setDescription("Liste des commandes de fin de jeu")
-      .addField("► ``win [village, loup-garou, joueur de flûte, amoureux]``","Attribue la victoire à un camp.")
-      .addField("► ``gamend``","Termine la partie, réinitialisant les rôles et affichant le résumé si la victoire a été attribuée.")
-      .addField("► ``allend``","Termine la session, retire les rôles de joueur et déplace tout le monde dans le salon vocal général.")
+      .addField(
+        "► ``win [village, loup-garou, joueur de flûte, amoureux]``",
+        "Attribue la victoire à un camp."
+      )
+      .addField(
+        "► ``gamend``",
+        "Termine la partie, réinitialisant les rôles et affichant le résumé si la victoire a été attribuée."
+      )
+      .addField(
+        " ``allend``",
+        "Termine la session, retire les rôles de joueur et déplace tout le monde dans le salon vocal général."
+      )
+      .setFooter(
+        "◀️ : Revenir au menu précédent. 1️⃣ : : Voir l'aide pour les commandes de début departie. 2️⃣ Voir l'aide pour les commandes de jeu."
+      );
+
+    this.helpTools = new Discord.RichEmbed()
+      .setTitle("Commandes de configuration")
+      .setDescription("Liste des commandes de configuration")
+      .addField("Aide et commandes non implémentées", "Mais bientôt.")
+      .setFooter("◀️ : Revenir au menu.");
 
     this.embedLG = new Discord.RichEmbed()
       .setTitle("Le Loup-Garou")
