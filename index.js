@@ -3037,12 +3037,15 @@ function helpGen(message,lui){
     collectorHelp.on("collect", reac => {
       switch (reac.emoji.name) {
         case "🖥️":
+          collectorHelp.stop();
           helpAdmin(message,lui)
           break;
         case "🎮":
+          collectorHelp.stop();
           helpGameGen(message,lui);
           break;
         case "🛠️":
+          collectorHelp.stop();
           helpTools(message,lui);
           break;
       
@@ -3062,14 +3065,17 @@ function helpGen(message,lui){
       collectorHelp.on("collect", reac => {
         switch (reac.emoji.name) {
           case "🖥️":
-            helpAdmin(message,lui)
-            break;
-          case "🎮":
-            helpGameGen(message,lui);
-            break;
-          case "🛠️":
-            helpTools(message,lui);
-            break;
+          collectorHelp.stop();
+          helpAdmin(message,lui)
+          break;
+        case "🎮":
+          collectorHelp.stop();
+          helpGameGen(message,lui);
+          break;
+        case "🛠️":
+          collectorHelp.stop();
+          helpTools(message,lui);
+          break;
         
           default:
             break;
@@ -3088,6 +3094,7 @@ function helpAdmin(message,lui){
     var collectorHadmin = message.createReactionCollector(filter)
     collectorHadmin.on("collect", reac =>{
       if(reac.emoji.name === "◀️"){
+        collectorHadmin.stop();
         helpGen(message,lui)
       }
     })
@@ -3106,15 +3113,19 @@ function helpGameGen(message,lui){
     collectorGG.on("collect", reac => {
       switch (reac.emoji.name) {
         case "1️⃣":
+          collectorGG.stop();
           helpGameOne(message,lui);
           break;
         case "2️⃣":
+            collectorGG.stop();
           helpGameTwo(message,lui);
           break;
         case "3️⃣":
+            collectorGG.stop();
           helpGameThree(message,lui);
           break;
         case "◀️":
+            collectorGG.stop();
           helpGen(message,lui);
           break;
       
@@ -3136,12 +3147,15 @@ function helpGameOne(message,lui){
     collectorG1.on("collect", reac =>{
       switch (reac.emoji.name) {
         case "◀️":
+            collectorG1.stop();
           helpGameGen(message,lui);
           break;
         case"2️⃣":
+        collectorG1.stop();
           helpGameTwo(message,lui);
           break;
         case "3️⃣":
+            collectorG1.stop();
           helpGameThree(message,lui);
           break;
       
@@ -3165,15 +3179,19 @@ message.clearReactions();
   collectorG2.on("collect", reac =>{
     switch (reac.emoji.name) {
       case "◀️":
+          collectorG2.stop();
         helpGameGen(message,lui);
         break;
       case "1️⃣":
+          collectorG2.stop();
         helpGameOne(message,lui);
         break;
       case "3️⃣":
+          collectorG2.stop();
         helpGameThree(message,lui);
         break;
       case "⚠️":
+          collectorG2.stop();
         helpGameWeird(message,lui);
         break;
 
@@ -3192,6 +3210,7 @@ function helpGameWeird(message,lui){
     var collectorGW = message.createReactionCollector(filter)
     collectorGW.on("collect", reac =>{
       if(reac.emoji.name === "◀️"){
+        collectorGW.stop();
         helpGameTwo(message,lui);
       }
     });
@@ -3209,12 +3228,15 @@ function helpGameThree(message,lui){
     collectorG3.on("collect", reac =>{
       switch (reac.emoji.name) {
         case "◀️":
+            collectorG3.stop();
           helpGameGen(message,lui);
           break;
         case "1️⃣":
+            collectorG3.stop();
           helpGameOne(message,lui);
           break;
         case "2️⃣":
+            collectorG3.stop();
           helpGameTwo(message,lui);
           break;
       
@@ -3233,6 +3255,7 @@ function helpTools(message,lui){
     var collectorT = message.createReactionCollector(filter)
     collectorT.on("collect", reac =>{
       if(reac.emoji.name === "◀️"){
+        collectorT.stop();
         helpGen(message,lui);
       }
     });
