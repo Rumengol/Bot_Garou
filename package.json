@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.3.2",
+    "discord.js": "^11.5.1",
     "discord.js-commando": "^0.10.0",
     "express": "^4.16.4",
     "lowdb": "^1.0.0"

@@ -1,6 +1,11 @@
 //to do :
 //Le collecteur de la nuit derp : on est au courant
 //Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos : c'pas demain la veille
+//Permettre des thèmes variés
+//Permettre une configuration personnalisée
+//LE SITE
+//Système de leveling
+
 
 //Notice pour rajouter un rôle :
 //- Rajouter sa logique d'action dans la commande  'nuit'
@@ -20,6 +25,7 @@ const db = low(adapter);
 
 const adeupter = new FileSync("composition.json");
 const comp = low(adeupter);
+const themeData = require("./themesEmbed.json");
 
 express().listen(PORT);
 
@@ -90,7 +96,8 @@ const identifiers = [
   "charmed",
   "general",
   "loups",
-  "logs"
+  "logs",
+  "cimetierre"
 ];
 
 const listeRoles = [
@@ -257,17 +264,21 @@ function init(id) {
 }
 
 bot.on("guildCreate", guild => {
-  admin = "<@" + guild.owner.id +">";
+  admin = "<@" + guild.owner.id + ">";
   var number = db
-            .get("ministrateurs")
-            .map("id")
-            .value().length;
-          db.get("ministrateurs")
-            .push({ guild: guild.id, id: number, story_value: admin })
-            .write();
+    .get("ministrateurs")
+    .map("id")
+    .value().length;
+  db.get("ministrateurs")
+    .push({ guild: guild.id, id: number, story_value: admin })
+    .write();
   guild.owner.createDM().then(channel => {
-    channel.send("Bonjour et merci de m'avoir ajouté à " + guild.name + " ! Vous pouvez utiliser la configuration automatique avec `/config auto` ou configurer les salons et rôles nécessaires en suivant _le manuel d'utilisation_. \n Vous pouvez également ajouter d'autres utilisateurs afin qu'ils puissent masteriser des parties en utilisant `/defadminhere [@user]`. \n Pour connaître la liste des commandes disponibles, utilisez la commande `/help` (vous ne verrez l'intégralité des commandes que sur votre serveur).")
-  })
+    channel.send(
+      "Bonjour et merci de m'avoir ajouté à " +
+        guild.name +
+        " ! Vous pouvez utiliser la configuration automatique avec `/config auto` ou configurer les salons et rôles nécessaires en suivant _le manuel d'utilisation_. \n Vous pouvez également ajouter d'autres utilisateurs afin qu'ils puissent masteriser des parties en utilisant `/defadminhere [@user]`. \n Pour connaître la liste des commandes disponibles, utilisez la commande `/help` (vous ne verrez l'intégralité des commandes que sur votre serveur)."
+    );
+  });
 });
 
 bot.on("message", message => {
@@ -290,13 +301,11 @@ bot.on("message", message => {
       }
 
       if (spliteMessage[0] === prefix + "ping") {
-        if (adminlist.includes(message.author)){
+        if (adminlist.includes(message.author)) {
           message.reply("Je suis là, ô maître");
-        }
-        else if(mini[message.guild.id]){
-          message.reply("Pong patron !")
-        }
-        else{
+        } else if (mini[message.guild.id]) {
+          message.reply("Pong patron !");
+        } else {
           message.reply("pong");
         }
       }
@@ -684,6 +693,271 @@ bot.on("message", message => {
           message.reply(
             "commande refusée. Seuls les administrateurs peuvent supprimer des salons ."
           );
+        }
+      }
+
+      //configuration du serveur
+      else if (spliteMessage[0] == prefix + "config") {
+        if (
+          adminlist.includes(message.author) ||
+          mini[message.guild.id] === true
+        ) {
+          if (spliteMessage[1] == "auto") {
+            var guild = message.guild;
+            if(db.get("roles").map("guild").value().toString().includes(guild.id) || db.get("salons").map("guild").value().toString().includes(guild.id)){
+              message.reply("Attention, au moins un élément est configuré sur ce serveur. Veuillez le(s) retirer afin d'activer la configuration automatique.")
+            } else {
+            message.channel.send(
+              "Configuration automatique du serveur en cours, veuillez patienter..."
+            );
+            var roleJV = guild
+              .createRole({
+                name: "Joueurs Vivants",
+                color: "DARK_GREEN",
+                mentionable: "true"
+              })
+              .then(roleJV => {
+                
+                db.get("roles")
+                  .push({
+                    guild: guild.id,
+                    id: "vivants",
+                    story_value: roleJV.id
+                  })
+                  .write();
+                  message.channel.send(`Le rôle ${roleJV} a été créé...`);
+
+                  var roleJM = guild
+              .createRole({
+                name: "Joueurs Morts",
+                color: "DARK_PURPLE",
+                mentionable: "true",
+                position: roleJV.position - 1
+              })
+              .then(roleJM => {
+                db.get("roles")
+                  .push({
+                    guild: guild.id,
+                    id: "morts",
+                    story_value: roleJM.id
+                  })
+                  .write();
+                  message.channel.send(`Le rôle ${roleJM} a été créé...`);
+
+              var game = guild.createChannel("Jeu Loup Garou",{
+                type: "category",
+                position: 0
+              }).then(game => {
+                message.channel.send(`La catégorie **${game.name}** a été créée...`);
+
+              var village = guild.createChannel("place-du-village",{
+                type: "text",
+                topic: "Débattez ici la journée.",
+                position : 1,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["VIEW_CHANNEL"]
+                  },
+                  {
+                  id : roleJV.id,
+                  deny : ["SEND_MESSAGES"],
+                  allow : ["VIEW_CHANNEL"]
+                  },
+                  {
+                    id : roleJM.id,
+                    deny : ["SEND_MESSAGES"],
+                    allow : ["VIEW_CHANNEL"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "village",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon ${channel} a été créé...`)
+
+              var vote = guild.createChannel("votes",{
+                type: "text",
+                topic: "Votez ici pour savoir qui aura l'honneur d'être accroché au grand arbre.",
+                position : 2,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["VIEW_CHANNEL","SEND_MESSAGES"]
+                  },
+                  {
+                  id : roleJV.id,
+                  deny : ["SEND_MESSAGES","VIEW_CHANNEL"]
+                  },
+                  {
+                    id : roleJM.id,
+                    deny : ["SEND_MESSAGES"],
+                    allow : ["VIEW_CHANNEL"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "votes",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon ${channel} a été créé...`)
+
+              var cimetiere = guild.createChannel("cimetière",{
+                type: "text",
+                topic: "Lieu de villégiature des morts, qui observent les tracas des vivants.",
+                position : 5,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["VIEW_CHANNEL","SEND_MESSAGES"]
+                  },
+                  {
+                    id : roleJM.id,
+                    allow : ["VIEW_CHANNEL","SEND_MESSAGES"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "cimetiere",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon ${channel} a été créé...`)
+
+              var taniere = guild.createChannel("tanière-des-loups",{
+                type: "text",
+                topic: "Le repaire des lycanthropes lorsque tombe la nuit.",
+                position : 3,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["VIEW_CHANNEL","SEND_MESSAGES"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "loups",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon ${channel} a été créé...`)
+
+              var audience = guild.createChannel("audience",{
+                type: "text",
+                topic: "Une flûte enjôleuse, un public apathique, chaque nuit plus important.",
+                position : 1,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["VIEW_CHANNEL","SEND_MESSAGES"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "charmed",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon ${channel} a été créé...`)
+              var logs = guild.createChannel("logs-bot-garou",{
+                type: "text",
+                topic: "Un salon pour le maître du jeu, qu'il puisse recueillir toutes les informations relatives à la partie.",
+                position : 0,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["VIEW_CHANNEL","SEND_MESSAGES"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "logs",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon ${channel} a été créé...`)
+              var general = guild.createChannel("Vocal général",{
+                type: "voice",
+                position : 1
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "general",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon vocal **${channel.name}** a été créé...`)
+              var vocal = guild.createChannel("Place Du Village",{
+                type: "voice",
+                position : 2,
+                permissionOverwrites: [
+                  {
+                    id : guild.id,
+                    deny : ["CONNECT","SPEAK"]
+                  },
+                  {
+                  id : roleJV.id,
+                  allow : ["SPEAK","CONNECT"]
+                  },
+                  {
+                    id : roleJM.id,
+                    deny : ["SPEAK"],
+                    allow : ["CONNECT"]
+                  }
+              ]
+              }).then(channel =>{
+                db.get("salons")
+                      .push({
+                        guild: guild.id,
+                        id: "vocal",
+                        story_value: channel.id
+                      })
+                      .write();
+                channel.setParent(game.id)
+                message.channel.send(`Le salon vocal **${channel.name}** a été créé...`).then(()=> 
+                  message.channel.send("Tous les salons et les rôles ont étés créés. Vous pouvez librement les renommer, modifier et déplacer, mais faites attention à ne pas les supprimer par inadvertance, auquel cas je risquerais de dysfonctionner."))
+              });
+              });
+              });
+              });
+              });
+              });
+              });
+              });
+              });
+              });
+              });
+            }
+          } else {
+            message.reply(
+              "Quelle type de configuration souhaitez-vous ? Actuellement, seule ``/config auto`` est disponible."
+            );
+          }
+        } else {
+          message.reply("Seul un administrateur peut configurer le serveur");
         }
       }
 
@@ -1313,7 +1587,7 @@ bot.on("message", message => {
             .get(roleDB[message.guild.id])
             .members.map(m => m.user.username);
 
-          village.overwritePermissions(amute, { SEND_MESSAGE: false });
+          village.overwritePermissions(amute, { SEND_MESSAGES: false });
           amute.members.forEach(mute => {
             mute.setMute(true);
           });
@@ -1374,7 +1648,7 @@ bot.on("message", message => {
             if (IDlg.includes(contenu) && rolajouer.includes(LG)) {
               //JoueursLG est jamais attribué je crois
               joueursLG[message.guild.id].forEach(joueur => {
-                lieu.overwritePermissions(joueur, { SEND_MESSAGE: true });
+                lieu.overwritePermissions(joueur, { SEND_MESSAGES: true });
               });
               lieu.send("Loups Garous ! Réveillez-vous et dévorez !");
               rolajouer.splice(rolajouer.indexOf(LG), 1);
@@ -2062,13 +2336,11 @@ bot.on("message", message => {
       }
       //aide générale
       else if (spliteMessage[0] === prefix + "help") {
-        if(mini[message.guild.id] || adminlist.includes(message.author)){
+        if (mini[message.guild.id] || adminlist.includes(message.author)) {
           var lui = message.author;
-          helpGen(message,lui)
+          helpGen(message, lui);
         }
       }
-
-
     }
   } catch (e) {
     message.reply(e.message);
@@ -3016,48 +3288,22 @@ function checkmin(message) {
   }
 }
 
-function helpGen(message,lui){
-
+function helpGen(message, lui) {
   var filter = reac => reac.users.map(u => u.username).includes(lui.username);
   var embed = new Discord.RichEmbed()
-  .setTitle("Aide des commandes")
-  .setDescription("Commandes accessibles pour **" + lui.username + "**.")
-  .addField("Préfixe","``/``")
-  .addField("► ``help``","Affiche cette interface")
-  .addField("► ``ask [rôle]``","Affiche les informations sur un rôle.")
-  .addField("► ``ping``","Vérifie l'activité du bot.")
-  .addField("Quel type de commandes souhaitez-vous connaître ?",":video_game: pour les commandes en jeu\n :desktop: pour les commandes d'administration\n :tools: pour les commandes de configuration.")
-  .setColor("#f1c40f");
-  if(message.author != bot.user){
-    message.channel.send(embed).then(message =>{
-    message.react("🎮");
-    message.react("🖥️");
-    message.react("🛠️");
-    var collectorHelp = message.createReactionCollector(filter);
-    collectorHelp.on("collect", reac => {
-      switch (reac.emoji.name) {
-        case "🖥️":
-          collectorHelp.stop();
-          helpAdmin(message,lui)
-          break;
-        case "🎮":
-          collectorHelp.stop();
-          helpGameGen(message,lui);
-          break;
-        case "🛠️":
-          collectorHelp.stop();
-          helpTools(message,lui);
-          break;
-      
-        default:
-          break;
-      }
-    })
-  })
-  }
-  else{
-    message.clearReactions();
-    message.edit(embed).then(message =>{
+    .setTitle("Aide des commandes")
+    .setDescription("Commandes accessibles pour **" + lui.username + "**.")
+    .addField("Préfixe", "``/``")
+    .addField("► ``help``", "Affiche cette interface")
+    .addField("► ``ask [rôle]``", "Affiche les informations sur un rôle.")
+    .addField("► ``ping``", "Vérifie l'activité du bot.")
+    .addField(
+      "Quel type de commandes souhaitez-vous connaître ?",
+      ":video_game: pour les commandes en jeu\n :desktop: pour les commandes d'administration\n :tools: pour les commandes de configuration."
+    )
+    .setColor("#f1c40f");
+  if (message.author != bot.user) {
+    message.channel.send(embed).then(message => {
       message.react("🎮");
       message.react("🖥️");
       message.react("🛠️");
@@ -3065,201 +3311,226 @@ function helpGen(message,lui){
       collectorHelp.on("collect", reac => {
         switch (reac.emoji.name) {
           case "🖥️":
-          collectorHelp.stop();
-          helpAdmin(message,lui)
-          break;
-        case "🎮":
-          collectorHelp.stop();
-          helpGameGen(message,lui);
-          break;
-        case "🛠️":
-          collectorHelp.stop();
-          helpTools(message,lui);
-          break;
-        
+            collectorHelp.stop();
+            helpAdmin(message, lui);
+            break;
+          case "🎮":
+            collectorHelp.stop();
+            helpGameGen(message, lui);
+            break;
+          case "🛠️":
+            collectorHelp.stop();
+            helpTools(message, lui);
+            break;
+
           default:
             break;
         }
-      })
-    })
+      });
+    });
+  } else {
+    message.clearReactions();
+    message.edit(embed).then(message => {
+      message.react("🎮");
+      message.react("🖥️");
+      message.react("🛠️");
+      var collectorHelp = message.createReactionCollector(filter);
+      collectorHelp.on("collect", reac => {
+        switch (reac.emoji.name) {
+          case "🖥️":
+            collectorHelp.stop();
+            helpAdmin(message, lui);
+            break;
+          case "🎮":
+            collectorHelp.stop();
+            helpGameGen(message, lui);
+            break;
+          case "🛠️":
+            collectorHelp.stop();
+            helpTools(message, lui);
+            break;
+
+          default:
+            break;
+        }
+      });
+    });
   }
-  
 }
 
-function helpAdmin(message,lui){
+function helpAdmin(message, lui) {
   var filter = reac => reac.users.map(u => u.username).includes(lui.username);
   message.clearReactions();
-  message.edit(Embeds.helpAdmin1).then(message =>{
-    message.react("◀️")
-    var collectorHadmin = message.createReactionCollector(filter)
-    collectorHadmin.on("collect", reac =>{
-      if(reac.emoji.name === "◀️"){
+  message.edit(Embeds.helpAdmin1).then(message => {
+    message.react("◀️");
+    var collectorHadmin = message.createReactionCollector(filter);
+    collectorHadmin.on("collect", reac => {
+      if (reac.emoji.name === "◀️") {
         collectorHadmin.stop();
-        helpGen(message,lui)
+        helpGen(message, lui);
       }
-    })
-  })
+    });
+  });
 }
 
-function helpGameGen(message,lui){
+function helpGameGen(message, lui) {
   var filter = reac => reac.users.map(u => u.username).includes(lui.username);
   message.clearReactions();
-    message.edit(Embeds.helpGameGen).then(message =>{
-    message.react("1️⃣")
-    message.react("2️⃣")
-    message.react("3️⃣")
-    message.react("◀️")
-    var collectorGG = message.createReactionCollector(filter)
+  message.edit(Embeds.helpGameGen).then(message => {
+    message.react("1️⃣");
+    message.react("2️⃣");
+    message.react("3️⃣");
+    message.react("◀️");
+    var collectorGG = message.createReactionCollector(filter);
     collectorGG.on("collect", reac => {
       switch (reac.emoji.name) {
         case "1️⃣":
           collectorGG.stop();
-          helpGameOne(message,lui);
+          helpGameOne(message, lui);
           break;
         case "2️⃣":
-            collectorGG.stop();
-          helpGameTwo(message,lui);
+          collectorGG.stop();
+          helpGameTwo(message, lui);
           break;
         case "3️⃣":
-            collectorGG.stop();
-          helpGameThree(message,lui);
+          collectorGG.stop();
+          helpGameThree(message, lui);
           break;
         case "◀️":
-            collectorGG.stop();
-          helpGen(message,lui);
+          collectorGG.stop();
+          helpGen(message, lui);
           break;
-      
-        default:
-          break;
-      }
-    })
-  })
-}
 
-function helpGameOne(message,lui){
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
-  message.clearReactions();
-    message.edit(Embeds.helpGame1).then(message => {
-    message.react("◀️")
-    message.react("2️⃣")
-    message.react("3️⃣")
-    var collectorG1 = message.createReactionCollector(filter)
-    collectorG1.on("collect", reac =>{
-      switch (reac.emoji.name) {
-        case "◀️":
-            collectorG1.stop();
-          helpGameGen(message,lui);
-          break;
-        case"2️⃣":
-        collectorG1.stop();
-          helpGameTwo(message,lui);
-          break;
-        case "3️⃣":
-            collectorG1.stop();
-          helpGameThree(message,lui);
-          break;
-      
         default:
           break;
       }
     });
-  })
-}
-
-function helpGameTwo(message,lui){
-  
-var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
-message.clearReactions();
-    message.edit(Embeds.helpGame2).then(message => {
-  message.react("◀️")
-  message.react("1️⃣")
-  message.react("3️⃣")
-  message.react("⚠️")
-  var collectorG2 = message.createReactionCollector(filter)
-  collectorG2.on("collect", reac =>{
-    switch (reac.emoji.name) {
-      case "◀️":
-          collectorG2.stop();
-        helpGameGen(message,lui);
-        break;
-      case "1️⃣":
-          collectorG2.stop();
-        helpGameOne(message,lui);
-        break;
-      case "3️⃣":
-          collectorG2.stop();
-        helpGameThree(message,lui);
-        break;
-      case "⚠️":
-          collectorG2.stop();
-        helpGameWeird(message,lui);
-        break;
-
-      default:
-        break;
-    }
   });
-})
 }
 
-function helpGameWeird(message,lui){
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+function helpGameOne(message, lui) {
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
   message.clearReactions();
-    message.edit(Embeds.helpGame2Chelou).then(message => {
-    message.react("◀️")
-    var collectorGW = message.createReactionCollector(filter)
-    collectorGW.on("collect", reac =>{
-      if(reac.emoji.name === "◀️"){
-        collectorGW.stop();
-        helpGameTwo(message,lui);
-      }
-    });
-  })
-}
-
-function helpGameThree(message,lui){
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
-  message.clearReactions();
-    message.edit(Embeds.helpGame3).then(message => {
-    message.react("◀️")
-    message.react("1️⃣")
-    message.react("2️⃣")
-    var collectorG3 = message.createReactionCollector(filter)
-    collectorG3.on("collect", reac =>{
+  message.edit(Embeds.helpGame1).then(message => {
+    message.react("◀️");
+    message.react("2️⃣");
+    message.react("3️⃣");
+    var collectorG1 = message.createReactionCollector(filter);
+    collectorG1.on("collect", reac => {
       switch (reac.emoji.name) {
         case "◀️":
-            collectorG3.stop();
-          helpGameGen(message,lui);
+          collectorG1.stop();
+          helpGameGen(message, lui);
+          break;
+        case "2️⃣":
+          collectorG1.stop();
+          helpGameTwo(message, lui);
+          break;
+        case "3️⃣":
+          collectorG1.stop();
+          helpGameThree(message, lui);
+          break;
+
+        default:
+          break;
+      }
+    });
+  });
+}
+
+function helpGameTwo(message, lui) {
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
+  message.clearReactions();
+  message.edit(Embeds.helpGame2).then(message => {
+    message.react("◀️");
+    message.react("1️⃣");
+    message.react("3️⃣");
+    message.react("⚠️");
+    var collectorG2 = message.createReactionCollector(filter);
+    collectorG2.on("collect", reac => {
+      switch (reac.emoji.name) {
+        case "◀️":
+          collectorG2.stop();
+          helpGameGen(message, lui);
           break;
         case "1️⃣":
-            collectorG3.stop();
-          helpGameOne(message,lui);
+          collectorG2.stop();
+          helpGameOne(message, lui);
           break;
-        case "2️⃣":
-            collectorG3.stop();
-          helpGameTwo(message,lui);
+        case "3️⃣":
+          collectorG2.stop();
+          helpGameThree(message, lui);
           break;
-      
+        case "⚠️":
+          collectorG2.stop();
+          helpGameWeird(message, lui);
+          break;
+
         default:
           break;
       }
     });
-  })
+  });
 }
 
-function helpTools(message,lui){
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username); 
+function helpGameWeird(message, lui) {
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
   message.clearReactions();
-    message.edit(Embeds.helpTools).then(message => {
-    message.react("◀️")
-    var collectorT = message.createReactionCollector(filter)
-    collectorT.on("collect", reac =>{
-      if(reac.emoji.name === "◀️"){
-        collectorT.stop();
-        helpGen(message,lui);
+  message.edit(Embeds.helpGame2Chelou).then(message => {
+    message.react("◀️");
+    var collectorGW = message.createReactionCollector(filter);
+    collectorGW.on("collect", reac => {
+      if (reac.emoji.name === "◀️") {
+        collectorGW.stop();
+        helpGameTwo(message, lui);
       }
     });
-  })
+  });
+}
+
+function helpGameThree(message, lui) {
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
+  message.clearReactions();
+  message.edit(Embeds.helpGame3).then(message => {
+    message.react("◀️");
+    message.react("1️⃣");
+    message.react("2️⃣");
+    var collectorG3 = message.createReactionCollector(filter);
+    collectorG3.on("collect", reac => {
+      switch (reac.emoji.name) {
+        case "◀️":
+          collectorG3.stop();
+          helpGameGen(message, lui);
+          break;
+        case "1️⃣":
+          collectorG3.stop();
+          helpGameOne(message, lui);
+          break;
+        case "2️⃣":
+          collectorG3.stop();
+          helpGameTwo(message, lui);
+          break;
+
+        default:
+          break;
+      }
+    });
+  });
+}
+
+function helpTools(message, lui) {
+  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
+  message.clearReactions();
+  message.edit(Embeds.helpTools).then(message => {
+    message.react("◀️");
+    var collectorT = message.createReactionCollector(filter);
+    collectorT.on("collect", reac => {
+      if (reac.emoji.name === "◀️") {
+        collectorT.stop();
+        helpGen(message, lui);
+      }
+    });
+  });
 }
 
 let poem =
