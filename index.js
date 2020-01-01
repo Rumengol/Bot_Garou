@@ -5,6 +5,7 @@
 //Permettre une configuration personnalisée
 //LE SITE
 //Système de leveling
+//Implémenter le /suggestion
 
 
 //Notice pour rajouter un rôle :
@@ -22,10 +23,12 @@ const express = require("express");
 const PORT = process.env.PORT || 5000;
 const adapter = new FileSync("adminrole.json");
 const db = low(adapter);
+const Theme = require("./themes/Themes.js");
+const Role = require("./themes/Role.js");
+const Presets = require("./themes/Presets.json")
 
 const adeupter = new FileSync("composition.json");
 const comp = low(adeupter);
-const themeData = require("./themesEmbed.json");
 
 express().listen(PORT);
 
@@ -51,11 +54,12 @@ db.defaults({ roles: [] }).write();
 comp.defaults({ composition: [] }).write();
 
 bot.on("ready", () => {
-  console.log("GRAOU est prêt!");
+  
   Activity();
   for (const guild of bot.guilds.values()) {
     init(guild.id);
   }
+  console.log("GRAOU est prêt!");
 });
 
 bot.login(token);
@@ -100,106 +104,40 @@ const identifiers = [
   "cimetierre"
 ];
 
-const listeRoles = [
-  "Loup-Garou",
-  "Simple Villageois",
-  "Cupidon",
-  "Sorcière",
-  "Voyante",
-  "Chasseur",
-  "Idiot Du Village",
-  "Ancien",
-  "Salvateur"
-];
+var listeRoles = {}
 
-const IDlg = [
-  "Loup-Garou",
-  "loup-garou",
-  "loups-garou",
-  "loup garou",
-  "loups garou",
-  "loups-garous",
-  "loups garous",
-  "lg",
-  "warwick "
-];
-const LG = "Loup-Garou";
-const emoteLG = ":wolf:";
-const IDcupi = ["Cupidon", "cupidon", "cupi", "varus"];
-const Cupi = "Cupidon";
-let emoteCupi = ":bow_and_arrow:";
-let IDsoso = [
-  "Sorcière",
-  "sorcière",
-  "sorciere",
-  "soso",
-  "witch",
-  "sorcier",
-  "morgana"
-];
-let Soso = "Sorcière";
-let emoteSoso = ":alembic:️";
-let IDvovo = ["Voyante", "voyante", "vovo", "voyant", "vel'koz"];
-let Vovo = "Voyante";
-let emoteVovo = ":eye:";
-let IDchassou = [
-  "Chasseur",
-  "chasseur",
-  "chasseuse",
-  "chassou",
-  "chasou",
-  "hunter",
-  "vayne"
-];
-let Chassou = "Chasseur";
-let emoteChassou = ":gun:";
-let IDidv = [
-  "IDV",
-  "idiot du village",
-  "idiot",
-  "idv",
-  "idiotduvillage",
-  "mundo"
-];
-let IDV = "Idiot du village";
-let emoteIDV = ":drooling_face:";
-let IDancien = ["Ancien", "ancien", "vieux", "maokai"];
-let Ancien = "Ancien";
-let emoteAncien = ":older_man:";
-let IDjdf = [
-  "Joueur de flûte",
-  "JDF",
-  "joueur de flûte",
-  "jdf",
-  "flûtise",
-  "musicien",
-  "joueur de flute",
-  "arhi"
-];
-let JDF = "Joueur de flûte";
-let emoteJDF = ":musical_note:";
-let IDsalva = [
-  "Salvateur",
-  "salvateur",
-  "salva",
-  "salveur",
-  "salvateurs",
-  "taric"
-];
-let Salva = "Salvateur";
-let emoteSalva = ":shield:";
-let IDsv = [
-  "Paysan",
-  "paysan",
-  "paysans",
-  "simple villageois",
-  "simples villageois",
-  "sv",
-  "villageois",
-  "teemo"
-];
-let SV = "Paysan";
-let emoteSV = ":man:‍:ear_of_rice:";
+var theme = {};
+
+let IDlg = {}
+let LG = {}
+let emoteLG = {}
+let IDcupi = {}
+let Cupi = {}
+let emoteCupi = {}
+let IDsoso = {}
+let Soso = {}
+let emoteSoso = {};
+let IDvovo = {} 
+let Vovo = {}
+let emoteVovo = {}
+let IDchassou = {}
+let Chassou = {}
+let emoteChassou = {}
+let IDidv = {}
+let IDV = {}
+let emoteIDV = {}
+let Ancien = {}
+let emoteAncien = {}
+let IDancien = {}
+let IDjdf = {}
+let JDF = {}
+let emoteJDF = {}
+let IDsalva = {}
+let Salva = {}
+let emoteSalva = {}
+let IDsv = {}
+let SV = {}
+let emoteSV = {}
 
 var rolesDeNuit = {};
 var potVie = {};
@@ -246,11 +184,45 @@ function init(id) {
 
   distribution[id] = [];
 
+  theme[id] = "classique";
   rolesDeNuit[id] = [Cupi, Salva, LG, Soso, Vovo, JDF];
   potVie[id] = true;
   potMort[id] = true;
   Lovers[id] = [];
   compo[id] = [];
+
+  listeRoles[id] = [];
+
+  IDlg[id] = []
+  LG[id] = ""
+  emoteLG[id] = ""
+  IDcupi[id] = []
+  Cupi[id] = ""
+  emoteCupi[id] = ""
+  IDsoso[id] = []
+  Soso[id] = ""
+  emoteSoso[id] =  ""
+  IDvovo[id] =  []
+  Vovo[id] = ""
+  emoteVovo[id] = ""
+  IDchassou[id] = []
+  Chassou[id] = ""
+  emoteChassou[id] = ""
+  IDidv[id] = []
+  IDV[id] = ""
+  emoteIDV[id] = ""
+  Ancien[id] = ""
+  emoteAncien[id] = ""
+  IDancien[id] = []
+  IDjdf[id] = []
+  JDF[id] = ""
+  emoteJDF[id] = ""
+  IDsalva[id] = []
+  Salva[id] = ""
+  emoteSalva[id] = []
+  IDsv[id] = []
+  SV[id] = ""
+  emoteSV[id] = ""
 
   //Cupidon messages
   eux[id] = [];
@@ -272,11 +244,12 @@ bot.on("guildCreate", guild => {
   db.get("ministrateurs")
     .push({ guild: guild.id, id: number, story_value: admin })
     .write();
+  init(guild.id);
   guild.owner.createDM().then(channel => {
     channel.send(
-      "Bonjour et merci de m'avoir ajouté à " +
+      "Bonjour et merci de m'avoir ajouté à **" +
         guild.name +
-        " ! Vous pouvez utiliser la configuration automatique avec `/config auto` ou configurer les salons et rôles nécessaires en suivant _le manuel d'utilisation_. \n Vous pouvez également ajouter d'autres utilisateurs afin qu'ils puissent masteriser des parties en utilisant `/defadminhere [@user]`. \n Pour connaître la liste des commandes disponibles, utilisez la commande `/help` (vous ne verrez l'intégralité des commandes que sur votre serveur)."
+        "** ! Vous pouvez utiliser la configuration automatique avec `/config auto` ou configurer les salons et rôles nécessaires en suivant _le manuel d'utilisation_. \n Vous pouvez également ajouter d'autres utilisateurs afin qu'ils puissent masteriser des parties en utilisant `/defadminhere [@user]`. \n Pour connaître la liste des commandes disponibles, utilisez la commande `/help` (vous ne verrez l'intégralité des commandes que sur votre serveur)."
     );
   });
 });
@@ -298,13 +271,13 @@ bot.on("message", message => {
         salonLog[message.guild.id] = logs;
         mini[message.guild.id] = false;
         checkmin(message);
-      }
+      
 
       if (spliteMessage[0] === prefix + "ping") {
         if (adminlist.includes(message.author)) {
-          message.reply("Je suis là, ô maître");
+          message.reply("Pong, grand administrateur");
         } else if (mini[message.guild.id]) {
-          message.reply("Pong patron !");
+          message.reply("Pong administrateur !");
         } else {
           message.reply("pong");
         }
@@ -1017,9 +990,9 @@ bot.on("message", message => {
             var defaite = "Perdant";
             win[message.guild.id] = true;
 
-            if (IDlg.includes(spliteMessage[1])) {
+            if (IDlg[message.guild.id].includes(spliteMessage[1])) {
               distribRoles[message.guild.id].forEach(role => {
-                if (role[1] == LG) {
+                if (role[1] == LG[message.guild.id]) {
                   role.push(victoire);
                 } else {
                   role.push(defaite);
@@ -1030,7 +1003,7 @@ bot.on("message", message => {
               );
             } else if (spliteMessage[1] === "village") {
               distribRoles[message.guild.id].forEach(role => {
-                if (role[1] != LG && role[1] != JDF) {
+                if (role[1] != LG[message.guild.id] && role[1] != JDF[message.guild.id]) {
                   role.push(victoire);
                 } else {
                   role.push(defaite);
@@ -1046,9 +1019,9 @@ bot.on("message", message => {
                 }
               });
               message.channel.send("La victoire revient aux **Amoureux** !");
-            } else if (IDjdf.includes(spliteMessage[1])) {
+            } else if (IDjdf[message.guild.id].includes(spliteMessage[1])) {
               distribRoles[message.guild.id].forEach(role => {
-                if (role[1] === JDF) {
+                if (role[1] === JDF[message.guild.id]) {
                   role.push(victoire);
                 } else {
                   role.push(defaite);
@@ -1137,7 +1110,7 @@ bot.on("message", message => {
 
           distribution[message.guild.id] = [];
 
-          rolesDeNuit[message.guild.id] = [Cupi, Salva, LG, Soso, Vovo, JDF];
+          rolesDeNuit[message.guild.id] = [Cupi[message.guild.id], Salva[message.guild.id], LG[message.guild.id], Soso[message.guild.id], Vovo[message.guild.id], JDF[message.guild.id]];
           potVie[message.guild.id] = true;
           potMort[message.guild.id] = true;
           Lovers[message.guild.id] = [];
@@ -1156,7 +1129,7 @@ bot.on("message", message => {
           clearTimeout(y[message.guild.id]);
           clearTimeout(z[message.guild.id]);
 
-          rolesDeNuit[message.guild.id] = [Cupi, Salva, LG, Soso, Vovo, JDF];
+          rolesDeNuit[message.guild.id] = [Cupi[message.guild.id], Salva[message.guild.id], LG[message.guild.id], Soso[message.guild.id], Vovo[message.guild.id], JDF[message.guild.id]];
 
           message.channel.send("Partie terminée, merci d'avoir joué !");
         } else {
@@ -1608,10 +1581,10 @@ bot.on("message", message => {
           if (
             !potMort[message.guild.id] &&
             !potVie[message.guild.id] &&
-            rolesDeNuit[message.guild.id].includes(Soso)
+            rolesDeNuit[message.guild.id].includes(Soso[message.guild.id])
           ) {
             rolesDeNuit[message.guild.id].splice(
-              rolesDeNuit[message.guild.id].indexOf(Soso),
+              rolesDeNuit[message.guild.id].indexOf(Soso[message.guild.id]),
               1
             );
           }
@@ -1645,20 +1618,20 @@ bot.on("message", message => {
               );
 
             //Action nocturne des Loups Garous
-            if (IDlg.includes(contenu) && rolajouer.includes(LG)) {
-              //JoueursLG est jamais attribué je crois
+            if (IDlg[message.guild.id].includes(contenu) && rolajouer.includes(LG[message.guild.id])) {
+              //JoueursLG[message.guild.id] est jamais attribué je crois
               joueursLG[message.guild.id].forEach(joueur => {
                 lieu.overwritePermissions(joueur, { SEND_MESSAGES: true });
               });
               lieu.send("Loups Garous ! Réveillez-vous et dévorez !");
-              rolajouer.splice(rolajouer.indexOf(LG), 1);
+              rolajouer.splice(rolajouer.indexOf(LG[message.guild.id]), 1);
             }
 
             //Action nocturne du Cupidon
-            else if (IDcupi.includes(contenu) && rolajouer.includes(Cupi)) {
+            else if (IDcupi[message.guild.id].includes(contenu) && rolajouer.includes(Cupi[message.guild.id])) {
               var item =
                 distribRoles[message.guild.id][
-                  findItemInList(distribRoles[message.guild.id], Cupi)
+                  findItemInList(distribRoles[message.guild.id], Cupi[message.guild.id])
                 ];
               var chan = item[2].dmChannel;
 
@@ -1739,18 +1712,18 @@ bot.on("message", message => {
                 }
               });
               rolesDeNuit[message.guild.id].splice(
-                rolesDeNuit[message.guild.id].indexOf(Cupi),
+                rolesDeNuit[message.guild.id].indexOf(Cupi[message.guild.id]),
                 1
               );
-              rolajouer.splice(rolajouer.indexOf(Cupi), 1);
+              rolajouer.splice(rolajouer.indexOf(Cupi[message.guild.id]), 1);
             }
 
             //Action nocturne de la Voyante
-            else if (IDvovo.includes(contenu) && rolajouer.includes(Vovo)) {
-              rolajouer.splice(rolajouer.indexOf(Vovo), 1);
+            else if (IDvovo[message.guild.id].includes(contenu) && rolajouer.includes(Vovo[message.guild.id])) {
+              rolajouer.splice(rolajouer.indexOf(Vovo[message.guild.id]), 1);
               var item =
                 distribRoles[message.guild.id][
-                  findItemInList(distribRoles[message.guild.id], Vovo)
+                  findItemInList(distribRoles[message.guild.id], Vovo[message.guild.id])
                 ];
               var chan = item[2].dmChannel;
               chan.send(
@@ -1791,8 +1764,8 @@ bot.on("message", message => {
 
             //Action nocture de la Sorcière
             else if (
-              IDsoso.includes(spliteMessage[0]) &&
-              rolajouer.includes(Soso)
+              IDsoso[message.guild.id].includes(spliteMessage[0]) &&
+              rolajouer.includes(Soso[message.guild.id])
             ) {
               //On s'attend à ce que le MJ indique en plus la victime des loups garous
               if (spliteMessage.length != 2) {
@@ -1800,7 +1773,7 @@ bot.on("message", message => {
                 message.reply("Quel est la victime de la nuit ?");
               } else {
                 //Sinon, tout va bien, on prend comme victime le membre mentionné
-                rolajouer.splice(rolajouer.indexOf(Soso), 1);
+                rolajouer.splice(rolajouer.indexOf(Soso[message.guild.id]), 1);
                 var previct = message.guild.member(
                   message.mentions.users.first()
                 );
@@ -1814,7 +1787,7 @@ bot.on("message", message => {
                 }
                 var item =
                   distribRoles[message.guild.id][
-                    findItemInList(distribRoles[message.guild.id], Soso)
+                    findItemInList(distribRoles[message.guild.id], Soso[message.guild.id])
                   ];
                 var chan = item[2].dmChannel;
                 var pots = "";
@@ -1896,13 +1869,13 @@ bot.on("message", message => {
             }
 
             //Action nocturne du Salvateur
-            else if (IDsalva.includes(contenu) && rolajouer.includes(Salva)) {
+            else if (IDsalva[message.guild.id].includes(contenu) && rolajouer.includes(Salva[message.guild.id])) {
               var item =
                 distribRoles[message.guild.id][
-                  findItemInList(distribRoles[message.guild.id], Salva)
+                  findItemInList(distribRoles[message.guild.id], Salva[message.guild.id])
                 ];
               var chan = item[2].dmChannel;
-              rolajouer.splice(rolajouer.indexOf(Salva), 1);
+              rolajouer.splice(rolajouer.indexOf(Salva[message.guild.id]), 1);
 
               chan.send(
                 "Réveille toi, Salvateur ! Qui vas-tu protéger cette nuit ? \n" +
@@ -1940,10 +1913,10 @@ bot.on("message", message => {
             }
 
             //Action nocturne du Joueur de flûte
-            else if (IDjdf.includes(contenu) && rolajouer.includes(JDF)) {
+            else if (IDjdf[message.guild.id].includes(contenu) && rolajouer.includes(JDF[message.guild.id])) {
               var item =
                 distribRoles[message.guild.id][
-                  findItemInList(distribRoles[message.guild.id], JDF)
+                  findItemInList(distribRoles[message.guild.id], JDF[message.guild.id])
                 ];
               var chan = item[2].dmChannel;
               var acharme = [];
@@ -2033,7 +2006,7 @@ bot.on("message", message => {
                   );
                 }
               });
-              rolajouer.splice(rolajouer.indexOf(JDF), 1);
+              rolajouer.splice(rolajouer.indexOf(JDF[message.guild.id]), 1);
             }
 
             message.delete();
@@ -2055,12 +2028,35 @@ bot.on("message", message => {
         }
       }
 
+      //Détermine un rôle pour la prochaine partie
+      else if (spliteMessage[0] === prefix + "theme"){
+        if(adminlist.includes(message.author) || mini[message.guild.id]){
+          if(spliteMessage[1] != null){
+            if(Presets[spliteMessage[1]] != undefined){
+              theme[message.guild.id] = spliteMessage[1];
+              message.channel.send("Thème de la prochaine partie : " + spliteMessage[1]);
+            }
+            else{
+              message.reply("Merci d'indiquer un thème valide")
+            }
+          }
+          else{
+            message.reply("Merci de préciser le thème désiré !")
+          }
+        }
+        else{
+          message.reply("Seuls les administrateurs peuvent déterminer le thème de la prochaine partie.")
+        }
+      }
+
       //Prépare la composition de la partie
       else if (spliteMessage[0] === prefix + "compo") {
         if (
           adminlist.includes(message.author) ||
           mini[message.guild.id] === true
         ) {
+          //Définie un thème pour la partie. Par défaut, il s'agit du thème classique.
+          var themeAct = new Theme().preset(theme[message.guild.id])
           gameOn[message.guild.id] = true;
           message.delete();
           compo[message.guild.id] = [];
@@ -2069,11 +2065,13 @@ bot.on("message", message => {
             .setDescription(
               "Préparez la composition de la partie à l'aide des commandes ci-dessous."
             )
+            .addField("Le thème sélectionné pour cette partie est le thème **" + themeAct.name + "**. ", themeAct.description)
             .addField(
               "**__Informations__**",
               " Vous pouvez ajouter des rôles en tapant ``+ [rôle] [nombre]`` et en retirer en tapant ``- [rôle] [nombre]``. Par défaut, le nombre est de 1.\n Vous pouvez vérifier la liste des rôles reconnus en tapant ``roles?``, annuler en tapant ``annuler``, et si vous avez terminé, tapez ``terminé``."
             );
 
+          setTheme(themeAct,message)
           message.channel.send(embed);
           collector2 = message.channel.createCollector(filter);
           prepCompo(collector2);
@@ -2098,7 +2096,8 @@ bot.on("message", message => {
             getPlaceInDb("loups", message);
             var lieuLG = lieuDB[message.guild.id];
 
-            var mess = message;
+            //Garde en mémoire le message dans la guilde
+            var mess = message
             var number = comp
               .get("composition")
               .map("id")
@@ -2162,7 +2161,7 @@ bot.on("message", message => {
                   if (!valides.includes(message.channel)) {
                     valides.push(message.channel);
                     var item = distribTemp[findItemInList(distribTemp, joueur)];
-                    if (item[1] === LG) {
+                    if (item[1] === LG[mess.guild.id]) {
                       mess.guild.channels
                         .get(lieuLG)
                         .overwritePermissions(item[2], {
@@ -2181,7 +2180,7 @@ bot.on("message", message => {
                     mess.guild.channels
                       .get(lieuLG)
                       .send(
-                        "Ce salon est destiné aux discussions nocturnes entre loups garous. Bon festin !"
+                        "Ce salon est destiné aux discussions nocturnes entre " + LG[mess.guild.id] + " !"
                       );
                   }
                 });
@@ -2305,41 +2304,62 @@ bot.on("message", message => {
           );
         }
       }
-
+    }
       //aide sur les rôles
-      else if (spliteMessage[0] === prefix + "ask") {
+      if (spliteMessage[0] === prefix + "ask") {
         spliteMessage.splice(0, 1);
         var contenu = spliteMessage.join(" ");
-        if (IDlg.includes(contenu)) {
-          message.channel.send(Embeds.embedLG);
-        } else if (IDcupi.includes(contenu)) {
-          message.channel.send(Embeds.embedCupi);
-        } else if (IDancien.includes(contenu)) {
-          message.channel.send(Embeds.embedAncien);
-        } else if (IDchassou.includes(contenu)) {
-          message.channel.send(Embeds.embedChass);
-        } else if (IDsoso.includes(contenu)) {
-          message.channel.send(Embeds.embedSoso);
-        } else if (IDsalva.includes(contenu)) {
-          message.channel.send(Embeds.embedSalva);
-        } else if (IDidv.includes(contenu)) {
-          message.channel.send(Embeds.embedIDV);
-        } else if (IDjdf.includes(contenu)) {
-          message.channel.send(Embeds.embedJDF);
-        } else if (IDsv.includes(contenu)) {
-          message.channel.send(Embeds.embedSV);
-        } else if (IDvovo.includes(contenu)) {
-          message.channel.send(Embeds.embedVovo);
-        } else {
-          message.channel.send("Je n'ai pas compris votre demande.");
+        sendHelp();
+        function sendHelp(){
+        for(var theme in Presets){
+          var role = Presets[theme].roles;
+          for(var i = 0; i < role.length; i++){
+            if(role[i].Id.split(",").includes(contenu)){
+              role = role[i];
+              embedHelp = new Discord.RichEmbed()
+                .setTitle(role.Name)
+                .setDescription(role.Description)
+                .setThumbnail(role.Thumbnail)
+                .setColor(role.Color)
+                .addField("Son but", role.Goal)
+                .addField("Quand gagne-t-il ?", role.Win)
+                .addField("Pouvoir", role.Power);
+
+                message.channel.send(embedHelp);
+                return;
+            }
+          }
         }
+      }
       }
       //aide générale
       else if (spliteMessage[0] === prefix + "help") {
         if (mini[message.guild.id] || adminlist.includes(message.author)) {
+          if(message.channel.type === "dm"){
+            message.channel.send("Utilisez cette commande dans un serveur pour avoir la liste des commandes que vous pouvez utiliser sur ce serveur.")
+          }
           var lui = message.author;
           helpGen(message, lui);
         }
+      }
+
+      //Suggestions
+      else if(spliteMessage[0] === prefix + "suggestion"){
+        spliteMessage.splice(0,1)
+        var contenu = spliteMessage.join(" ");
+        bot.fetchUser("218701822670405633").then(moi => {
+        var embed = new Discord.RichEmbed()
+          .setTitle("Nouvelle suggestion")
+          .setDescription("Suggestion de " + message.author.tag)
+          .setThumbnail(message.author.avatarURL)
+          .addField("Suggestion :",contenu)
+          .setFooter("Suggestion faite le " + message.createdAt)
+        moi.createDM().then(channel => {
+          channel.send(embed);
+        })
+        })
+        
+
       }
     }
   } catch (e) {
@@ -2599,303 +2619,63 @@ function prepCompo(collector) {
     }
 
     if (splitemess[0] === "+") {
-      if (IDlg.includes(splitemess[1])) {
-        onAddRole(LG, emoteLG);
-      } else if (IDcupi.includes(splitemess[1])) {
-        onAddRole(Cupi, emoteCupi);
-      } else if (IDsalva.includes(splitemess[1])) {
-        onAddRole(Salva, emoteSalva);
-      } else if (IDsoso.includes(splitemess[1])) {
+      if (IDlg[message.guild.id].includes(splitemess[1])) {
+        onAddRole(LG[message.guild.id], emoteLG[message.guild.id]);
+      } else if (IDcupi[message.guild.id].includes(splitemess[1])) {
+        onAddRole(Cupi[message.guild.id], emoteCupi[message.guild.id]);
+      } else if (IDsalva[message.guild.id].includes(splitemess[1])) {
+        onAddRole(Salva[message.guild.id], emoteSalva[message.guild.id]);
+      } else if (IDsoso[message.guild.id].includes(splitemess[1])) {
         feminin = "e";
-        onAddRole(Soso, emoteSoso);
-      } else if (IDancien.includes(splitemess[1])) {
-        onAddRole(Ancien, emoteAncien);
-      } else if (IDchassou.includes(splitemess[1])) {
-        onAddRole(Chassou, emoteChassou);
-      } else if (IDidv.includes(splitemess[1])) {
-        onAddRole(IDV, emoteIDV);
-      } else if (IDjdf.includes(splitemess[1])) {
-        onAddRole(JDF, emoteJDF);
-      } else if (IDvovo.includes(splitemess[1])) {
+        onAddRole(Soso[message.guild.id], emoteSoso[message.guild.id]);
+      } else if (IDancien[message.guild.id].includes(splitemess[1])) {
+        onAddRole(Ancien[message.guild.id], emoteAncien[message.guild.id]);
+      } else if (IDchassou[message.guild.id].includes(splitemess[1])) {
+        onAddRole(Chassou[message.guild.id], emoteChassou[message.guild.id]);
+      } else if (IDidv[message.guild.id].includes(splitemess[1])) {
+        onAddRole(IDV[message.guild.id], emoteIDV[message.guild.id]);
+      } else if (IDjdf[message.guild.id].includes(splitemess[1])) {
+        onAddRole(JDF[message.guild.id], emoteJDF[message.guild.id]);
+      } else if (IDvovo[message.guild.id].includes(splitemess[1])) {
         feminin = "e";
-        onAddRole(Vovo, emoteVovo);
-      } else if (IDsv.includes(splitemess[1])) {
-        onAddRole(SV, emoteSV);
+        onAddRole(Vovo[message.guild.id], emoteVovo[message.guild.id]);
+      } else if (IDsv[message.guild.id].includes(splitemess[1])) {
+        onAddRole(SV[message.guild.id], emoteSV[message.guild.id]);
       } else {
         nbRole[message.guild.id] -= qte;
       }
       nbRole[message.guild.id] += qte;
       message.delete();
     } else if (splitemess[0] === "-") {
-      if (IDlg.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(LG) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Loup" +
-                pluriel +
-                "-garou" +
-                pluriel +
-                "** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDcupi.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(Cupi) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Cupidon" +
-                pluriel +
-                "** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDsalva.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(Salva) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Salvateur" +
-                pluriel +
-                "** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDsoso.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(Soso) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Sorcière" +
-                pluriel +
-                "** retirée" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDancien.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(Ancien) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Ancien" +
-                pluriel +
-                "** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDchassou.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(Chassou) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Chasseur" +
-                pluriel +
-                "** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDidv.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(IDV) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Idiot" +
-                pluriel +
-                " du village** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDjdf.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(JDF) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Joueur" +
-                pluriel +
-                " de flûte** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDvovo.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(Vovo) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Voyante" +
-                pluriel +
-                "** retirée" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
-      } else if (IDsv.includes(splitemess[1])) {
-        compo[message.guild.id].forEach(role => {
-          if (role.indexOf(SV) === 0) {
-            compo[message.guild.id][
-              compo[message.guild.id].indexOf(role)
-            ][1] -= qte;
-            if (
-              compo[message.guild.id][
-                compo[message.guild.id].indexOf(role)
-              ][1] <= 0
-            ) {
-              compo[message.guild.id].splice(
-                compo[message.guild.id].indexOf(role)
-              );
-            }
-            message.channel.send(
-              "**" +
-                qte +
-                " Simple" +
-                pluriel +
-                " Villageois** retiré" +
-                pluriel +
-                " de la composition de la partie."
-            );
-          }
-        });
+      if (IDlg[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(LG[message.guild.id]);
+      } else if (IDcupi[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(Cupi[message.guild.id]);
+      } else if (IDsalva[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(Salva[message.guild.id]);
+      } else if (IDsoso[message.guild.id].includes(splitemess[1])) {
+        feminin = "e";
+        onSuppRole(Soso[message.guild.id]);
+      } else if (IDancien[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(Ancien[message.guild.id]);
+      } else if (IDchassou[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(Chassou[message.guild.id]);
+      } else if (IDidv[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(IDV[message.guild.id]);
+      } else if (IDjdf[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(JDF[message.guild.id]);
+      } else if (IDvovo[message.guild.id].includes(splitemess[1])) {
+        feminin = "e";
+        onSuppRole(Vovo[message.guild.id]);
+      } else if (IDsv[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(SV[message.guild.id]);
       } else {
         nbRole[message.guild.id] += qte;
       }
       nbRole[message.guild.id] -= qte;
       message.delete();
     } else if (message.content === "roles?") {
-      message.channel.send("**Liste des rôles reconnus **: \n" + listeRoles);
+      message.channel.send("**Liste des rôles reconnus **: \n" + listeRoles[message.guild.id]);
     } else if (message.content === "annuler") {
       collector.stop();
       compo[message.guild.id] = [];
@@ -2904,17 +2684,11 @@ function prepCompo(collector) {
       message.channel.send(
         "__Composition actuelle de la partie__ : " + compo[message.guild.id]
       );
-    } else if (
-      message.content === "oui" ||
-      message.content === "o" ||
-      message.content === "non" ||
-      message.content === "n"
-    ) {
-      return;
-    } else if (message.content === "terminé") {
+    } 
+     else if (message.content === "terminé") {
       //S'il y a moins de rôles attribués que d'inscrits
-      if (nbRole[message.guild.id] < inscrits.length) {
-        var diffSV = inscrits.length - nbRole[message.guild.id];
+      if (nbRole[message.guild.id] < inscrits[message.guild.id].length) {
+        var diffSV = inscrits[message.guild.id].length - nbRole[message.guild.id];
         message.channel.send(
           "Il n'y a pas assez de rôles pour tout le monde. **" +
             diffSV +
@@ -2935,15 +2709,15 @@ function prepCompo(collector) {
             }
             //Fill de la composition
             qte = diffSV;
-            onAddRole(SV, emoteSV);
+            onAddRole(SV[message.guild.id], emoteSV[message.guild.id]);
             annonceCompo(message);
           } else if (message === "non" || message === "n") {
             message.channel.send("Il reste " + diffSV + " rôles à attribuer.");
             collector11.stop();
           }
         });
-      } else if (nbRole[message.guild.id] > inscrits.length) {
-        var diff = nbRole[message.guild.id] - inscrits.length;
+      } else if (nbRole[message.guild.id] > inscrits[message.guild.id].length) {
+        var diff = nbRole[message.guild.id] - inscrits[message.guild.id].length;
         message.channel.send(
           "Il y a trop de rôles par rapport au nombre d'inscrits. Veuillez retirer **" +
             diff +
@@ -2960,13 +2734,13 @@ function prepCompo(collector) {
           .setTitle("Composition de la partie")
           .setDescription(
             "Composition pour une partie de **" +
-              inscrits.length +
+              nbRole[message.guild.id] +
               "** joueurs."
           )
           .setThumbnail(
             "https://images.ecosia.org/usDAmTwJGwk-iLDbV9SuUYP6Tz4=/0x390/smart/http%3A%2F%2Fgusandcodotnet.files.wordpress.com%2F2011%2F03%2Floups-garous-loup-large.jpg"
           );
-        //Va, pour chaque rôle présent dans la liste compo[message.guild.id][réer un champs pour l'afficher
+        //Va, pour chaque rôle présent dans la liste compo, créer un champs pour l'afficher
         compo[message.guild.id].forEach(role => {
           embed.addField(
             compo[message.guild.id][compo[message.guild.id].indexOf(role)][1] +
@@ -3042,8 +2816,37 @@ function prepCompo(collector) {
           " à la composition de la partie."
       );
     }
+function onSuppRole(role) {
+  compo[message.guild.id].forEach(Role => {
+    if (Role.includes(role)) {
+      compo[message.guild.id][
+        compo[message.guild.id].indexOf(Role)
+      ][1] -= qte;
+      if (
+        compo[message.guild.id][compo[message.guild.id].indexOf(Role)][1] <= 0
+      ) {
+        compo[message.guild.id].splice(
+          compo[message.guild.id].indexOf(Role)
+        );
+        }
+      }
+  });
+  
+  message.channel.send(
+    "**" +
+      qte +
+      " " +
+      role +
+      pluriel +
+      "** supprimé" +
+      feminin +
+      pluriel +
+      " de la composition de la partie."
+  );
+}
   });
 }
+  
 
 function Charme(message, lui) {
   getPlaceInDb("charmed", message);
@@ -3145,6 +2948,68 @@ function Kill(message, lui) {
     Lovers[message.guild.id] = [];
     Kill(message, amorreux);
   }
+}
+
+function setTheme(theme,message){
+  theme.roles.forEach(role => {
+    listeRoles[message.guild.id].push(role.name)
+    switch (role.title) {
+      case "Loup-Garou":
+        LG[message.guild.id] = role.name
+        IDlg[message.guild.id] = role.ID;
+        emoteLG[message.guild.id] = role.emote;
+        break;
+        case "Simple Villageois":
+        SV[message.guild.id] = role.name
+        IDsv[message.guild.id] = role.ID;
+        emoteSV[message.guild.id] = role.emote;
+        break;
+        case "Cupidon":
+        Cupi[message.guild.id] = role.name
+        IDcupi[message.guild.id] = role.ID;
+        emoteCupi[message.guild.id] = role.emote;
+        break;
+        case "Salvateur":
+        Salva[message.guild.id] = role.name
+        IDsalva[message.guild.id] = role.ID;
+        emoteSalva[message.guild.id] = role.emote;
+        break;
+        case "Chasseur":
+        Chassou[message.guild.id] = role.name
+        IDchassou[message.guild.id] = role.ID;
+        emoteChassou[message.guild.id] = role.emote;
+        break;
+        case "Sorcière":
+        Soso[message.guild.id] = role.name
+        IDsoso[message.guild.id] = role.ID;
+        emoteSoso[message.guild.id] = role.emote;
+        break;
+        case "Voyante":
+        Vovo[message.guild.id] = role.name
+        IDvovo[message.guild.id] = role.ID;
+        emoteVovo[message.guild.id] = role.emote;
+        break;
+        case "Idiot Du Village":
+        IDV[message.guild.id] = role.name
+        IDidv[message.guild.id] = role.ID;
+        emoteIDV[message.guild.id] = role.emote;
+        break;
+        case "Joueur De Flûte":
+        JDF[message.guild.id] = role.name
+        IDjdf[message.guild.id] = role.ID;
+        emoteJDF[message.guild.id] = role.emote;
+        break;
+        case "Ancien":
+        Ancien[message.guild.id] = role.name
+        IDancien[message.guild.id] = role.ID;
+        emoteAncien[message.guild.id] = role.emote;
+        break;
+    
+      default:
+        throw new ReferenceError("Erreur dans le titre du rôle.")
+        break;
+    }
+  });
 }
 
 function voteJour(message) {

@@ -145,7 +145,7 @@ class Embeds {
         "Dévorer tous les innocents, ceux qui ne sont pas Loup-Garou."
       )
       .addField(
-        "Comment ?",
+        "Pouvoir",
         "Chaque nuit, il se réunit avec les autres Loup-Garou dans un salon privé pour dévorer un joueur."
       )
       .addField(

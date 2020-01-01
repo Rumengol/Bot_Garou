@@ -1470,6 +1470,34 @@
       "compo": [
         "Sorcière"
       ]
+    },
+    {
+      "guild": "463971610408255489",
+      "id": 177,
+      "compo": [
+        "Paysan"
+      ]
+    },
+    {
+      "guild": "328894239364612096",
+      "id": 178,
+      "compo": [
+        "Simple Villageois"
+      ]
+    },
+    {
+      "guild": "328894239364612096",
+      "id": 179,
+      "compo": [
+        "L'Espion de la Royal Navy"
+      ]
+    },
+    {
+      "guild": "328894239364612096",
+      "id": 180,
+      "compo": [
+        "Espion de la Royal Navy"
+      ]
     }
   ]
 }
