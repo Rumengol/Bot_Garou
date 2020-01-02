@@ -31,6 +31,12 @@ class Role {
      * @type {string}
      */
     this.emote = data.emote;
+
+    /**
+     * Si le rôle agit la nuit ou non
+     * @type {bool}
+     */
+    this.nuit = data.nuit;
   }
 
   /**
@@ -107,6 +113,17 @@ class Role {
   setEmote(emote) {
     emote = resolveString(emote);
     this.emote = emote;
+
+    return this;
+  }
+
+  /**
+   * Set l'activité nocturne du rôle
+   * @param {bool} nuit nocturne ou non
+   * @returns {Role} ce rôle
+   */
+  setNuit(nuit) {
+    this.nuit = nuit;
 
     return this;
   }

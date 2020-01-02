@@ -76,7 +76,8 @@ class Theme {
         .setName(role.Name)
         .setTitle(role.Title)
         .setEmote(role.Emote)
-        .setId(role.Id.split(","));
+        .setId(role.Id.split(","))
+        .setNuit(role.Nuit);
 
       this.addRole(actualrole);
     });

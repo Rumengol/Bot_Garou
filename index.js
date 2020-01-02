@@ -5,8 +5,11 @@
 //Permettre une configuration personnalisée
 //LE SITE
 //Système de leveling
-//Implémenter le /suggestion
+//Rajouter le bouc émissaire
 
+//TODO Thèmes :
+//Star Wars
+//Epithet Erased
 
 //Notice pour rajouter un rôle :
 //- Rajouter sa logique d'action dans la commande  'nuit'
@@ -106,7 +109,7 @@ const identifiers = [
 
 var listeRoles = {}
 
-var theme = {};
+let theme = {};
 
 let IDlg = {}
 let LG = {}
@@ -185,7 +188,7 @@ function init(id) {
   distribution[id] = [];
 
   theme[id] = "classique";
-  rolesDeNuit[id] = [Cupi, Salva, LG, Soso, Vovo, JDF];
+  rolesDeNuit[id] = [];
   potVie[id] = true;
   potMort[id] = true;
   Lovers[id] = [];
@@ -1542,17 +1545,19 @@ bot.on("message", message => {
           adminlist.includes(message.author) ||
           mini[message.guild.id] === true
         ) {
+          var themeuh = Presets[theme[message.guild.id]]
+
           getPlaceInDb("loups", message);
-          lieu = message.guild.channels.get(lieuDB[message.guild.id]);
+          var lieu = message.guild.channels.get(lieuDB[message.guild.id]);
 
           getPlaceInDb("charmed", message);
-          lieu2 = message.guild.channels.get(lieuDB[message.guild.id]);
+          var lieu2 = message.guild.channels.get(lieuDB[message.guild.id]);
 
           getPlaceInDb("vocal", message);
-          vocal = message.guild.channels.get(lieuDB[message.guild.id]);
+          var vocal = message.guild.channels.get(lieuDB[message.guild.id]);
 
           getPlaceInDb("village", message);
-          village = message.guild.channels.get(lieuDB[message.guild.id]);
+          var village = message.guild.channels.get(lieuDB[message.guild.id]);
 
           getRoleInDb("vivants", message);
           var amute = message.guild.roles.get(roleDB[message.guild.id]);
@@ -1596,6 +1601,7 @@ bot.on("message", message => {
             );
           rolesDeNuit[message.guild.id].forEach(role => {
             distribRoles[message.guild.id].forEach(gens => {
+              console.log(gens)
               if (role === gens[1]) {
                 embed.addField(gens[1], "N'a pas encore agi");
                 rolajouer.push(gens[1]);
@@ -1623,7 +1629,7 @@ bot.on("message", message => {
               joueursLG[message.guild.id].forEach(joueur => {
                 lieu.overwritePermissions(joueur, { SEND_MESSAGES: true });
               });
-              lieu.send("Loups Garous ! Réveillez-vous et dévorez !");
+              lieu.send(LG[message.guild.id] + " Réveillez-vous et dévorez !");
               rolajouer.splice(rolajouer.indexOf(LG[message.guild.id]), 1);
             }
 
@@ -1636,12 +1642,12 @@ bot.on("message", message => {
               var chan = item[2].dmChannel;
 
               chan.send(
-                "Réveille toi, Cupidon ! Quels joueurs vas-tu unir par les liens indestructibles de l'amour ? \n" +
+                "Réveille toi, " + Cupi[message.guild.id] + " ! Quels joueurs vas-tu unir par les liens indestructibles de l'amour ? \n" +
                   vivants[message.guild.id] +
                   " \n *N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-3`` pour unir " +
                   distribRoles[message.guild.id][0][2].username +
                   " et " +
-                  distribRoles[message.guild.id][2][2].username +
+                  distribRoles[message.guild.id][1][2].username +
                   ".*"
               );
               var collectorLove = chan.createCollector(filter2);
@@ -1670,11 +1676,11 @@ bot.on("message", message => {
                     );
                     Lovers[message.guild.id] = eux[message.guild.id];
                     chan.send(
-                      "Flèches envoyées. " +
+                      "C'est fait. " +
                         eux[message.guild.id][0][2].username +
                         " et " +
                         eux[message.guild.id][1][2].username +
-                        " sont désormais amoureux pour la vie... et la mort."
+                        " sont désormais liés pour la vie... et la mort."
                     );
                     salonLog[message.guild.id].send(
                       "Les amoureux sont : " +
@@ -1683,17 +1689,18 @@ bot.on("message", message => {
                         eux[message.guild.id][0][2].username +
                         "."
                     );
+                    var amour = themeuh.Amour.split("|");
                     var chan2 = eux[message.guild.id][0][2].dmChannel;
                     chan2.send(
-                      "Tu es amoureux(se) de **" +
+                      amour[0] +
                         eux[message.guild.id][1][2].username +
-                        "** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse."
+                        amour[1]
                     );
                     var chan3 = eux[message.guild.id][1][2].dmChannel;
                     chan3.send(
-                      "Tu es amoureux(se) de **" +
+                      amour[0] +
                         eux[message.guild.id][0][2].username +
-                        "** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse."
+                        amour[1]
                     );
                     eux[message.guild.id] = [];
                   } else {
@@ -1727,7 +1734,7 @@ bot.on("message", message => {
                 ];
               var chan = item[2].dmChannel;
               chan.send(
-                "Réveille toi, Voyante ! De quel joueur veux-tu connaître le rôle cette nuit ? \n" +
+                "Réveille toi, " + Vovo[message.guild.id] + " ! De quel joueur veux-tu connaître le rôle cette nuit ? \n" +
                   vivants[message.guild.id] +
                   "*N'indiquez que le numéro du joueur, par exemple ``1`` pour voir le rôle de " +
                   Listvivants[0] +
@@ -1794,23 +1801,23 @@ bot.on("message", message => {
                 var info = "";
                 if (potVie[message.guild.id]) {
                   info =
-                    "La victime des loups-garous ce soir est **" +
+                    "La victime des " + LG[message.guild.id] + " ce soir est **" +
                     victime[message.guild.id] +
                     "**, _veux tu la sauver ?_";
                   if (potMort[message.guild.id]) {
-                    pots = "la potion de vie et la potion de mort";
+                    pots = themeuh.potions.Vie + " et " + themeuh.potions.Mort;
                   } else {
-                    pots = "la potion de vie";
+                    pots = themeuh.potions.Vie;
                   }
                 } else if (
                   potMort[message.guild.id] &&
                   !potVie[message.guild.id]
                 ) {
-                  pots = "la potion de mort";
+                  pots = themeuh.potions.Mort;
                 }
                 chan
                   .send(
-                    "Réveille toi, Sorcière ! " +
+                    "Réveille toi, " + Soso[message.guild.id] + " ! " +
                       info +
                       "\n Il te reste " +
                       pots +
@@ -1837,18 +1844,19 @@ bot.on("message", message => {
                                 "** mourra."
                             );
                             salonLog[message.guild.id].send(
-                              "La sorcière n'a protégé personne."
+                              Soso[message.guild.id] + "n'a protégé personne."
                             );
                             next[message.guild.id] = true;
                             collectorSoso.stop();
                           } else if (reac.emoji.name === "✅") {
+                            var sauvetage = themeuh.potions.Save.split("|");
                             reac.message.channel.send(
-                              "Le liquide olive coule entre les lèvres de **" +
+                              sauvetage[0] +
                                 victime[message.guild.id] +
-                                "**, soignant ses blessures."
+                                sauvetage[1]
                             );
                             salonLog[message.guild.id].send(
-                              "La sorcière a protégé **" +
+                              Soso[message.guild.id] + " a protégé **" +
                                 victime[message.guild.id] +
                                 "**, qui ne mourra pas cette nuit."
                             );
@@ -1861,9 +1869,9 @@ bot.on("message", message => {
                         }
                       });
                       collectorSoso.on("end", c => {
-                        UsePotMort(mess, message.guild);
+                        UsePotMort(mess, message.guild, themeuh);
                       });
-                    } else UsePotMort(mess, message.guild);
+                    } else UsePotMort(mess, message.guild, themeuh);
                   });
               }
             }
@@ -1878,7 +1886,7 @@ bot.on("message", message => {
               rolajouer.splice(rolajouer.indexOf(Salva[message.guild.id]), 1);
 
               chan.send(
-                "Réveille toi, Salvateur ! Qui vas-tu protéger cette nuit ? \n" +
+                "Réveille toi, " + Salva[message.guild.id] + " ! Qui vas-tu protéger cette nuit ? \n" +
                   vivants[message.guild.id] +
                   "*N'indiquez que le numéro du joueur, par exemple ``1`` pour protéger " +
                   Listvivants[message.guild.id][0] +
@@ -1900,7 +1908,7 @@ bot.on("message", message => {
                   mess.channel.send(
                     "**" +
                       lui[0][2].username +
-                      "** est protégé cette nuit. Aucun loup ne pourra lui faire du mal."
+                      "** est protégé cette nuit. Aucun " + LG[message.guild.id] + " ne pourra lui faire du mal."
                   );
                   logs.send(item[2] + " a protégé le joueur " + lui[0][2]);
                   collector2.stop();
@@ -1921,6 +1929,7 @@ bot.on("message", message => {
               var chan = item[2].dmChannel;
               var acharme = [];
               var acharmer = "";
+              var welcome = themeuh.flute.Welcome.split("|");
               charmes[message.guild.id].forEach(charme => {
                 distribRoles[message.guild.id].forEach(vivant => {
                   if (vivant != charme.user.username) {
@@ -1940,25 +1949,25 @@ bot.on("message", message => {
               for (var i = 0; i < acharme.length; i++) {
                 acharmer += "**" + (i + 1) + "**. " + acharme[i] + "\n";
               }
-
+              
               chan.send(
-                "Réveille toi, Joueur de flûte ! Quels joueurs vas-tu charmer cette nuit ? \n" +
+                "Réveille toi, " + JDF[message.guild.id] + welcome[0] + " \n" +
                   acharmer +
-                  "*N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-2`` pour charmer " +
+                  "*N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-2`` pour " + welcome[1] +
                   acharme[0] +
                   " et " +
                   acharme[1] +
-                  ". Si vous ne souhaitez charmer qu'une personne, écrivez sous la forme ``X-0``. Si vous ne souhaitez charmer personne, écrivez ``0``. \n (Attention, si jamais vous écrivez ``0-X`` par exemple, personne ne sera charmé.)*"
+                  ". Si vous ne souhaitez " + welcome[1] + " qu'une personne, écrivez sous la forme ``X-0``. Si vous ne souhaitez " + welcome[1] + " personne, écrivez ``0``. \n (Attention, si jamais vous écrivez ``0-X`` par exemple, personne ne sera " + welcome[2] + ".)*"
               );
 
               collector2 = chan.createCollector(filter2);
               collector2.on("collect", mess => {
                 if (mess[0] == "0") {
                   mess.channel.send(
-                    "Personne ne  sera charmé cette nuit. Le manque d'inspiration, sans doute."
+                    "Personne ne sera " + welcome[1] + " cette nuit."
                   );
                   salonLog[message.guild.id].send(
-                    item[2] + " n'a charmé personne cette nuit."
+                    item[2] + " n'a " + welcome[1] + " personne cette nuit."
                   );
                   collector2.stop();
                 }
@@ -1984,20 +1993,20 @@ bot.on("message", message => {
                       eux[0][2].username +
                       "** et **" +
                       eux2 +
-                      "** sont touchés par l'extase de ta flûte.."
+                      themeuh.flute.Charme
                   );
                   logs.send(
                     item[2] +
-                      " a charmé les joueurs " +
+                      " a " + welcome[2] + " les joueurs " +
                       eux[0][2] +
                       " et " +
                       eux2
                   );
-                  Charme(message, eux[0][0]);
+                  Charme(message, eux[0][0], welcome);
                   if (cible2 != 0)
                     Charme(
                       message,
-                      distribRoles[message.guild.id][cible2 - 1][0]
+                      distribRoles[message.guild.id][cible2 - 1][0], welcome
                     );
                   collector2.stop();
                 } else {
@@ -2031,6 +2040,7 @@ bot.on("message", message => {
       //Détermine un rôle pour la prochaine partie
       else if (spliteMessage[0] === prefix + "theme"){
         if(adminlist.includes(message.author) || mini[message.guild.id]){
+          if(!gameOn[message.guild.id]){
           if(spliteMessage[1] != null){
             if(Presets[spliteMessage[1]] != undefined){
               theme[message.guild.id] = spliteMessage[1];
@@ -2043,6 +2053,10 @@ bot.on("message", message => {
           else{
             message.reply("Merci de préciser le thème désiré !")
           }
+        }
+        else{
+          message.reply("Impossible de changer le thème lorsqu'une partie est en cours !")
+        }
         }
         else{
           message.reply("Seuls les administrateurs peuvent déterminer le thème de la prochaine partie.")
@@ -2563,10 +2577,10 @@ bot.on("messageReactionRemove", (reac, lui) => {
   }
 });
 
-function UsePotMort(message, guild) {
+function UsePotMort(message, guild, theme) {
   if (potMort[guild.id]) {
     message.channel.send(
-      "Sur qui souhaite-tu utiliser la potion de mort ? \n **0** Personne\n" +
+      "Sur qui souhaites-tu utiliser " + theme.potions.Mort + " ? \n **0** Personne\n" +
         vivants[guild.id] +
         "*N'indiquez que le numéro du joueur, par exemple ``0`` pour ne tuer personne.*"
     );
@@ -2580,13 +2594,14 @@ function UsePotMort(message, guild) {
         if (lui[0] === undefined) {
           console.log("erreur avec cible = " + cible);
         } else {
+          var meurtre = theme.potions.Kill.split("|");
           mess.channel.send(
-            "Le poison fera vite effet, **" +
+            meurtre[0] +
               lui[0][2].username +
-              "** ne se réveillera pas demain..."
+              meurtre[1]
           );
           salonLog[guild.id].send(
-            "La sorcière a décidé de tuer **" + lui[0][2] + "**."
+            Soso[guild.id] + " a décidé de tuer **" + lui[0][2] + "**."
           );
           potMort[guild.id] = false;
           collector2.stop();
@@ -2595,7 +2610,7 @@ function UsePotMort(message, guild) {
         mess.channel.send(
           "Tu décides que ce n'est pas encore le moment. Peut être une prochaine fois."
         );
-        salonLog[guild.id].send("La sorcière n'a voulu tuer personne.");
+        salonLog[guild.id].send(Soso[guild.id] + " n'a voulu tuer personne.");
         collector2.stop();
       }
     });
@@ -2848,14 +2863,14 @@ function onSuppRole(role) {
 }
   
 
-function Charme(message, lui) {
+function Charme(message, lui, welcome) {
   getPlaceInDb("charmed", message);
   lieu = lieuDB[message.guild.id];
 
   message.guild.channels
     .get(lieu)
     .overwritePermissions(lui, { VIEW_CHANNEL: true, SEND_MESSAGES: false });
-  message.guild.channels.get(lieu).send(lui + " vient de se faire charmer !");
+  message.guild.channels.get(lieu).send(lui + " vient de se faire " + welcome[1] + " !");
   charmes[message.guild.id].push(lui);
 }
 
@@ -2952,6 +2967,9 @@ function Kill(message, lui) {
 
 function setTheme(theme,message){
   theme.roles.forEach(role => {
+    if(role.nuit){
+      rolesDeNuit[message.guild.id].push(role.name);
+    }
     listeRoles[message.guild.id].push(role.name)
     switch (role.title) {
       case "Loup-Garou":
@@ -3004,6 +3022,8 @@ function setTheme(theme,message){
         IDancien[message.guild.id] = role.ID;
         emoteAncien[message.guild.id] = role.emote;
         break;
+        case "Bouc émissaire":
+          break;
     
       default:
         throw new ReferenceError("Erreur dans le titre du rôle.")
