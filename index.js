@@ -86,6 +86,7 @@ var distribRolMorts = {};
 var charmes = {};
 var votes = {};
 var avote = {};
+var voted = {};
 var joueursLG = {};
 var Listvivants = {};
 var vivants = {};
@@ -93,6 +94,8 @@ var win = {};
 var embedRecap = {};
 
 var distribution = {};
+//Représente l'état de la partie, avec nuit ou jour en première clef, le nombre en deuxième
+var StateOfTheGame = {}
 
 const identifiers = [
   "vivants",
@@ -141,6 +144,9 @@ let emoteSalva = {}
 let IDsv = {}
 let SV = {}
 let emoteSV = {}
+let BE = {}
+let IDbe = {}
+let emoteBE = {}
 
 var rolesDeNuit = {};
 var potVie = {};
@@ -181,11 +187,13 @@ function init(id) {
   charmes[id] = [];
   votes[id] = [];
   avote[id] = [];
+  voted[id] = [];
   joueursLG[id] = [];
   vivants[id] = "";
   win[id] = false;
 
   distribution[id] = [];
+  StateOfTheGame[id] = ["",0];
 
   theme[id] = "classique";
   rolesDeNuit[id] = [];
@@ -226,6 +234,9 @@ function init(id) {
   IDsv[id] = []
   SV[id] = ""
   emoteSV[id] = ""
+  BE[id] = ""
+  IDbe[id] = []
+  emoteBE[id] = ""
 
   //Cupidon messages
   eux[id] = [];
@@ -1096,43 +1107,12 @@ bot.on("message", message => {
           if (messCompo[message.guild.id] != null) {
             messCompo[message.guild.id].unpin();
           }
+          init(message.guild)
 
-          gameOn[message.guild.id] = false;
-          compoDone[message.guild.id] = false;
-          nbRole[message.guild.id] = 0;
-          inscrits[message.guild.id] = [];
-          inscrep[message.guild.id] = [];
-          distribRoles[message.guild.id] = [];
-          distribRolMorts[message.guild.id] = [];
-          charmes[message.guild.id] = [];
-          votes[message.guild.id] = [];
-          avote[message.guild.id] = [];
-          joueursLG[message.guild.id] = [];
-          vivants[message.guild.id] = "";
-          win[message.guild.id] = false;
-
-          distribution[message.guild.id] = [];
-
-          rolesDeNuit[message.guild.id] = [Cupi[message.guild.id], Salva[message.guild.id], LG[message.guild.id], Soso[message.guild.id], Vovo[message.guild.id], JDF[message.guild.id]];
-          potVie[message.guild.id] = true;
-          potMort[message.guild.id] = true;
-          Lovers[message.guild.id] = [];
-
-          compo[message.guild.id] = [];
-
-          //Cupidon messages
-          eux[message.guild.id] = [];
-
-          //Sorcière messages
-          victime[message.guild.id] = "";
-
-          votedejour[message.guild.id] = false;
 
           clearInterval(x[message.guild.id]);
           clearTimeout(y[message.guild.id]);
           clearTimeout(z[message.guild.id]);
-
-          rolesDeNuit[message.guild.id] = [Cupi[message.guild.id], Salva[message.guild.id], LG[message.guild.id], Soso[message.guild.id], Vovo[message.guild.id], JDF[message.guild.id]];
 
           message.channel.send("Partie terminée, merci d'avoir joué !");
         } else {
@@ -1293,7 +1273,7 @@ bot.on("message", message => {
                 "Formulation incorrecte. La bonne syntaxe est : /kill @[utilisateur]."
               );
             } else {
-              Kill(message, lui);
+              PreKill(message, lui);
             }
           } else {
             message.reply(
@@ -1362,6 +1342,7 @@ bot.on("message", message => {
       else if (spliteMessage[0] === prefix + "vote") {
         votes[message.guild.id] = [];
         avote[message.guild.id] = [];
+        voted[message.guild.id] = [];
         if (
           adminlist.includes(message.author) ||
           mini[message.guild.id] === true
@@ -1407,6 +1388,7 @@ bot.on("message", message => {
             pouet[message.guild.id] = 5;
           }
           var finpouet = pouet[message.guild.id] * 60000;
+          StateOfTheGame[message.guild.id][0] = Presets[theme[message.guild.id]].time.Day;
 
           message.delete();
           getRoleInDb("vivants", message);
@@ -1414,7 +1396,7 @@ bot.on("message", message => {
 
           message.channel.overwritePermissions(role, { SEND_MESSAGES: true });
           unmute(role, message);
-          message.channel.send("Une nouvelle journée commence.");
+          message.channel.send("Une nouvelle journée commence. (" + StateOfTheGame.join(" ") + ")");
           getPlaceInDb("votes", message);
           lieu = lieuDB[message.guild.id];
           getPlaceInDb("vocal", message);
@@ -1515,6 +1497,7 @@ bot.on("message", message => {
           mini[message.guild.id] === true
         ) {
           message.delete();
+          endVote(message);
           getRoleInDb("vivants", message);
           role = roleDB[message.guild.id];
           getPlaceInDb("votes", message);
@@ -1546,6 +1529,8 @@ bot.on("message", message => {
           mini[message.guild.id] === true
         ) {
           var themeuh = Presets[theme[message.guild.id]]
+          StateOfTheGame[message.guild.id][0] = Presets[theme[message.guild.id]].time.Night;
+          StateOfTheGame[message.guild.id][1] += 1
 
           getPlaceInDb("loups", message);
           var lieu = message.guild.channels.get(lieuDB[message.guild.id]);
@@ -1595,7 +1580,7 @@ bot.on("message", message => {
           }
 
           var embed = new Discord.RichEmbed()
-            .setTitle("La nuit")
+            .setTitle(StateOfTheGame[message.guild.id].join(" "))
             .setDescription(
               "La liste des rôles qui n'ont pas encore agi apparaît ci-dessous. Citez-en un pour déclencher son tour."
             );
@@ -2040,6 +2025,7 @@ bot.on("message", message => {
       //Détermine un rôle pour la prochaine partie
       else if (spliteMessage[0] === prefix + "theme"){
         if(adminlist.includes(message.author) || mini[message.guild.id]){
+          message.delete();
           if(!gameOn[message.guild.id]){
           if(spliteMessage[1] != null){
             if(Presets[spliteMessage[1]] != undefined){
@@ -2427,6 +2413,7 @@ bot.on("messageReactionAdd", (reac, lui) => {
             );
           });
         }
+
       } else if (votes[reac.message.guild.id].includes(reac.message)) {
         //Vérifie que celui qui vote est bien vivant et que c'est un vote du jour
 
@@ -2447,6 +2434,8 @@ bot.on("messageReactionAdd", (reac, lui) => {
               avote[reac.message.guild.id].push(lui);
               reac.remove(lui);
             }
+            var item = findItemInList(voted[reac.message.guild.id], reac.message.content)
+            item[1] += 1;
           } else {
             if (votedejour[reac.message.guild.id]) {
               reac.remove(lui);
@@ -2454,7 +2443,7 @@ bot.on("messageReactionAdd", (reac, lui) => {
           }
         }
       }
-      //PB ICI
+     /* //PB ICI
       else if (reac.message === ConfCupi[reac.message.channel.id]) {
         if (!lui.bot) {
           if (reac.emoji.name === "❌") {
@@ -2523,7 +2512,7 @@ bot.on("messageReactionAdd", (reac, lui) => {
             UsePotMort(reac.message);
           }
         }
-      }
+      }*/
     }
   } catch (e) {
     reac.message.reply(e.message);
@@ -2567,6 +2556,8 @@ bot.on("messageReactionRemove", (reac, lui) => {
             avote[reac.message.guild.id].indexOf(lui),
             1
           );
+          var item = findItemInList(voted[reac.message.guild.id], reac.message.content)
+          item[1] -= 1;
         }
       }
     }
@@ -2700,7 +2691,7 @@ function prepCompo(collector) {
         "__Composition actuelle de la partie__ : " + compo[message.guild.id]
       );
     } 
-     else if (message.content === "terminé") {
+    else if (message.content === "terminé") {
       //S'il y a moins de rôles attribués que d'inscrits
       if (nbRole[message.guild.id] < inscrits[message.guild.id].length) {
         var diffSV = inscrits[message.guild.id].length - nbRole[message.guild.id];
@@ -2906,17 +2897,40 @@ function unmute(role, message) {
   });
 }
 
-function Kill(message, lui) {
+function PreKill(message,lui){
+  var item =
+    distribRoles[message.guild.id][
+      findItemInList(distribRoles[message.guild.id], lui)
+    ];
+
+  if(StateOfTheGame[0] === Presets[theme[message.guild.id].time.Night]){
+    message.reply(`Attention, ${item[0]} est ${item[1]} ! S'il n'est pas censé mourir, vous avez 5 secondes pour annuler en écrivant quelque chose ici`)
+    var collector = message.channel.createCollector(filter, {time:5000})
+    collector.on("collect", mess =>{
+      if(adminlist.includes(mess.author || checkmin(mess))){
+        return;
+      }
+    })
+    collector.on("end", collected =>{
+      Kill(message, item)
+    })
+  }
+  else{
+    Kill(message,item)
+  }
+}
+
+function Kill(message, item) {
   getRoleInDb("vivants", message);
   role = roleDB[message.guild.id];
   setTimeout(() => {
     getRoleInDb("morts", message);
     role2 = roleDB[message.guild.id];
-    lui.addRole(role2);
+    item[0].addRole(role2);
   }, 500);
 
   setTimeout(() => {
-    lui.removeRole(role);
+    item[0].removeRole(role);
   }, 3000);
   getPlaceInDb("village", message);
   lieu = lieuDB[message.guild.id];
@@ -2924,10 +2938,6 @@ function Kill(message, lui) {
   getPlaceInDb("vocal", message);
   lieu3 = lieuDB[message.guild.id];
 
-  var item =
-    distribRoles[message.guild.id][
-      findItemInList(distribRoles[message.guild.id], lui)
-    ];
   if (item != undefined) {
     rolmort = ", il/elle était " + item[1] + ".";
     distribRolMorts[message.guild.id].push(item);
@@ -2939,29 +2949,31 @@ function Kill(message, lui) {
     rolmort = ".";
   }
 
-  lui.setMute(true);
-  message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
+  item[0].setMute(true);
+  message.guild.channels.get(lieu).send(item[0] + " est mort" + rolmort);
 
   getPlaceInDb("charmed", message);
   lieu2 = lieuDB[message.guild.id];
 
   message.guild.channels
     .get(lieu2)
-    .overwritePermissions(lui, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
-  charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(lui), 1);
+    .overwritePermissions(item[0], { VIEW_CHANNEL: false, SEND_MESSAGES: false });
+  charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(item[0]), 1);
 
   if (Lovers[message.guild.id].includes(item)) {
+    var dead = Presets[theme[message.guild.id]].amour.OnDeath.split("|")
     Lovers[message.guild.id].splice(Lovers[message.guild.id].indexOf(item), 1);
     message.guild.channels
       .get(lieu)
       .send(
-        "Fou de douleur en voyant son amoureux décédé, **" +
+        dead[0] +
           Lovers[message.guild.id][0][2] +
-          "** se suicide de chagrin."
-      );
-    var amorreux = Lovers[message.guild.id][0][0];
+          dead[1]
+      ).then(mess =>{
+    var amorreux = Lovers[message.guild.id][0];
     Lovers[message.guild.id] = [];
-    Kill(message, amorreux);
+    Kill(mess, amorreux);
+      })
   }
 }
 
@@ -3023,6 +3035,9 @@ function setTheme(theme,message){
         emoteAncien[message.guild.id] = role.emote;
         break;
         case "Bouc émissaire":
+        BE[message.guild.id] = role.name
+        IDbe[message.guild.id] = role.ID;
+        emoteBE[message.guild.id] = role.emote;
           break;
     
       default:
@@ -3035,6 +3050,7 @@ function setTheme(theme,message){
 function voteJour(message) {
   votes[message.guild.id] = [];
   avote[message.guild.id] = [];
+  voted[message.guild.id] = [];
   votedejour[message.guild.id] = true;
 
   getRoleInDb("vivants", message);
@@ -3049,10 +3065,11 @@ function voteJour(message) {
   for (var i = 0; i < vivants[message.guild.id].length; i++) {
     message.guild.channels
       .get(lieu)
-      .send(" " + vivants[message.guild.id][i])
+      .send(vivants[message.guild.id][i])
       .then(function(message) {
         message.react("👎");
         votes[message.guild.id].push(message);
+        voted[message.guild.id].push([message.content,0])
       });
   }
 }

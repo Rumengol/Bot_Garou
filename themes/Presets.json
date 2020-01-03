@@ -143,7 +143,14 @@
       "Charme": "** sont touchés par l'extase de ta flûte...",
       "Welcome": "! Quels joueurs vas-tu charmer cette nuit ?|charmer|charmé"
     },
-    "Amour": "Tu es amoureux(se) de **|** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse."
+    "time": {
+      "Day": "Jour",
+      "Night": "Nuit"
+    },
+    "amour": {
+      "OnLove": "Tu es amoureux(se) de **|** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse.",
+      "OnDeath": "Fou de douleur en voyant son amoureux décédé, **|** se suicide de chagrin."
+    }
   },
   "pirate": {
     "roles": [
@@ -302,6 +309,13 @@
       "Charme": "** sont touchés par ton discours, et rejoignent tes rangs...",
       "Welcome": "! Quels joueurs vas-tu convertir cette nuit ?|convertir|converti"
     },
-    "Amour": "Tu es maudit(e) avec **|** ! Si l'un de vous meurt, l'autre sera foudroyé par la malédiction."
+    "time": {
+      "Day": "Jour",
+      "Night": "Nuit"
+    },
+    "amour": {
+      "OnLove": "Tu es maudit(e) avec **|** ! Si l'un de vous meurt, l'autre sera foudroyé par la malédiction.",
+      "OnDeath": "Un autre cadavre a été retrouvé, celui de **|** visiblement foudroyé par une attaque lors de la nuit."
+    }
   }
 }
