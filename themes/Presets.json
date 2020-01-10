@@ -149,8 +149,10 @@
     },
     "amour": {
       "OnLove": "Tu es amoureux(se) de **|** ! Si l'un de vous meurt, l'autre ira le rejoindre de tristesse.",
-      "OnDeath": "Fou de douleur en voyant son amoureux décédé, **|** se suicide de chagrin."
-    }
+      "OnDeath": "Fou de douleur en voyant son amoureux décédé, **|** se suicide de chagrin.",
+      "Amoureux": "amoureux"
+    },
+    "villageois": "Villageois"
   },
   "pirate": {
     "roles": [
@@ -315,7 +317,9 @@
     },
     "amour": {
       "OnLove": "Tu es maudit(e) avec **|** ! Si l'un de vous meurt, l'autre sera foudroyé par la malédiction.",
-      "OnDeath": "Un autre cadavre a été retrouvé, celui de **|** visiblement foudroyé par une attaque lors de la nuit."
-    }
+      "OnDeath": "Un autre cadavre a été retrouvé, celui de **|** visiblement foudroyé par une attaque lors de la nuit.",
+      "Amoureux": "Maudits"
+    },
+    "villageois": "pirates"
   }
 }
