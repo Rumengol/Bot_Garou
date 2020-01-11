@@ -157,7 +157,9 @@ var Lovers = {};
 //{Name,Quantite,Emote}
 var compo = {};
 
+var banniDeVote = {};
 let IDVcache = {};
+var jourBE = {};
 
 //Cupidon messages
 let eux = {};
@@ -242,8 +244,9 @@ function init(id) {
   IDbe[id] = []
   emoteBE[id] = ""
 
-
+  banniDeVote[id] = [];
   IDVcache[id] = true;
+  jourBE[id] = false;
   //Cupidon messages
   eux[id] = [];
 
@@ -1496,6 +1499,13 @@ bot.on("message", message => {
             .overwritePermissions(role, { VIEW_CHANNEL: false });
           mute(role, message);
           message.channel.send("La journée s'achève. Bonne nuit.");
+          if(jourBE[message.guild.id]){
+            var item;
+            if(!IDVcache[message.guild.id]){
+              item = findObjectInList(distribroles[message.guild.id],"Role",IDV[message.guild.id])
+            }
+            banniDeVote[message.guild.id] = [item]
+          }
         } else {
           message.delete();
           message.reply(
@@ -2234,7 +2244,6 @@ bot.on("messageReactionAdd", (reac, lui) => {
   try {
     if (reac.message.channel.type != "dm") {
       if (reac.message === inscr[reac.message.guild.id]) {
-        console.log(lui)
         getRoleInDb("vivants", reac.message);
         rolevivant = roleDB[reac.message.guild.id];
         if (gameOn[reac.message.guild.id] === false) {
@@ -2284,11 +2293,11 @@ bot.on("messageReactionAdd", (reac, lui) => {
         getRoleInDb("vivants", reac.message);
         rolevivant = roleDB[reac.message.guild.id];
         if (!lui.bot) {
-          var item = findObjectInList(distribRoles[reac.message.guild.id],"Role", IDV[reac.message.guild.id])
+          var item = findObjectInList(distribRoles[reac.message.guild.id],"GuildMember",lui)
           var luiroles = reac.message.guild.members
             .get(lui.id)
             .roles.map(r => r.id);
-          if(!IDVcache[reac.message.guild.id] && item != undefined){
+          if(banniDeVote[message.guild.id].includes(item)){
             avote[reac.message.guild.id].push(item.User)
           }
           if (
@@ -2368,7 +2377,7 @@ bot.on("messageReactionRemove", (reac, lui) => {
 function UsePotMort(message, guild, theme) {
   if (potMort[guild.id]) {
     message.channel.send(
-      "Sur qui souhaites-tu utiliser " + theme.potions.Mort + " ? \n **0** Personne\n" +
+      "Sur qui souhaites-tu utiliser " + theme.potions.Mort + " ? \n**0.** Personne\n" +
         vivants[guild.id] +
         "*N'indiquez que le numéro du joueur, par exemple ``0`` pour ne tuer personne.*"
     );
@@ -2441,7 +2450,10 @@ function prepCompo(collector) {
         onAddRole(Vovo[message.guild.id], emoteVovo[message.guild.id]);
       } else if (IDsv[message.guild.id].includes(splitemess[1])) {
         onAddRole(SV[message.guild.id], emoteSV[message.guild.id]);
-      } else {
+      } else if (IDbe[message.guild.id].includes(splitemess[1])) {
+        onAddRole(BE[message.guild.id], emoteBE[message.guild.id])
+      } 
+      else {
         nbRole[message.guild.id] -= qte;
       }
       nbRole[message.guild.id] += qte;
@@ -2469,6 +2481,8 @@ function prepCompo(collector) {
         onSuppRole(Vovo[message.guild.id]);
       } else if (IDsv[message.guild.id].includes(splitemess[1])) {
         onSuppRole(SV[message.guild.id]);
+      } else if (IDbe[message.guild.id].includes(splitemess[1])) {
+        onSuppRole(BE[message.guild.id], emoteBE[message.guild.id])
       } else {
         nbRole[message.guild.id] += qte;
       }
@@ -2769,20 +2783,60 @@ function endVote(message){
   })
 
   if(egalite){
+    if(distribroles[message.guild.id].map("Roles").includes(BE[message.guild.id])){
+      var item = findObjectInList(distribRoles[message.guild.id],BE[message.guild.id]);
+      village.send(`Vous hésitez, ne sachant trop que faire. Puis tous les regards convergent vers le ${item.GuildMember}. Le ${item.Role}, il n'y a qu'à l'éliminer lui ! \n *Il va décider qui pourra voter le lendemain.*`)
+      Kill(message,item.GuildMember)
+      deathBE(message,item)
+    } else {
     village.send(`Vous n'avez pas pu vous décider, il y aura donc des prolongations (1min30).`).then(message => {
       prolongations(message,90000)
     })
+  }
   }
   else{
     village.send(`Après concertation, il est clair que ${pendu.contenu} était indigne de vivre.`)
     var item = findObjectInList(distribRoles[message.guild.id], "User", pendu.user)
     if(item.Role === IDV[message.guild.id] && IDVcache[message.guild.id]){
       village.send(`Au moment d'éliminer ${pendu.contenu}, il devient clair qu'il est en fait ${item.Role} ! Quelqu'un comme lui n'a aucune chance d'être ${LG[message.guild.id]}. Mais d'un autre côté, le vote de quelqu'un comme lui n'a aucune valeur désormais...`);
+      banniDeVote[message.guild.id].push(item);
       IDVcache[message.guild.id] = false;
       return;
     }
     Kill(message,item.GuildMember)
   }
+}
+
+function deathBE(message,item){
+var chan = item.User.dmChannel;
+const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
+              chan.send(
+                "Tu as été éliminé par défaut, " + BE[message.guild.id] + " ! Mais dans ton dernier souffle, tu peux décider qui est digne de voter demain. \n **0.** Personne \n" +
+                  vivants[message.guild.id] +
+                  " \n *N'indiquez que les numéros sous la forme X-Y-... Par exemple, ``1-2`` pour permettre à " +
+                  distribRoles[message.guild.id][0].User.username +
+                  " et " +
+                  distribRoles[message.guild.id][1].User.username +
+                  " de voter.*"
+              );
+              var collector = chan.createCollector(filter2);
+              eux[message.guild.id] = [];
+
+              collector.on("collect", mess => {
+                var choix = [];
+                var splitemess = mess.content.toLowerCase().split("-");
+                for(var i =0; i < splitemess.length; i++){
+                  choix.push(distribRoles[message.guild.id][splitemess[i] - 1])
+                }
+                var reply = choix.map("User").join(", ");
+                mess.channel.send("Voici ceux qui peuvent voter demain : " + reply)
+
+                var annonce = choix.map("GuildMember").join(", ")
+                message.channel.send(`Le ${Be[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
+                banniDeVote[message.guild.id].push(choix);
+                jourBE[message.guild.id] = true
+                collector.stop();
+              })
 }
 
 function setTheme(theme,message){

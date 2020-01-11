@@ -130,6 +130,19 @@
         "Emote": ":shield:",
         "Id": "salvateur,salva,salveur,salvateurs",
         "Nuit": true
+      },
+      {
+        "Title": "Bouc émissaire",
+        "Name": "Bouc émissaire",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=1&name=Simple%20Villageois)",
+        "Thumbnail": "",
+        "Color": "#FFFFFF",
+        "Goal": "Déterminer qui sont les **Loups-Garous** et les éliminer.",
+        "Power": "En cas d'égalité dans les votes, il est éliminé. En échange, il peut désigner qui aura le droit de voter au jour suivant.",
+        "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
+        "Emote": ":goat:",
+        "Id": "be,bouc émissaire,bouc emissaire,bouc",
+        "Nuit": false
       }
     ],
     "description": "Thème classique du loup garou. Le village de thiercelieux, un environnement médiéval, les rôles originaux.",
