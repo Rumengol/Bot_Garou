@@ -1,11 +1,9 @@
 //to do :
 //Le collecteur de la nuit derp : on est au courant
 //Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos : c'pas demain la veille
-//Permettre des thèmes variés
 //Permettre une configuration personnalisée
 //LE SITE
 //Système de leveling
-//Rajouter le bouc émissaire
 
 //TODO Thèmes :
 //Star Wars
@@ -148,6 +146,9 @@ let emoteSV = {}
 let BE = {}
 let IDbe = {}
 let emoteBE = {}
+let PF = {}
+let IDpf = {}
+let emotePF = {}
 
 var rolesDeNuit = {};
 var potVie = {};
@@ -243,6 +244,9 @@ function init(id) {
   BE[id] = ""
   IDbe[id] = []
   emoteBE[id] = ""
+  PF[id] = ""
+  IDpf[id] = []
+  emotePF[id] = ""
 
   banniDeVote[id] = [];
   IDVcache[id] = true;
@@ -285,6 +289,7 @@ bot.on("message", message => {
       const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
       const filterSoso = reac =>
         reac.emoji.name === "✅" || reac.emoji.name === "❌";
+      const filterLG = m => joueursLG[message.guild.id].includes(m.author)
       var lowercase = message.content.toLowerCase();
       let spliteMessage = lowercase.split(" ");
 
@@ -1408,7 +1413,7 @@ bot.on("message", message => {
 
           message.channel.overwritePermissions(role, { SEND_MESSAGES: true });
           unmute(role, message);
-          message.channel.send("Une nouvelle journée commence. (" + StateOfTheGame.join(" ") + ")");
+          message.channel.send("Une nouvelle journée commence. (" + StateOfTheGame[message.guild.id].join(" ") + ")");
           getPlaceInDb("votes", message);
           lieu = lieuDB[message.guild.id];
           getPlaceInDb("vocal", message);
@@ -1524,6 +1529,8 @@ bot.on("message", message => {
           StateOfTheGame[message.guild.id][0] = Presets[theme[message.guild.id]].time.Night;
           StateOfTheGame[message.guild.id][1] += 1
 
+          var collectorLG;
+
           getPlaceInDb("loups", message);
           var lieu = message.guild.channels.get(lieuDB[message.guild.id]);
 
@@ -1579,7 +1586,7 @@ bot.on("message", message => {
           rolesDeNuit[message.guild.id].forEach(role => {
             distribRoles[message.guild.id].forEach(gens => {
               if (role === gens.Role) {
-                embed.addField(gens.Rol, "N'a pas encore agi");
+                embed.addField(gens.Role, "N'a pas encore agi");
                 rolajouer.push(gens.Role);
               }
             });
@@ -1605,7 +1612,18 @@ bot.on("message", message => {
               joueursLG[message.guild.id].forEach(joueur => {
                 lieu.overwritePermissions(joueur, { SEND_MESSAGES: true });
               });
-              lieu.send(LG[message.guild.id] + " Réveillez-vous et dévorez !");
+              var chan;
+              var pf = findObjectInList(distribRoles[message.guild.id],"Role",PF[message.guild.id])
+              lieu.send(LG[message.guild.id] + " Réveillez-vous et dévorez !").then(message => {
+                if(pf != undefined){
+                collectorLG = message.channel.createCollector(filterLG)
+                chan = pf.User.dmChannel;
+                collectorLG.on("collect", mess => {
+                  chan.send(`**[${LG[message.guild.id]}**]: ${mess.content}`)
+                })
+                }
+              })
+
               rolajouer.splice(rolajouer.indexOf(LG[message.guild.id]), 1);
             }
 
@@ -1708,7 +1726,7 @@ bot.on("message", message => {
                 "Réveille toi, " + Vovo[message.guild.id] + " ! De quel joueur veux-tu connaître le rôle cette nuit ? \n" +
                   vivants[message.guild.id] +
                   "*N'indiquez que le numéro du joueur, par exemple ``1`` pour voir le rôle de " +
-                  Listvivants[message.guild.id][0] +
+                  distribRoles[message.guild.id][0].User.username +
                   ".*"
               );
               collector2 = chan.createCollector(filter2);
@@ -1854,7 +1872,7 @@ bot.on("message", message => {
                 "Réveille toi, " + Salva[message.guild.id] + " ! Qui vas-tu protéger cette nuit ? \n" +
                   vivants[message.guild.id] +
                   "*N'indiquez que le numéro du joueur, par exemple ``1`` pour protéger " +
-                  Listvivants[message.guild.id][0] +
+                  distribRoles[message.guild.id][0].User.username +
                   ".*"
               );
               collector2 = chan.createCollector(filter2);
@@ -1986,6 +2004,9 @@ bot.on("message", message => {
                 "Nuit terminée",
                 "Tous les rôles ont étés appelés, s'ils ont tous répondu, la nuit peut s'achever."
               );
+              if(collectorLG != undefined){
+              collectorLG.stop()
+              }
             }
 
             messNuit.edit(embed2);
@@ -2297,7 +2318,7 @@ bot.on("messageReactionAdd", (reac, lui) => {
           var luiroles = reac.message.guild.members
             .get(lui.id)
             .roles.map(r => r.id);
-          if(banniDeVote[message.guild.id].includes(item)){
+          if(banniDeVote[reac.message.guild.id].includes(item)){
             avote[reac.message.guild.id].push(item.User)
           }
           if (
@@ -2452,7 +2473,9 @@ function prepCompo(collector) {
         onAddRole(SV[message.guild.id], emoteSV[message.guild.id]);
       } else if (IDbe[message.guild.id].includes(splitemess[1])) {
         onAddRole(BE[message.guild.id], emoteBE[message.guild.id])
-      } 
+      } else if (IDpf[message.guild.id].includes(splitemess[1])){
+        onAddRole(PF[message.guild.id], emotePF[message.guild.id])
+      }
       else {
         nbRole[message.guild.id] -= qte;
       }
@@ -2466,7 +2489,6 @@ function prepCompo(collector) {
       } else if (IDsalva[message.guild.id].includes(splitemess[1])) {
         onSuppRole(Salva[message.guild.id]);
       } else if (IDsoso[message.guild.id].includes(splitemess[1])) {
-        feminin = "e";
         onSuppRole(Soso[message.guild.id]);
       } else if (IDancien[message.guild.id].includes(splitemess[1])) {
         onSuppRole(Ancien[message.guild.id]);
@@ -2477,12 +2499,13 @@ function prepCompo(collector) {
       } else if (IDjdf[message.guild.id].includes(splitemess[1])) {
         onSuppRole(JDF[message.guild.id]);
       } else if (IDvovo[message.guild.id].includes(splitemess[1])) {
-        feminin = "e";
         onSuppRole(Vovo[message.guild.id]);
       } else if (IDsv[message.guild.id].includes(splitemess[1])) {
         onSuppRole(SV[message.guild.id]);
       } else if (IDbe[message.guild.id].includes(splitemess[1])) {
         onSuppRole(BE[message.guild.id], emoteBE[message.guild.id])
+      } else if (IDpf[message.guild.id].includes(splitemess[1])){
+        onSuppRole(PF[message.guild.id], emotePF[message.guild.id])
       } else {
         nbRole[message.guild.id] += qte;
       }
@@ -2610,9 +2633,6 @@ function prepCompo(collector) {
           if (Role.Name === role) {
             var item = findObjectInList(compo[message.guild.id],"Name",Role);
             item.Quantite += 1;
-            /*compo[message.guild.id][
-              compo[message.guild.id].indexOf(Role)
-            ][1] += qte;*/
           } else {
             i++;
           }
@@ -2707,7 +2727,6 @@ function unmute(role, message) {
 
 
 function Kill(message, lui) {
-  console.log("ping")
   getRoleInDb("vivants", message);
   role = roleDB[message.guild.id];
   setTimeout(() => {
@@ -2739,7 +2758,7 @@ function Kill(message, lui) {
   }
 
   lui.setMute(true);
-  message.guild.channels.get(lieu).send(lui.nickname + " est mort" + rolmort);
+  message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
   getPlaceInDb("charmed", message);
   lieu2 = lieuDB[message.guild.id];
 
@@ -2765,7 +2784,7 @@ function Kill(message, lui) {
 }
 
 function endVote(message){
-  var pendu = {user : null, votes : 0, contenu  : "personne"}
+  var pendu = {user : null, votes : -1, contenu  : "personne"}
   var egalite = false;
   getPlaceInDb("village", message);
   var village = message.guild.channels.get(lieuDB[message.guild.id]);
@@ -2773,6 +2792,7 @@ function endVote(message){
   voted[message.guild.id].forEach(vote => {
     if(vote.votes > pendu.votes){
       pendu = vote;
+      egalite = false;
     }
     else if(vote.votes === pendu.votes){
       pendu.user = pendu.user + " " + vote.user
@@ -2783,7 +2803,7 @@ function endVote(message){
   })
 
   if(egalite){
-    if(distribroles[message.guild.id].map("Roles").includes(BE[message.guild.id])){
+    if(distribRoles[message.guild.id].map("Roles").includes(BE[message.guild.id])){
       var item = findObjectInList(distribRoles[message.guild.id],BE[message.guild.id]);
       village.send(`Vous hésitez, ne sachant trop que faire. Puis tous les regards convergent vers le ${item.GuildMember}. Le ${item.Role}, il n'y a qu'à l'éliminer lui ! \n *Il va décider qui pourra voter le lendemain.*`)
       Kill(message,item.GuildMember)
@@ -2847,59 +2867,64 @@ function setTheme(theme,message){
     listeRoles[message.guild.id].push(role.name)
     switch (role.title) {
       case "Loup-Garou":
-        LG[message.guild.id] = role.name
-        IDlg[message.guild.id] = role.ID;
-        emoteLG[message.guild.id] = role.emote;
-        break;
+          LG[message.guild.id] = role.name
+          IDlg[message.guild.id] = role.ID;
+          emoteLG[message.guild.id] = role.emote;
+          break;
         case "Simple Villageois":
-        SV[message.guild.id] = role.name
-        IDsv[message.guild.id] = role.ID;
-        emoteSV[message.guild.id] = role.emote;
-        break;
+          SV[message.guild.id] = role.name
+          IDsv[message.guild.id] = role.ID;
+          emoteSV[message.guild.id] = role.emote;
+          break;
         case "Cupidon":
-        Cupi[message.guild.id] = role.name
-        IDcupi[message.guild.id] = role.ID;
-        emoteCupi[message.guild.id] = role.emote;
-        break;
+          Cupi[message.guild.id] = role.name
+          IDcupi[message.guild.id] = role.ID;
+          emoteCupi[message.guild.id] = role.emote;
+          break;
         case "Salvateur":
-        Salva[message.guild.id] = role.name
-        IDsalva[message.guild.id] = role.ID;
-        emoteSalva[message.guild.id] = role.emote;
-        break;
+          Salva[message.guild.id] = role.name
+          IDsalva[message.guild.id] = role.ID;
+          emoteSalva[message.guild.id] = role.emote;
+          break;
         case "Chasseur":
-        Chassou[message.guild.id] = role.name
-        IDchassou[message.guild.id] = role.ID;
-        emoteChassou[message.guild.id] = role.emote;
-        break;
+          Chassou[message.guild.id] = role.name
+          IDchassou[message.guild.id] = role.ID;
+          emoteChassou[message.guild.id] = role.emote;
+          break;
         case "Sorcière":
-        Soso[message.guild.id] = role.name
-        IDsoso[message.guild.id] = role.ID;
-        emoteSoso[message.guild.id] = role.emote;
-        break;
+          Soso[message.guild.id] = role.name
+          IDsoso[message.guild.id] = role.ID;
+          emoteSoso[message.guild.id] = role.emote;
+          break;
         case "Voyante":
-        Vovo[message.guild.id] = role.name
-        IDvovo[message.guild.id] = role.ID;
-        emoteVovo[message.guild.id] = role.emote;
-        break;
+          Vovo[message.guild.id] = role.name
+          IDvovo[message.guild.id] = role.ID;
+          emoteVovo[message.guild.id] = role.emote;
+          break;
         case "Idiot Du Village":
-        IDV[message.guild.id] = role.name
-        IDidv[message.guild.id] = role.ID;
-        emoteIDV[message.guild.id] = role.emote;
-        break;
+          IDV[message.guild.id] = role.name
+          IDidv[message.guild.id] = role.ID;
+          emoteIDV[message.guild.id] = role.emote;
+          break;
         case "Joueur De Flûte":
-        JDF[message.guild.id] = role.name
-        IDjdf[message.guild.id] = role.ID;
-        emoteJDF[message.guild.id] = role.emote;
-        break;
+          JDF[message.guild.id] = role.name
+          IDjdf[message.guild.id] = role.ID;
+          emoteJDF[message.guild.id] = role.emote;
+          break;
         case "Ancien":
-        Ancien[message.guild.id] = role.name
-        IDancien[message.guild.id] = role.ID;
-        emoteAncien[message.guild.id] = role.emote;
-        break;
+          Ancien[message.guild.id] = role.name
+          IDancien[message.guild.id] = role.ID;
+          emoteAncien[message.guild.id] = role.emote;
+          break;
         case "Bouc émissaire":
-        BE[message.guild.id] = role.name
-        IDbe[message.guild.id] = role.ID;
-        emoteBE[message.guild.id] = role.emote;
+          BE[message.guild.id] = role.name
+          IDbe[message.guild.id] = role.ID;
+          emoteBE[message.guild.id] = role.emote;
+          break;
+        case "Petite Fille":
+          PF[message.guild.id] = role.name;
+          IDpf[message.guild.id] = role.ID;
+          emotePF[message.guild.id] = role.emote;
           break;
     
       default:
@@ -3067,7 +3092,6 @@ function Distribution(message){
     .map("id")
     .value().length;
   var valides = [];
-  var distribTemp;
   var once = true;
 
   var distribText = "";
@@ -3109,7 +3133,6 @@ function Distribution(message){
       distribution[message.guild.id].indexOf(roleRND),
       1
     );
-    distribTemp = distribRoles[message.guild.id];
     joueur.createDM().then(channel => {
       channel.send(
         "Tu es " +
@@ -3122,14 +3145,15 @@ function Distribution(message){
       collector.on("collect", message => {
         if (!valides.includes(message.channel)) {
           valides.push(message.channel);
-          var item = findObjectInList(distribTemp,"GuildMember",joueur)
-          if (item.role === LG[mess.guild.id]) {
+          var item = findObjectInList(distribRoles[mess.guild.id],"GuildMember",joueur)
+          if (item.Role === LG[mess.guild.id]) {
             mess.guild.channels
               .get(lieuLG)
               .overwritePermissions(item.User, {
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
               });
+              joueursLG[mess.guild.id].push(item.User);
           }
           logs.send(item.User.username + ", " + item.Role + " validé.");
         }
@@ -3148,7 +3172,6 @@ function Distribution(message){
       });
     });
   });
-  distribRoles[message.guild.id] = distribTemp;
   for (let i = 0; i < distribRoles[message.guild.id].length; i++) {
     distribText =
       distribText +
