@@ -89,7 +89,7 @@
         "Power": "Chaque nuit, il peut charmer jusqu'à 2 joueurs. Ces joueurs sont informés de leurs enchantement, et savent qui sont les autres personnes charmées. Le charme n'a aucun impact sur les personnages ou la façon de jouer.",
         "Win": "Lorsque l'intégralité des joueurs vivants est charmée, il remporte une victoire de Flûtiste.",
         "Emote": ":muscial_note:",
-        "Id": "joueur de flûte,joueur de flute, jdf, flûtiste,musicien,flutiste",
+        "Id": "joueur de flûte,joueur de flute,jdf,flûtiste,musicien,flutiste",
         "Nuit": true
       },
       {
@@ -359,6 +359,6 @@
       "OnDeath": "Un autre cadavre a été retrouvé, celui de **|** visiblement foudroyé par une attaque lors de la nuit.",
       "Amoureux": "Maudits"
     },
-    "villageois": "pirates"
+    "villageois": "Pirates"
   }
 }

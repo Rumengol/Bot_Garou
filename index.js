@@ -78,7 +78,7 @@ var inscr = {};
 var nbRole = {};
 var inscrits = {};
 var inscrep = {};
-//{GuildMember,Role,User}
+//{GuildMember,Role,User,Victoire}
 var distribRoles = {};
 var distribRolMorts = {};
 var charmes = {};
@@ -197,7 +197,7 @@ function init(id) {
   voted[id] = [];
   joueursLG[id] = [];
   vivants[id] = "";
-  win[id] = false;
+  win[id] = null;
 
   distribution[id] = [];
   StateOfTheGame[id] = ["",0];
@@ -1016,7 +1016,6 @@ bot.on("message", message => {
           if (spliteMessage[1] != null) {
             var victoire = "**VICTORIEUX** 👑";
             var defaite = "Perdant";
-            win[message.guild.id] = true;
             var villageois = Presets[theme[message.guild.id]].villageois
             var amoureux = Presets[theme[message.guild.id]].amour.Amoureux
             var jdf = findObjectInList(Presets[theme[message.guild.id]].roles,"Title","Joueur De Flûte")
@@ -1024,40 +1023,47 @@ bot.on("message", message => {
             if (IDlg[message.guild.id].includes(spliteMessage[1])) {
               distribRoles[message.guild.id].forEach(role => {
                 if (role.Role == LG[message.guild.id]) {
-                  role.push(victoire);
+                  role.Victoire = victoire
                 } else {
-                  role.push(defaite);
+                  role.Victoire = defaite;
                 }
               });
+              win[message.guild.id] = LG[message.guild.id];
               message.channel.send(
                 `La victoire revient aux **${LG[message.guild.id]}** !`
               );
             } else if (spliteMessage[1] === "village") {
               distribRoles[message.guild.id].forEach(role => {
                 if (role.Role != LG[message.guild.id] && role.Role != JDF[message.guild.id]) {
-                  role.push(victoire);
+                  role.Victoire = victoire
                 } else {
-                  role.push(defaite);
+                  role.Victoire = defaite;
                 }
               });
+              win[message.guild.id] = villageois;
               message.channel.send(`La victoire revient aux **${villageois}** !`);
-            } else if (spliteMessage[1] === "amoureux") {
+            } 
+            else if (spliteMessage[1] === "amoureux") {
               distribRoles[message.guild.id].forEach(role => {
                 if (Lovers[message.guild.id].includes(role)) {
-                  role.push(victoire);
+                  role.Victoire = victoire
                 } else {
-                  role.push(defaite);
+                  role.Victoire = defaite;
                 }
               });
+              
+              win[message.guild.id] = amoureux;
               message.channel.send(`La victoire revient aux **${amoureux}** !`);
             } else if (IDjdf[message.guild.id].includes(spliteMessage[1])) {
               distribRoles[message.guild.id].forEach(role => {
                 if (role.role === JDF[message.guild.id]) {
-                  role.push(victoire);
+                  role.Victoire = victoire
                 } else {
-                  role.push(defaite);
+                  role.Victoire = defaite;
                 }
               });
+              
+              win[message.guild.id] = jdf.Name;
               message.channel.send(
                 `La victoire revient au **${jdf.Name}** !`
               );
@@ -1095,7 +1101,7 @@ bot.on("message", message => {
           getPlaceInDb("village", message);
           village = message.guild.channels.get(lieuDB[message.guild.id]);
 
-          if ((win = true)) Recap(village);
+          if ((win != null)) Recap(village);
           else
             message.channel.send(
               "La victoire n'a pas été déclarée, le récapitulatif de la partie ne sera pas affiché."
@@ -1125,7 +1131,6 @@ bot.on("message", message => {
             messCompo[message.guild.id].unpin();
           }
           init(message.guild)
-          console.log(gameOn[message.guild.id])
 
           clearInterval(x[message.guild.id]);
           clearTimeout(y[message.guild.id]);
@@ -1507,7 +1512,7 @@ bot.on("message", message => {
           if(jourBE[message.guild.id]){
             var item;
             if(!IDVcache[message.guild.id]){
-              item = findObjectInList(distribroles[message.guild.id],"Role",IDV[message.guild.id])
+              item = findObjectInList(distribRoles[message.guild.id],"Role",IDV[message.guild.id])
             }
             banniDeVote[message.guild.id] = [item]
           }
@@ -3127,7 +3132,8 @@ function Distribution(message){
     distribRoles[message.guild.id].push({
       GuildMember : joueur,
       Role : roleRND,
-      User : joueur.user
+      User : joueur.user,
+      Victoire : "Partie toujours en cours"
     });
     distribution[message.guild.id].splice(
       distribution[message.guild.id].indexOf(roleRND),
@@ -3186,6 +3192,7 @@ function Distribution(message){
 function Recap(channel) {
   embedRecap = new Discord.RichEmbed()
     .setTitle("Récapitulatif de la partie")
+    .setDescription("Victoire des **" + win[channel.guild.id] + "** !")
     .setThumbnail(
       "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png"
     )
@@ -3193,15 +3200,15 @@ function Recap(channel) {
 
   distribRoles[channel.guild.id].forEach(role => {
     embedRecap.addField(
-      role[3],
-      role[2] + " était **" + role[1] + "** *(vivant)*."
+      role.Victoire,
+      role.User + " était **" + role.Role + "** *(vivant)*."
     );
   });
 
   distribRolMorts[channel.guild.id].forEach(mort => {
     embedRecap.addField(
       "Perdant",
-      mort[2] + " était **" + mort[1] + "** *(mort)*."
+      mort.User + " était **" + mort.Role + "** *(mort)*."
     );
   });
 
