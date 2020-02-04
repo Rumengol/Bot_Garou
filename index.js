@@ -1101,7 +1101,7 @@ bot.on("message", message => {
           getPlaceInDb("village", message);
           village = message.guild.channels.get(lieuDB[message.guild.id]);
 
-          if ((win != null)) Recap(village);
+          if ((win[message.guild.id ] != null)) Recap(village);
           else
             message.channel.send(
               "La victoire n'a pas été déclarée, le récapitulatif de la partie ne sera pas affiché."
@@ -1131,6 +1131,9 @@ bot.on("message", message => {
             messCompo[message.guild.id].unpin();
           }
           init(message.guild)
+
+          console.log(gameOn[message.guild.id]);
+          gameOn[message.guild.id] = false;
 
           clearInterval(x[message.guild.id]);
           clearTimeout(y[message.guild.id]);
@@ -2795,7 +2798,7 @@ function endVote(message){
   var village = message.guild.channels.get(lieuDB[message.guild.id]);
 
   voted[message.guild.id].forEach(vote => {
-    if(vote.votes > pendu.votes){
+    if(vote.votes > pendu.votes && vote.votes != 0){
       pendu = vote;
       egalite = false;
     }
@@ -2807,16 +2810,30 @@ function endVote(message){
     console.log("Vote maximal : " + pendu.votes + ", vote proposé " + vote.votes)
   })
 
+  if(pendu.votes === -1){
+    egalite = true;
+  }
+
   if(egalite){
-    if(distribRoles[message.guild.id].map("Roles").includes(BE[message.guild.id])){
-      var item = findObjectInList(distribRoles[message.guild.id],BE[message.guild.id]);
-      village.send(`Vous hésitez, ne sachant trop que faire. Puis tous les regards convergent vers le ${item.GuildMember}. Le ${item.Role}, il n'y a qu'à l'éliminer lui ! \n *Il va décider qui pourra voter le lendemain.*`)
-      Kill(message,item.GuildMember)
-      deathBE(message,item)
+    if(distribRoles[message.guild.id].map(getItem).includes(BE[message.guild.id])){
+      var bouc = findObjectInList(distribRoles[message.guild.id],"Role",BE[message.guild.id]);
+      console.log(bouc)
+      console.log(BE[message.guild.id]);
+      village.send(`Vous hésitez, ne sachant trop que faire. Puis tous les regards convergent vers le ${bouc.GuildMember}. Le ${bouc.Role}, il n'y a qu'à l'éliminer lui ! \n *Il va décider qui pourra voter le lendemain.*`)
+      Kill(message,bouc.GuildMember)
+      deathBE(message,bouc)
     } else {
-    village.send(`Vous n'avez pas pu vous décider, il y aura donc des prolongations (1min30).`).then(message => {
-      prolongations(message,90000)
-    })
+      if(pendu.user != null){
+        village.send(`Vous n'avez pas pu vous décider, il y aura donc des prolongations (1min30).`).then(message => {
+        voteJour(message,pendu.user.join(" "));
+        prolongations(message,90000)
+      })
+    } 
+    else
+      village.send("Aucun vote ? Quelle déception...")
+  }
+  function getItem(item){
+    return item.Role;
   }
   }
   else{
@@ -2853,15 +2870,23 @@ const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
                 for(var i =0; i < splitemess.length; i++){
                   choix.push(distribRoles[message.guild.id][splitemess[i] - 1])
                 }
-                var reply = choix.map("User").join(", ");
+                var reply = choix.map(getUser).join(", ");
                 mess.channel.send("Voici ceux qui peuvent voter demain : " + reply)
 
-                var annonce = choix.map("GuildMember").join(", ")
-                message.channel.send(`Le ${Be[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
-                banniDeVote[message.guild.id].push(choix);
+                var annonce = choix.map(getMember).join(", ")
+                message.channel.send(`Le ${BE[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
+                banniDeVote[message.guild.id].concat(choix);
+                console.log(banniDeVote[message.guild.id]);
+                console.log(choix)
                 jourBE[message.guild.id] = true
                 collector.stop();
               })
+              function getUser(item){
+                return item.User.username;
+              }
+              function getMember(item){
+                return item.GuildMember;
+              }
 }
 
 function setTheme(theme,message){
@@ -2939,7 +2964,7 @@ function setTheme(theme,message){
   });
 }
 
-function voteJour(message) {
+function voteJour(message, egalite = null) {
   votes[message.guild.id] = [];
   avote[message.guild.id] = [];
   voted[message.guild.id] = [];
@@ -2951,14 +2976,23 @@ function voteJour(message) {
   getPlaceInDb("votes", message);
   lieu = lieuDB[message.guild.id];
 
-  vivants[message.guild.id] = Array.from(
-    message.guild.roles.get(Jvivants).members.values()
-  );
-  for (var i = 0; i < vivants[message.guild.id].length; i++) {
-    var temp = vivants[message.guild.id][i].user
+  var vivants;
+
+  if(egalite === null){
+    vivants = Array.from(
+      message.guild.roles.get(Jvivants).members.values()
+    );
+  }
+  else{
+    egalite.forEach(user => {
+      vivants.push(message.guild.members.get(user));
+    })
+  }
+  for (var i = 0; i < vivants.length; i++) {
+    var temp = vivants[i].user
     message.guild.channels
       .get(lieu)
-      .send(" " + vivants[message.guild.id][i])
+      .send(" " + vivants[i])
       .then(function(mess) {
         mess.react("👎");
         votes[message.guild.id].push(mess);
@@ -3033,11 +3067,12 @@ function prolongations(message,finpouet){
             .get(lieu)
             .overwritePermissions(role, { VIEW_CHANNEL: true });
           unmute(role, message);
+          var limite = 90;
           x[message.guild.id] = setInterval(function() {
             message.channel.send(
-              pouet[message.guild.id] + " secondes restantes."
+              limite + " secondes restantes."
             );
-            pouet[message.guild.id] -= 30;
+            limite -= 30;
           }, 30000);
           z[message.guild.id] = setTimeout(function() {
             message.channel.overwritePermissions(role, {
