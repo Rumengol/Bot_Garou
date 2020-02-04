@@ -1,0 +1,11 @@
+#Regular
+.vscode/
+node_modules/
+package*
+Procfile
+*.grbt
+{
+
+
+#Auth
+Auth.json

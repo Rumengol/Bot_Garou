@@ -39,7 +39,7 @@ function Activity() {
   }, 540000);
 }
 
-token = "NDYzOTcwNzg4NjI2NjYxMzc3.XfKmHg.ubxXW20RVbFYX1QuVtuNPYlVDu0";
+const token = require("./Auth.json");
 
 var adminlist = db
   .get("administrateurs")
@@ -62,7 +62,7 @@ bot.on("ready", () => {
   console.log("GRAOU est prêt!");
 });
 
-bot.login(token);
+bot.login(token.bot_token);
 
 const prefix = "/";
 var admin = {};
