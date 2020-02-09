@@ -303,11 +303,11 @@ bot.on("message", message => {
 
       if (spliteMessage[0] === prefix + "ping") {
         if (adminlist.includes(message.author)) {
-          message.reply("Pong, grand administrateur");
+          message.reply("Pong ! \n *Rang de l'utilisateur : Propriétaire.*");
         } else if (mini[message.guild.id]) {
-          message.reply("Pong administrateur !");
+          message.reply("Pong ! \n *Rang de l'utilisateur : Administrateur local.*");
         } else {
-          message.reply("pong");
+          message.reply("Pong.");
         }
       }
 
@@ -2639,8 +2639,13 @@ function prepCompo(collector) {
         var i = 0;
         compo[message.guild.id].forEach(Role => {
           if (Role.Name === role) {
-            var item = findObjectInList(compo[message.guild.id],"Name",Role);
+            var item = findObjectInList(compo[message.guild.id],"Name",Role.Name);
+            try{
             item.Quantite += 1;
+            }
+            catch(e){
+              message.channel.send(`Erreur : le rôle ${role} n'a pas été trouvé dans la liste. Merci de reporter cette erreur aux administrateurs. Détail : **${e.message}**`)
+            }
           } else {
             i++;
           }
