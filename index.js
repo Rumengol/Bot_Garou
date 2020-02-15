@@ -1645,7 +1645,7 @@ bot.on("message", message => {
                   " \n *N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-3`` pour unir " +
                   distribRoles[message.guild.id][0].User.username +
                   " et " +
-                  distribRoles[message.guild.id][1].User.username +
+                  distribRoles[message.guild.id][2].User.username +
                   ".*"
               );
               var collectorLove = chan.createCollector(filter2);
@@ -1687,7 +1687,7 @@ bot.on("message", message => {
                         eux[message.guild.id][0].User.username +
                         "."
                     );
-                    var amour = themeuh.amour.split("|");
+                    var amour = themeuh.amour.OnLove.split("|");
                     var chan2 = eux[message.guild.id][0].User.dmChannel;
                     chan2.send(
                       amour[0] +
