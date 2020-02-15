@@ -1701,6 +1701,7 @@ bot.on("message", message => {
                         amour[1]
                     );
                     eux[message.guild.id] = [];
+                    collectorLove.stop();
                   } else {
                     mess.channel.send(
                       "Woof ! Je ne  comprends pas ``" +
@@ -2825,7 +2826,7 @@ function endVote(message){
       pendu.contenu = pendu.contenu + " " + vote.user
       egalite = true;
     }
-    console.log("Vote maximal : " + pendu.votes + ", vote proposé " + vote.votes)
+    //console.log("Vote maximal : " + pendu.votes + ", vote proposé " + vote.votes)
   })
 
   if(pendu.votes === -1){
@@ -2857,7 +2858,7 @@ function endVote(message){
   else{
     village.send(`Après concertation, il est clair que ${pendu.contenu} était indigne de vivre.`)
     var item = findObjectInList(distribRoles[message.guild.id], "User", pendu.user)
-    console.log(item)
+    //console.log(item)
     if(item.Role === IDV[message.guild.id] && IDVcache[message.guild.id]){
       village.send(`Au moment d'éliminer ${pendu.contenu}, il devient clair qu'il est en fait ${item.Role} ! Quelqu'un comme lui n'a aucune chance d'être ${LG[message.guild.id]}. Mais d'un autre côté, le vote de quelqu'un comme lui n'a aucune valeur désormais...`);
       banniDeVote[message.guild.id].push(item);
@@ -2895,8 +2896,8 @@ const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
                 var annonce = choix.map(getMember).join(", ")
                 message.channel.send(`Le ${BE[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
                 banniDeVote[message.guild.id].concat(choix);
-                console.log(banniDeVote[message.guild.id]);
-                console.log(choix)
+                //console.log(banniDeVote[message.guild.id]);
+                //console.log(choix)
                 jourBE[message.guild.id] = true
                 collector.stop();
               })
@@ -3001,7 +3002,7 @@ function voteJour(message, egalite = null) {
     vivants = Array.from(
       message.guild.roles.get(Jvivants).members.values()
     );
-    console.log(vivants)
+    //console.log(vivants)
   }
   else{
     egalite.forEach(user => {
