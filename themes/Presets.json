@@ -2,19 +2,6 @@
   "classique": {
     "roles": [
       {
-        "Title": "Loup-Garou",
-        "Name": "Loup Garou",
-        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=2&name=Loup-Garou)",
-        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png",
-        "Color": "#FF0000",
-        "Goal": "Dévorer tous les innocents, ceux qui ne sont pas Loup-Garou.",
-        "Power": "Chaque nuit, il se réunit avec les autres Loup-Garou dans un salon privé pour dévorer un joueur.",
-        "Win": "Lorsque tous les innocents sont morts, il obtient une victoire de Loup-Garou.",
-        "Emote": ":wolf:",
-        "Id": "lg,loup-garou,loup,loupgarou,loup garou,loups-garou,loups garou,loups-garous,loups",
-        "Nuit": true
-      },
-      {
         "Title": "Cupidon",
         "Name": "Cupidon",
         "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=7&name=Cupidon)",
@@ -25,6 +12,45 @@
         "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
         "Emote": ":bow_and_arrow:",
         "Id": "cupi,cupidon,cupido",
+        "Nuit": true
+      },
+      {
+        "Title": "Salvateur",
+        "Name": "Salvateur",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=4&name=Salvateur)",
+        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte4.png",
+        "Color": "#FFFFFF",
+        "Goal": "Déterminer qui sont les **Loups-Garous** et les éliminer.",
+        "Power": "Chaque nuit, il peut protéger un joueur de l'attaque des Loups-Garous. Si ce joueur est désigné par les Loups-Garous, il ne mourra pas. Il peut se protéger lui-même, mais pas deux nuits de suite la même personne.",
+        "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
+        "Emote": ":shield:",
+        "Id": "salvateur,salva,salveur,salvateurs",
+        "Nuit": true
+      },
+      {
+        "Title": "Voyante",
+        "Name": "Voyante",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=3&name=Voyante)",
+        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte3.png",
+        "Color": "#FFFFFF",
+        "Goal": "Déterminer qui sont les **Loups-Garous** et les éliminer.",
+        "Power": "Chaque nuit, elle peut désigner un joueur dont elle verra le rôle.",
+        "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
+        "Emote": ":eye:",
+        "Id": "voyante,vovo,voyant",
+        "Nuit": true
+      },
+      {
+        "Title": "Loup-Garou",
+        "Name": "Loup Garou",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=2&name=Loup-Garou)",
+        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png",
+        "Color": "#FF0000",
+        "Goal": "Dévorer tous les innocents, ceux qui ne sont pas Loup-Garou.",
+        "Power": "Chaque nuit, il se réunit avec les autres Loup-Garou dans un salon privé pour dévorer un joueur.",
+        "Win": "Lorsque tous les innocents sont morts, il obtient une victoire de Loup-Garou.",
+        "Emote": ":wolf:",
+        "Id": "lg,loup-garou,loup,loupgarou,loup garou,loups-garou,loups garou,loups-garous,loups",
         "Nuit": true
       },
       {
@@ -51,19 +77,6 @@
         "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
         "Emote": ":alembic:",
         "Id": "sorcière,sorciere,soso,witch,sorcier",
-        "Nuit": true
-      },
-      {
-        "Title": "Voyante",
-        "Name": "Voyante",
-        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=3&name=Voyante)",
-        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte3.png",
-        "Color": "#FFFFFF",
-        "Goal": "Déterminer qui sont les **Loups-Garous** et les éliminer.",
-        "Power": "Chaque nuit, elle peut désigner un joueur dont elle verra le rôle.",
-        "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
-        "Emote": ":eye:",
-        "Id": "voyante,vovo,voyant",
         "Nuit": true
       },
       {
@@ -119,19 +132,6 @@
         "Nuit": false
       },
       {
-        "Title": "Salvateur",
-        "Name": "Salvateur",
-        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=4&name=Salvateur)",
-        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte4.png",
-        "Color": "#FFFFFF",
-        "Goal": "Déterminer qui sont les **Loups-Garous** et les éliminer.",
-        "Power": "Chaque nuit, il peut protéger un joueur de l'attaque des Loups-Garous. Si ce joueur est désigné par les Loups-Garous, il ne mourra pas. Il peut se protéger lui-même, mais pas deux nuits de suite la même personne.",
-        "Win": "Lorsque tous les Loups-Garous sont morts, il obtient une victoire du Village.",
-        "Emote": ":shield:",
-        "Id": "salvateur,salva,salveur,salvateurs",
-        "Nuit": true
-      },
-      {
         "Title": "Bouc émissaire",
         "Name": "Bouc émissaire",
         "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=14&name=Bouc%20Emissaire)",
@@ -183,19 +183,6 @@
   "pirate": {
     "roles": [
       {
-        "Title": "Loup-Garou",
-        "Name": "Espion de la Royal Navy",
-        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=2&name=Loup-Garou)",
-        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png",
-        "Color": "#FF0000",
-        "Goal": "Eliminer tous les pirates, et saborder le navire.",
-        "Power": "Chaque nuit, il se réunit avec les autres Espion de la Royal Navy dans un salon privé pour éliminer discrètement un pirate.",
-        "Win": "Lorsque tous les pirates sont morts, il obtient une victoire de britannique.",
-        "Emote": ":guard:",
-        "Id": "lg,espion,britannique,soldat,espion de la royal navy",
-        "Nuit": true
-      },
-      {
         "Title": "Cupidon",
         "Name": "Maudit",
         "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=7&name=Cupidon)",
@@ -206,6 +193,45 @@
         "Win": "Lorsque tous les Espions de la Royal Navy sont morts, il obtient une victoire de pirate.",
         "Emote": ":dvd:",
         "Id": "cupi,maudit,coffre",
+        "Nuit": true
+      },
+      {
+        "Title": "Salvateur",
+        "Name": "Chef Coq",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=4&name=Salvateur)",
+        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte4.png",
+        "Color": "#FFFFFF",
+        "Goal": "Déterminer qui sont les **Espions de la Royal Navy** et les éliminer.",
+        "Power": "Chaque nuit, il peut peut faire ingérer à un joueur une mixture tellement infecte que celui-ci vomira toute la nuit, le protégeant de l'attaque des Espions de la Royal Navy. Même si les Espions de la Royal Navy veulent l'éliminer, il ne mourra pas. Il peut se protéger lui-même, mais pas deux nuits de suite la même personne, aucun estomac n'y résisterait.",
+        "Win": "Lorsque tous les Espions de la Royal Navy sont morts, il obtient une victoire de pirate.",
+        "Emote": ":stew:",
+        "Id": "cuistot,chef coq,chef,coq,salva",
+        "Nuit": true
+      },
+      {
+        "Title": "Voyante",
+        "Name": "Vigie",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=3&name=Voyante)",
+        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte3.png",
+        "Color": "#FFFFFF",
+        "Goal": "Déterminer qui sont les **Espions de la Royal Navy** et leur faire subir le supplice de la planche.",
+        "Power": "Chaque nuit, elle peut désigner un joueur dont elle verra le rôle.",
+        "Win": "Lorsque tous les Espions de la Royal Navy sont morts, elle obtient une victoire de pirate.",
+        "Emote": ":telescope:",
+        "Id": "vovo,vigie",
+        "Nuit": true
+      },
+      {
+        "Title": "Loup-Garou",
+        "Name": "Espion de la Royal Navy",
+        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=2&name=Loup-Garou)",
+        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png",
+        "Color": "#FF0000",
+        "Goal": "Eliminer tous les pirates, et saborder le navire.",
+        "Power": "Chaque nuit, il se réunit avec les autres Espion de la Royal Navy dans un salon privé pour éliminer discrètement un pirate.",
+        "Win": "Lorsque tous les pirates sont morts, il obtient une victoire de britannique.",
+        "Emote": ":guard:",
+        "Id": "lg,espion,britannique,soldat,espion de la royal navy",
         "Nuit": true
       },
       {
@@ -232,19 +258,6 @@
         "Win": "Lorsque tous les Espions de la Royal Navy sont morts, elle obtient une victoire de pirate.",
         "Emote": ":teddy_bear:",
         "Id": "sorcière,sorciere,soso,witch,sorcier,vaudou,sorciere vaudou,sorcière vaudou",
-        "Nuit": true
-      },
-      {
-        "Title": "Voyante",
-        "Name": "Vigie",
-        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=3&name=Voyante)",
-        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte3.png",
-        "Color": "#FFFFFF",
-        "Goal": "Déterminer qui sont les **Espions de la Royal Navy** et leur faire subir le supplice de la planche.",
-        "Power": "Chaque nuit, elle peut désigner un joueur dont elle verra le rôle.",
-        "Win": "Lorsque tous les Espions de la Royal Navy sont morts, elle obtient une victoire de pirate.",
-        "Emote": ":telescope:",
-        "Id": "vovo,vigie",
         "Nuit": true
       },
       {
@@ -298,19 +311,6 @@
         "Emote": ":bomb:",
         "Id": "chasseur,canonnier,canon,canonier",
         "Nuit": false
-      },
-      {
-        "Title": "Salvateur",
-        "Name": "Chef Coq",
-        "Description": "[Fiche du site](https://www.loups-garous-en-ligne.com/?carte=4&name=Salvateur)",
-        "Thumbnail": "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte4.png",
-        "Color": "#FFFFFF",
-        "Goal": "Déterminer qui sont les **Espions de la Royal Navy** et les éliminer.",
-        "Power": "Chaque nuit, il peut peut faire ingérer à un joueur une mixture tellement infecte que celui-ci vomira toute la nuit, le protégeant de l'attaque des Espions de la Royal Navy. Même si les Espions de la Royal Navy veulent l'éliminer, il ne mourra pas. Il peut se protéger lui-même, mais pas deux nuits de suite la même personne, aucun estomac n'y résisterait.",
-        "Win": "Lorsque tous les Espions de la Royal Navy sont morts, il obtient une victoire de pirate.",
-        "Emote": ":stew:",
-        "Id": "cuistot,chef coq,chef,coq,salva",
-        "Nuit": true
       },
       {
         "Title": "Bouc émissaire",
