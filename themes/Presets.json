@@ -101,7 +101,7 @@
         "Goal": "Charmer tous les habitants du village.",
         "Power": "Chaque nuit, il peut charmer jusqu'à 2 joueurs. Ces joueurs sont informés de leurs enchantement, et savent qui sont les autres personnes charmées. Le charme n'a aucun impact sur les personnages ou la façon de jouer.",
         "Win": "Lorsque l'intégralité des joueurs vivants est charmée, il remporte une victoire de Flûtiste.",
-        "Emote": ":muscial_note:",
+        "Emote": ":musical_note:",
         "Id": "joueur de flûte,joueur de flute,jdf,flûtiste,musicien,flutiste",
         "Nuit": true
       },
@@ -282,7 +282,7 @@
         "Goal": "Convertir tous l'équipage.",
         "Power": "Chaque nuit, il peut convertir jusqu'à 2 joueurs. Ces joueurs sont informés de leurs conversion, et savent qui sont les autres personnes converties. La conversion n'a aucun impact sur les personnages ou la façon de jouer.",
         "Win": "Lorsque l'intégralité des joueurs vivants est convertie, il devient Capitaine et remporte une victoire de mutinerie.",
-        "Emote": ":muscial_note:",
+        "Emote": ":musical_note:",
         "Id": "jdf,mutin,mutinerie",
         "Nuit": true
       },

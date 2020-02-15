@@ -1056,7 +1056,7 @@ bot.on("message", message => {
               message.channel.send(`La victoire revient aux **${amoureux}** !`);
             } else if (IDjdf[message.guild.id].includes(spliteMessage[1])) {
               distribRoles[message.guild.id].forEach(role => {
-                if (role.role === JDF[message.guild.id]) {
+                if (role.Role === JDF[message.guild.id]) {
                   role.Victoire = victoire
                 } else {
                   role.Victoire = defaite;
@@ -1126,7 +1126,7 @@ bot.on("message", message => {
             });
           }, 3000);
 
-          charmes = [];
+          charmes[message.guild.id] = [];
           if (messCompo[message.guild.id] != null) {
             messCompo[message.guild.id].unpin();
           }
@@ -1914,6 +1914,14 @@ bot.on("message", message => {
               var acharme = [];
               var acharmer = "";
               var welcome = themeuh.flute.Welcome.split("|");
+              var distribTemp = []
+              if(charmes[message.guild.id].length === 0){
+                charmes[message.guild.id].push(item.GuildMember)
+                distribRoles[message.guild.id].forEach(role =>{
+                  if(role != item)
+                    distribTemp.push(role)
+                })
+              }
               charmes[message.guild.id].forEach(charme => {
                 distribRoles[message.guild.id].forEach(vivant => {
                   if (vivant.User.username != charme.user.username) {
@@ -1967,11 +1975,11 @@ bot.on("message", message => {
                   0 <= cible2 &&
                   cible2 <= acharme.length
                 ) {
-                  eux.push(distribRoles[message.guild.id][cible1 - 1]);
+                  eux.push(distribTemp[cible1 - 1]);
                   var eux2 = "c'est tout";
                   if (cible2 != 0)
                     eux2 =
-                      distribRoles[message.guild.id][cible2 - 1].User.username;
+                    distribTemp[cible2 - 1].User.username;
                   mess.channel.send(
                     "**" +
                       eux[0].User.username +
@@ -1982,15 +1990,15 @@ bot.on("message", message => {
                   logs.send(
                     item[2] +
                       " a " + welcome[2] + " les joueurs " +
-                      eux[0][2] +
+                      eux[0].User.username +
                       " et " +
                       eux2
                   );
-                  Charme(message, eux[0][0], welcome);
+                  Charme(message, eux[0].GuildMember, welcome);
                   if (cible2 != 0)
                     Charme(
                       message,
-                      distribRoles[message.guild.id][cible2 - 1].GuildMember, welcome
+                      distribTemp[cible2 - 1].GuildMember, welcome
                     );
                   collector2.stop();
                 } else {
@@ -2182,10 +2190,9 @@ bot.on("message", message => {
           clearInterval(x[message.guild.id]);
           clearTimeout(y[message.guild.id]);
           clearTimeout(z[message.guild.id]);
-          let tempo = message.channel.send(
+          message.channel.send(
             "Tous les décomptes ont été interrompus."
           );
-          setTimeout(tempo.delete(), 5000);
         }
       }
 
@@ -2422,11 +2429,11 @@ function UsePotMort(message, guild, theme) {
           var meurtre = theme.potions.Kill.split("|");
           mess.channel.send(
             meurtre[0] +
-              lui[0][2].username +
+              lui[0].User.username +
               meurtre[1]
           );
           salonLog[guild.id].send(
-            Soso[guild.id] + " a décidé de tuer **" + lui[0][2] + "**."
+            Soso[guild.id] + " a décidé de tuer **" + lui[0].User.username + "**."
           );
           potMort[guild.id] = false;
           collector2.stop();
@@ -2668,8 +2675,13 @@ function prepCompo(collector) {
 function onSuppRole(role) {
   compo[message.guild.id].forEach(Role => {
     if (Role.Name === role) {
-      var item = findObjectInList(compo[message.guild.id],"Name",Role);
-            item.Quantite -= 1;
+      var item = findObjectInList(compo[message.guild.id],"Name",Role.Name);
+            try{
+            item.Quantite += 1;
+            }
+            catch(e){
+              message.channel.send(`Erreur : le rôle ${role} n'a pas été trouvé dans la liste. Merci de reporter cette erreur aux administrateurs. Détail : **${e.message}**`)
+            }
       if (item.Quantite <= 0) {
         compo[message.guild.id].splice(
           compo[message.guild.id].indexOf(item),1
@@ -2758,7 +2770,9 @@ function Kill(message, lui) {
 
   var item = findObjectInList(distribRoles[message.guild.id],"GuildMember",lui)
   if (item != undefined) {
-    charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(item.GuildMember), 1);
+    if(charmes[message.guild.id] != undefined)
+      charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(item.GuildMember), 1);
+
     rolmort = ", il/elle était " + item.Role + ".";
     distribRolMorts[message.guild.id].push(item);
     distribRoles[message.guild.id].splice(
@@ -2788,7 +2802,7 @@ function Kill(message, lui) {
           Lovers[message.guild.id][0].User +
           dead[1]
       ).then(mess =>{
-    var amorreux = Lovers[message.guild.id][0];
+    var amorreux = Lovers[message.guild.id][0].GuildMember;
     Lovers[message.guild.id] = [];
     Kill(mess, amorreux);
       })
@@ -2843,6 +2857,7 @@ function endVote(message){
   else{
     village.send(`Après concertation, il est clair que ${pendu.contenu} était indigne de vivre.`)
     var item = findObjectInList(distribRoles[message.guild.id], "User", pendu.user)
+    console.log(item)
     if(item.Role === IDV[message.guild.id] && IDVcache[message.guild.id]){
       village.send(`Au moment d'éliminer ${pendu.contenu}, il devient clair qu'il est en fait ${item.Role} ! Quelqu'un comme lui n'a aucune chance d'être ${LG[message.guild.id]}. Mais d'un autre côté, le vote de quelqu'un comme lui n'a aucune valeur désormais...`);
       banniDeVote[message.guild.id].push(item);
@@ -2986,6 +3001,7 @@ function voteJour(message, egalite = null) {
     vivants = Array.from(
       message.guild.roles.get(Jvivants).members.values()
     );
+    console.log(vivants)
   }
   else{
     egalite.forEach(user => {
