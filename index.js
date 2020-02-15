@@ -1616,7 +1616,6 @@ bot.on("message", message => {
 
             //Action nocturne des Loups Garous
             if (IDlg[message.guild.id].includes(contenu) && rolajouer.includes(LG[message.guild.id])) {
-              //JoueursLG[message.guild.id] est jamais attribué je crois
               joueursLG[message.guild.id].forEach(joueur => {
                 lieu.overwritePermissions(joueur, { SEND_MESSAGES: true });
               });
@@ -1688,7 +1687,7 @@ bot.on("message", message => {
                         eux[message.guild.id][0].User.username +
                         "."
                     );
-                    var amour = themeuh.Amour.split("|");
+                    var amour = themeuh.amour.split("|");
                     var chan2 = eux[message.guild.id][0].User.dmChannel;
                     chan2.send(
                       amour[0] +
