@@ -1688,7 +1688,7 @@ bot.on("message", message => {
                         eux[message.guild.id][0].User.username +
                         "."
                     );
-                    var amour = themeuh.Amour.split("|");
+                    var amour = themeuh.amour.split("|");
                     var chan2 = eux[message.guild.id][0].User.dmChannel;
                     chan2.send(
                       amour[0] +
