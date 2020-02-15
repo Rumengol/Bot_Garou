@@ -5,6 +5,10 @@
 //LE SITE
 //Système de leveling
 
+//TODO URGENT :
+//Arrêter le collecteur de la nuit
+//Random kill de je saispas trop où au dayend
+
 //TODO Thèmes :
 //Star Wars
 //Epithet Erased
