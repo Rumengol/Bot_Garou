@@ -6,6 +6,9 @@
 //Système de leveling
 
 //TODO URGENT :
+//Le bot donne plus accès à la tanière :> strange
+//Soso marche plus la deuxième fois
+//votes foireux :> ok theory
 
 //TODO Thèmes :
 //Star Wars
@@ -1824,7 +1827,7 @@ bot.on("message", message => {
                       ConfSoso[message.guild.id] = mess;
                       mess.react("✅");
                       mess.react("❌");
-                      const collectorSoso = mess.createReactionCollector(
+                      var collectorSoso = mess.createReactionCollector(
                         filterSoso
                       );
                       collectorSoso.on("collect", reac => {
@@ -1840,7 +1843,7 @@ bot.on("message", message => {
                                 "** mourra."
                             );
                             salonLog[message.guild.id].send(
-                              Soso[message.guild.id] + "n'a protégé personne."
+                              Soso[message.guild.id] + " n'a protégé personne."
                             );
                             next[message.guild.id] = true;
                             collectorSoso.stop();
@@ -2353,6 +2356,8 @@ bot.on("messageReactionAdd", (reac, lui) => {
               reac.remove(lui);
             }
             var membre = reac.message.content.split("<@!");
+            if(membre[1] === undefined)
+              membre = reac.message.content.split("<@")
             membre = membre[1].split(">")
             var item2 = findObjectInList(voted[reac.message.guild.id],"contenu",reac.message.guild.members.get(membre[0]))
             item2.votes += 1;
