@@ -6,9 +6,6 @@
 //Système de leveling
 
 //TODO URGENT :
-//Arrêter le collecteur de la nuit :> ok
-//Random kill de je saispas trop où au dayend :> ok
-//Empêcher les loups morts de parler, et les loups pendant la journée :> ok
 
 //TODO Thèmes :
 //Star Wars
