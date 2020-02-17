@@ -1182,7 +1182,8 @@ bot.on("message", message => {
             );
             blep = setTimeout(function() {
               eux[message.guild.id].forEach(lui => {
-                lui.setVoiceChannel(lieu2);
+                if(lieu.members.includes(lui))
+                  lui.setVoiceChannel(lieu2);
                 lui.removeRole(role);
               });
             }, 3000);
@@ -1339,7 +1340,10 @@ bot.on("message", message => {
               getPlaceInDb("village", message);
               lieu = lieuDB[message.guild.id];
               message.guild.channels.get(lieu).send(lui + " a ressuscité !");
-              lui.setMute(false);
+              getPlaceInDb("vocal",message);
+              lieuVocal = lieuDB[message.guild.id];
+              if(lieuVocal.members.includes(lui))
+                lui.setMute(false);
             }
           } else {
             message.reply(
@@ -1561,10 +1565,11 @@ bot.on("message", message => {
           Listvivants[message.guild.id] = message.guild.roles
             .get(roleDB[message.guild.id])
             .members.map(m => m.user.username);
-
+            
           village.overwritePermissions(amute, { SEND_MESSAGES: false });
           amute.members.forEach(mute => {
-            mute.setMute(true);
+            if(vocal.members.includes(mute))
+              mute.setMute(true);
           });
 
           vivants[message.guild.id] = "";
@@ -2733,6 +2738,8 @@ function Charme(message, lui, welcome) {
 function reviveAll(message) {
   getRoleInDb("morts", message);
   role = roleDB[message.guild.id];
+  getPlaceInDb("vocal",message);
+  vocal = lieuDB[message.guild.id];
 
   eux = message.guild.roles.get(role).members;
   eux.forEach(lui => {
@@ -2741,7 +2748,8 @@ function reviveAll(message) {
       role2 = roleDB[message.guild.id];
       lui.addRole(role2);
     }, 500);
-    lui.setMute(false);
+    if(vocal.members.includes(lui))
+      lui.setMute(false);
     //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
     setTimeout(() => {
       lui.removeRole(role);
@@ -2751,14 +2759,20 @@ function reviveAll(message) {
 }
 
 function mute(role, message) {
+  getPlaceInDb("vocal",message);
+  vocal = lieuDB[message.guild.id];
   message.guild.roles.get(role).members.forEach(membre => {
-    membre.setMute(true);
+    if(vocal.members.includes(membre))
+      membre.setMute(true);
   });
 }
 
 function unmute(role, message) {
+  getPlaceInDb("vocal",message);
+  vocal = lieuDB[message.guild.id];
   message.guild.roles.get(role).members.forEach(membre => {
-    membre.setMute(false);
+    if(vocal.members.includes(membre))
+      membre.setMute(false);
   });
 }
 
@@ -2780,7 +2794,7 @@ function Kill(message, lui) {
   lieu = lieuDB[message.guild.id];
 
   getPlaceInDb("vocal", message);
-  lieu3 = lieuDB[message.guild.id];
+  vocal = lieuDB[message.guild.id];
 
   var item = findObjectInList(distribRoles[message.guild.id],"GuildMember",lui)
   if (item != undefined) {
@@ -2797,7 +2811,8 @@ function Kill(message, lui) {
     rolmort = ".";
   }
 
-  lui.setMute(true);
+  if(vocal.members.inclduess(lui))
+    lui.setMute(true);
   message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
   getPlaceInDb("charmed", message);
   lieu2 = lieuDB[message.guild.id];
