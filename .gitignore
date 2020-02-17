@@ -1,0 +1,12 @@
+#Regular
+.vscode/
+node_modules/
+package*
+Procfile
+*.grbt
+{
+Manuel.txt
+
+
+#Auth
+config.json
