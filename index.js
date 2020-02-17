@@ -20,7 +20,7 @@
 //- Le rajouter dans RolesDeNuit s'il agit la nuit
 
 const Discord = require("discord.js");
-const Embed = require("./commands/embeds");
+const Embed = require("./src/commands/embeds");
 const Embeds = new Embed();
 const bot = new Discord.Client();
 const low = require("lowdb");
@@ -32,6 +32,8 @@ const db = low(adapter);
 const Theme = require("./themes/Themes.js");
 const Role = require("./themes/Role.js");
 const Presets = require("./themes/Presets.json")
+const Enmap = require("enmap");
+const fs = require("fs");
 
 const adeupter = new FileSync("composition.json");
 const comp = low(adeupter);
@@ -44,7 +46,49 @@ function Activity() {
   }, 540000);
 }
 
-token = require("./Auth.json");
+const config = require("./config.json");
+const token = config.token;
+const prefix = config.prefix;
+bot.config = config;
+
+
+fs.readdir("./src/events/", (err, files) => {
+  if (err) return console.error(err);
+  files.forEach(file => {
+    // If the file is not a JS file, ignore it
+    if (!file.endsWith(".js")) return;
+    // Load the event file itself
+    const event = require(`./src/events/${file}`);
+    // Get just the event name from the file name
+    let eventName = file.split(".")[0];
+    // super-secret recipe to call events with all their proper arguments *after* the `client` var.
+    // without going into too many details, this means each event will be called with the client argument,
+    // followed by its "normal" arguments, like message, member, etc etc.
+    // This line is awesome by the way. Just sayin'.
+    bot.on(eventName, event.bind(null, bot));
+    delete require.cache[require.resolve(`./src/events/${file}`)];
+  });
+});
+
+bot.commands = new Enmap();
+
+fs.readdir("./src/commands/", (err, files) => {
+  if (err) return console.error(err);
+  files.forEach(file => {
+    if (!file.endsWith(".js")) return;
+    // Load the command file itself
+    let props = require(`./src/commands/${file}`);
+    // Get just the command name from the file name
+    let commandName = file.split(".")[0];
+    console.log(`Attempting to load command ${commandName}`);
+    // Here we simply store the whole thing in the command Enmap. We're not running it right now.
+    bot.commands.set(commandName, props);
+  });
+});
+
+
+
+
 
 var adminlist = db
   .get("administrateurs")
@@ -67,9 +111,8 @@ bot.on("ready", () => {
   console.log("GRAOU est prêt!");
 });
 
-bot.login(token.bot_token);
+bot.login(token);
 
-const prefix = "/";
 var admin = {};
 var mini = {};
 var gameOn = {};
@@ -289,6 +332,9 @@ bot.on("guildCreate", guild => {
 bot.on("message", message => {
   try {
     if (message.content[0] === prefix) {
+      const args = message.content.slice(prefix.length).trim().split(/ +/g);
+      const command = args.shift().toLowerCase();
+      
       const filter = m =>
         m.author === message.author || adminlist.includes(m.author);
       const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
@@ -306,7 +352,7 @@ bot.on("message", message => {
         checkmin(message);
       
 
-      if (spliteMessage[0] === prefix + "ping") {
+      /*if (spliteMessage[0] === prefix + "ping") {
         if (adminlist.includes(message.author)) {
           message.reply("Pong ! \n *Rang de l'utilisateur : Propriétaire.*");
         } else if (mini[message.guild.id]) {
@@ -314,10 +360,10 @@ bot.on("message", message => {
         } else {
           message.reply("Pong.");
         }
-      }
+      }*/
 
       //initialisation des rôles admins
-      else if (
+      if (
         spliteMessage[0] == prefix + "defadmin" &&
         spliteMessage[1] != null
       ) {
