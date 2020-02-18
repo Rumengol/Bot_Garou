@@ -1,9 +1,14 @@
-//to do :
+//TODO :
 //Le collecteur de la nuit derp : on est au courant
 //Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos : c'pas demain la veille
 //Permettre une configuration personnalisée
 //LE SITE
 //Système de leveling
+
+//TODO URGENT :
+//Le bot donne plus accès à la tanière :> strange
+//Soso marche plus la deuxième fois
+//votes foireux :> ok theory
 
 //TODO Thèmes :
 //Star Wars
@@ -39,7 +44,7 @@ function Activity() {
   }, 540000);
 }
 
-const token = require("./Auth.json");
+const config = require("./Auth.json");
 
 var adminlist = db
   .get("administrateurs")
@@ -62,9 +67,9 @@ bot.on("ready", () => {
   console.log("GRAOU est prêt!");
 });
 
-bot.login(token.bot_token);
+bot.login(config.token);
 
-const prefix = "/";
+const prefix = config.prefix;
 var admin = {};
 var mini = {};
 var gameOn = {};
@@ -303,11 +308,11 @@ bot.on("message", message => {
 
       if (spliteMessage[0] === prefix + "ping") {
         if (adminlist.includes(message.author)) {
-          message.reply("Pong, grand administrateur");
+          message.reply("Pong ! \n *Rang de l'utilisateur : Propriétaire.*");
         } else if (mini[message.guild.id]) {
-          message.reply("Pong administrateur !");
+          message.reply("Pong ! \n *Rang de l'utilisateur : Administrateur local.*");
         } else {
-          message.reply("pong");
+          message.reply("Pong.");
         }
       }
 
@@ -1056,7 +1061,7 @@ bot.on("message", message => {
               message.channel.send(`La victoire revient aux **${amoureux}** !`);
             } else if (IDjdf[message.guild.id].includes(spliteMessage[1])) {
               distribRoles[message.guild.id].forEach(role => {
-                if (role.role === JDF[message.guild.id]) {
+                if (role.Role === JDF[message.guild.id]) {
                   role.Victoire = victoire
                 } else {
                   role.Victoire = defaite;
@@ -1126,7 +1131,7 @@ bot.on("message", message => {
             });
           }, 3000);
 
-          charmes = [];
+          charmes[message.guild.id] = [];
           if (messCompo[message.guild.id] != null) {
             messCompo[message.guild.id].unpin();
           }
@@ -1593,7 +1598,7 @@ bot.on("message", message => {
             );
           rolesDeNuit[message.guild.id].forEach(role => {
             distribRoles[message.guild.id].forEach(gens => {
-              if (role === gens.Role) {
+              if (role === gens.Role && !rolajouer.includes(gens.Role)) {
                 embed.addField(gens.Role, "N'a pas encore agi");
                 rolajouer.push(gens.Role);
               }
@@ -1616,7 +1621,6 @@ bot.on("message", message => {
 
             //Action nocturne des Loups Garous
             if (IDlg[message.guild.id].includes(contenu) && rolajouer.includes(LG[message.guild.id])) {
-              //JoueursLG[message.guild.id] est jamais attribué je crois
               joueursLG[message.guild.id].forEach(joueur => {
                 lieu.overwritePermissions(joueur, { SEND_MESSAGES: true });
               });
@@ -1646,7 +1650,7 @@ bot.on("message", message => {
                   " \n *N'indiquez que les numéros sous la forme X-Y. Par exemple, ``1-3`` pour unir " +
                   distribRoles[message.guild.id][0].User.username +
                   " et " +
-                  distribRoles[message.guild.id][1].User.username +
+                  distribRoles[message.guild.id][2].User.username +
                   ".*"
               );
               var collectorLove = chan.createCollector(filter2);
@@ -1688,7 +1692,7 @@ bot.on("message", message => {
                         eux[message.guild.id][0].User.username +
                         "."
                     );
-                    var amour = themeuh.amour.split("|");
+                    var amour = themeuh.amour.OnLove.split("|");
                     var chan2 = eux[message.guild.id][0].User.dmChannel;
                     chan2.send(
                       amour[0] +
@@ -1702,6 +1706,7 @@ bot.on("message", message => {
                         amour[1]
                     );
                     eux[message.guild.id] = [];
+                    collectorLove.stop();
                   } else {
                     mess.channel.send(
                       "Woof ! Je ne  comprends pas ``" +
@@ -1822,7 +1827,7 @@ bot.on("message", message => {
                       ConfSoso[message.guild.id] = mess;
                       mess.react("✅");
                       mess.react("❌");
-                      const collectorSoso = mess.createReactionCollector(
+                      var collectorSoso = mess.createReactionCollector(
                         filterSoso
                       );
                       collectorSoso.on("collect", reac => {
@@ -1838,7 +1843,7 @@ bot.on("message", message => {
                                 "** mourra."
                             );
                             salonLog[message.guild.id].send(
-                              Soso[message.guild.id] + "n'a protégé personne."
+                              Soso[message.guild.id] + " n'a protégé personne."
                             );
                             next[message.guild.id] = true;
                             collectorSoso.stop();
@@ -1915,6 +1920,14 @@ bot.on("message", message => {
               var acharme = [];
               var acharmer = "";
               var welcome = themeuh.flute.Welcome.split("|");
+              var distribTemp = []
+              if(charmes[message.guild.id].length === 0){
+                charmes[message.guild.id].push(item.GuildMember)
+                distribRoles[message.guild.id].forEach(role =>{
+                  if(role != item)
+                    distribTemp.push(role)
+                })
+              }
               charmes[message.guild.id].forEach(charme => {
                 distribRoles[message.guild.id].forEach(vivant => {
                   if (vivant.User.username != charme.user.username) {
@@ -1968,11 +1981,11 @@ bot.on("message", message => {
                   0 <= cible2 &&
                   cible2 <= acharme.length
                 ) {
-                  eux.push(distribRoles[message.guild.id][cible1 - 1]);
+                  eux.push(distribTemp[cible1 - 1]);
                   var eux2 = "c'est tout";
                   if (cible2 != 0)
                     eux2 =
-                      distribRoles[message.guild.id][cible2 - 1].User.username;
+                    distribTemp[cible2 - 1].User.username;
                   mess.channel.send(
                     "**" +
                       eux[0].User.username +
@@ -1983,15 +1996,15 @@ bot.on("message", message => {
                   logs.send(
                     item[2] +
                       " a " + welcome[2] + " les joueurs " +
-                      eux[0][2] +
+                      eux[0].User.username +
                       " et " +
                       eux2
                   );
-                  Charme(message, eux[0][0], welcome);
+                  Charme(message, eux[0].GuildMember, welcome);
                   if (cible2 != 0)
                     Charme(
                       message,
-                      distribRoles[message.guild.id][cible2 - 1].GuildMember, welcome
+                      distribTemp[cible2 - 1].GuildMember, welcome
                     );
                   collector2.stop();
                 } else {
@@ -2012,15 +2025,19 @@ bot.on("message", message => {
                 "Nuit terminée",
                 "Tous les rôles ont étés appelés, s'ils ont tous répondu, la nuit peut s'achever."
               );
-              if(collectorLG != undefined){
-              collectorLG.stop()
-              }
+              collector.stop()
             }
 
             messNuit.edit(embed2);
-          });
+          },36000);
           collector.on("end", collected => {
             message.channel.send("Collecteur terminé.");
+            joueursLG[message.guild.id].forEach(joueur => {
+              lieu.overwritePermissions(joueur, { SEND_MESSAGES: false });
+            });
+            if(collectorLG != undefined){
+            collectorLG.stop()
+            }
           });
         }
       }
@@ -2183,10 +2200,9 @@ bot.on("message", message => {
           clearInterval(x[message.guild.id]);
           clearTimeout(y[message.guild.id]);
           clearTimeout(z[message.guild.id]);
-          let tempo = message.channel.send(
+          message.channel.send(
             "Tous les décomptes ont été interrompus."
           );
-          setTimeout(tempo.delete(), 5000);
         }
       }
 
@@ -2339,7 +2355,11 @@ bot.on("messageReactionAdd", (reac, lui) => {
               avote[reac.message.guild.id].push(lui);
               reac.remove(lui);
             }
-            var item2 = findObjectInList(voted[reac.message.guild.id],"contenu",reac.message.content)
+            var membre = reac.message.content.split("<@!");
+            if(membre[1] === undefined)
+              membre = reac.message.content.split("<@")
+            membre = membre[1].split(">")
+            var item2 = findObjectInList(voted[reac.message.guild.id],"contenu",reac.message.guild.members.get(membre[0]))
             item2.votes += 1;
           } else {
             if (votedejour[reac.message.guild.id]) {
@@ -2423,11 +2443,11 @@ function UsePotMort(message, guild, theme) {
           var meurtre = theme.potions.Kill.split("|");
           mess.channel.send(
             meurtre[0] +
-              lui[0][2].username +
+              lui[0].User.username +
               meurtre[1]
           );
           salonLog[guild.id].send(
-            Soso[guild.id] + " a décidé de tuer **" + lui[0][2] + "**."
+            Soso[guild.id] + " a décidé de tuer **" + lui[0].User.username + "**."
           );
           potMort[guild.id] = false;
           collector2.stop();
@@ -2639,8 +2659,13 @@ function prepCompo(collector) {
         var i = 0;
         compo[message.guild.id].forEach(Role => {
           if (Role.Name === role) {
-            var item = findObjectInList(compo[message.guild.id],"Name",Role);
+            var item = findObjectInList(compo[message.guild.id],"Name",Role.Name);
+            try{
             item.Quantite += 1;
+            }
+            catch(e){
+              message.channel.send(`Erreur : le rôle ${role} n'a pas été trouvé dans la liste. Merci de reporter cette erreur aux administrateurs. Détail : **${e.message}**`)
+            }
           } else {
             i++;
           }
@@ -2664,8 +2689,13 @@ function prepCompo(collector) {
 function onSuppRole(role) {
   compo[message.guild.id].forEach(Role => {
     if (Role.Name === role) {
-      var item = findObjectInList(compo[message.guild.id],"Name",Role);
-            item.Quantite -= 1;
+      var item = findObjectInList(compo[message.guild.id],"Name",Role.Name);
+            try{
+            item.Quantite += 1;
+            }
+            catch(e){
+              message.channel.send(`Erreur : le rôle ${role} n'a pas été trouvé dans la liste. Merci de reporter cette erreur aux administrateurs. Détail : **${e.message}**`)
+            }
       if (item.Quantite <= 0) {
         compo[message.guild.id].splice(
           compo[message.guild.id].indexOf(item),1
@@ -2754,7 +2784,9 @@ function Kill(message, lui) {
 
   var item = findObjectInList(distribRoles[message.guild.id],"GuildMember",lui)
   if (item != undefined) {
-    charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(item.GuildMember), 1);
+    if(charmes[message.guild.id] != undefined)
+      charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(item.GuildMember), 1);
+
     rolmort = ", il/elle était " + item.Role + ".";
     distribRolMorts[message.guild.id].push(item);
     distribRoles[message.guild.id].splice(
@@ -2774,6 +2806,12 @@ function Kill(message, lui) {
     .get(lieu2)
     .overwritePermissions(lui, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
 
+  if(joueursLG[message.guild.id].includes(lui)){
+    getPlaceInDb("loups",message)
+    lieu3 = lieuDB[message.guild.id];
+    message.guild.channels.get(lieu3).overwrittePermissions(lui, { SEND_MESSAGES: false });
+  }
+
   if (Lovers[message.guild.id].includes(item)) {
     var dead = Presets[theme[message.guild.id]].amour.OnDeath.split("|")
     Lovers[message.guild.id].splice(Lovers[message.guild.id].indexOf(item), 1);
@@ -2784,7 +2822,7 @@ function Kill(message, lui) {
           Lovers[message.guild.id][0].User +
           dead[1]
       ).then(mess =>{
-    var amorreux = Lovers[message.guild.id][0];
+    var amorreux = Lovers[message.guild.id][0].GuildMember;
     Lovers[message.guild.id] = [];
     Kill(mess, amorreux);
       })
@@ -2807,7 +2845,7 @@ function endVote(message){
       pendu.contenu = pendu.contenu + " " + vote.user
       egalite = true;
     }
-    console.log("Vote maximal : " + pendu.votes + ", vote proposé " + vote.votes)
+    //console.log("Vote maximal : " + pendu.votes + ", vote proposé " + vote.votes)
   })
 
   if(pendu.votes === -1){
@@ -2825,7 +2863,7 @@ function endVote(message){
     } else {
       if(pendu.user != null){
         village.send(`Vous n'avez pas pu vous décider, il y aura donc des prolongations (1min30).`).then(message => {
-        voteJour(message,pendu.user.join(" "));
+        voteJour(message,pendu.user.split(" "));
         prolongations(message,90000)
       })
     } 
@@ -2839,6 +2877,8 @@ function endVote(message){
   else{
     village.send(`Après concertation, il est clair que ${pendu.contenu} était indigne de vivre.`)
     var item = findObjectInList(distribRoles[message.guild.id], "User", pendu.user)
+    if(item === undefined)
+      item = {User:pendu.user, Role:"dérangé", GuildMember:pendu.contenu}
     if(item.Role === IDV[message.guild.id] && IDVcache[message.guild.id]){
       village.send(`Au moment d'éliminer ${pendu.contenu}, il devient clair qu'il est en fait ${item.Role} ! Quelqu'un comme lui n'a aucune chance d'être ${LG[message.guild.id]}. Mais d'un autre côté, le vote de quelqu'un comme lui n'a aucune valeur désormais...`);
       banniDeVote[message.guild.id].push(item);
@@ -2876,8 +2916,8 @@ const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
                 var annonce = choix.map(getMember).join(", ")
                 message.channel.send(`Le ${BE[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
                 banniDeVote[message.guild.id].concat(choix);
-                console.log(banniDeVote[message.guild.id]);
-                console.log(choix)
+                //console.log(banniDeVote[message.guild.id]);
+                //console.log(choix)
                 jourBE[message.guild.id] = true
                 collector.stop();
               })
@@ -2982,6 +3022,7 @@ function voteJour(message, egalite = null) {
     vivants = Array.from(
       message.guild.roles.get(Jvivants).members.values()
     );
+    //console.log(vivants)
   }
   else{
     egalite.forEach(user => {
@@ -2990,13 +3031,13 @@ function voteJour(message, egalite = null) {
   }
   for (var i = 0; i < vivants.length; i++) {
     var temp = vivants[i].user
+    voted[message.guild.id].push({user : temp, votes : 0, contenu : message.guild.members.get(temp.id)})
     message.guild.channels
       .get(lieu)
       .send(" " + vivants[i])
       .then(function(mess) {
         mess.react("👎");
         votes[message.guild.id].push(mess);
-        voted[message.guild.id].push({user : temp, votes : 0, contenu : mess.content})
       });
   }
 }
@@ -3513,6 +3554,17 @@ function helpTools(message, lui) {
       }
     });
   });
+}
+
+function cleanArray(array) {
+  var i, j, len = array.length, out = [], obj = {};
+  for (i = 0; i < len; i++) {
+    obj[array[i]] = 0;
+  }
+  for (j in obj) {
+    out.push(j);
+  }
+  return out;
 }
 
 let poem =
