@@ -6,6 +6,9 @@
 //Système de leveling
 
 //TODO URGENT :
+//Le bot donne plus accès à la tanière :> strange
+//Soso marche plus la deuxième fois
+//votes foireux :> ok theory
 
 //TODO Thèmes :
 //Star Wars
@@ -17,7 +20,7 @@
 //- Le rajouter dans RolesDeNuit s'il agit la nuit
 
 const Discord = require("discord.js");
-const Embed = require("./commands/embeds");
+const Embed = require("./src/commands/embeds");
 const Embeds = new Embed();
 const bot = new Discord.Client();
 const low = require("lowdb");
@@ -29,6 +32,8 @@ const db = low(adapter);
 const Theme = require("./themes/Themes.js");
 const Role = require("./themes/Role.js");
 const Presets = require("./themes/Presets.json")
+const Enmap = require("enmap");
+const fs = require("fs");
 
 const adeupter = new FileSync("composition.json");
 const comp = low(adeupter);
@@ -41,7 +46,46 @@ function Activity() {
   }, 540000);
 }
 
-token = require("./Auth.json");
+const config = require("./config.json");
+const token = config.token;
+const prefix = config.prefix;
+bot.config = config;
+
+
+fs.readdir("./src/events/", (err, files) => {
+  if (err) return console.error(err);
+  files.forEach(file => {
+    // If the file is not a JS file, ignore it
+    if (!file.endsWith(".js")) return;
+    // Load the event file itself
+    const event = require(`./src/events/${file}`);
+    // Get just the event name from the file name
+    let eventName = file.split(".")[0];
+    // super-secret recipe to call events with all their proper arguments *after* the `client` var.
+    // without going into too many details, this means each event will be called with the client argument,
+    // followed by its "normal" arguments, like message, member, etc etc.
+    // This line is awesome by the way. Just sayin'.
+    bot.on(eventName, event.bind(null, bot));
+    delete require.cache[require.resolve(`./src/events/${file}`)];
+  });
+});
+
+bot.commands = new Enmap();
+
+fs.readdir("./src/commands/", (err, files) => {
+  if (err) return console.error(err);
+  files.forEach(file => {
+    if (!file.endsWith(".js")) return;
+    // Load the command file itself
+    let props = require(`./src/commands/${file}`);
+    // Get just the command name from the file name
+    let commandName = file.split(".")[0];
+    console.log(`Attempting to load command ${commandName}`);
+    // Here we simply store the whole thing in the command Enmap. We're not running it right now.
+    bot.commands.set(commandName, props);
+  });
+});
+
 
 var adminlist = db
   .get("administrateurs")
@@ -64,9 +108,8 @@ bot.on("ready", () => {
   console.log("GRAOU est prêt!");
 });
 
-bot.login(token.bot_token);
+bot.login(token);
 
-const prefix = "/";
 var admin = {};
 var mini = {};
 var gameOn = {};
@@ -286,6 +329,9 @@ bot.on("guildCreate", guild => {
 bot.on("message", message => {
   try {
     if (message.content[0] === prefix) {
+      const args = message.content.slice(prefix.length).trim().split(/ +/g);
+      const command = args.shift().toLowerCase();
+      
       const filter = m =>
         m.author === message.author || adminlist.includes(m.author);
       const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
@@ -303,7 +349,7 @@ bot.on("message", message => {
         checkmin(message);
       
 
-      if (spliteMessage[0] === prefix + "ping") {
+      /*if (spliteMessage[0] === prefix + "ping") {
         if (adminlist.includes(message.author)) {
           message.reply("Pong ! \n *Rang de l'utilisateur : Propriétaire.*");
         } else if (mini[message.guild.id]) {
@@ -311,82 +357,28 @@ bot.on("message", message => {
         } else {
           message.reply("Pong.");
         }
-      }
+      }*/
 
       //initialisation des rôles admins
-      else if (
+      if (
         spliteMessage[0] == prefix + "defadmin" &&
         spliteMessage[1] != null
-      ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          admin = spliteMessage[1];
-          var number = db
-            .get("administrateurs")
-            .map("id")
-            .value().length;
-          db.get("administrateurs")
-            .push({ id: number, story_value: admin, user: admin.id })
-            .write();
-          message.channel.send(
-            "Enregistré, " + admin + " est désormais administrateur."
-          );
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en nommer un autre !"
-          );
-        }
-      }
+      ) 
+      return;
 
       //supprime le membre mentionné des administrateurs
       else if (
         spliteMessage[0] == prefix + "supadmin" &&
         spliteMessage[1] != null
       ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          noadmin = spliteMessage[1];
-          db.get("administrateurs")
-            .remove({ story_value: noadmin })
-            .write();
-          message.reply(noadmin + " supprimé des administrateurs.");
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en révoquer un autre !"
-          );
-        }
+        return;
       }
       //initialisation des rôles admins sur un serveur unique
       else if (
         spliteMessage[0] == prefix + "defadminhere" &&
         spliteMessage[1] != null
       ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          admin = spliteMessage[1];
-          var number = db
-            .get("ministrateurs")
-            .map("id")
-            .value().length;
-          db.get("ministrateurs")
-            .push({ guild: message.guild.id, id: number, story_value: admin })
-            .write();
-          message.channel.send(
-            "Enregistré, " +
-              admin +
-              " est désormais administrateur sur ce serveur."
-          );
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en nommer un autre !"
-          );
-        }
+        return;
       }
 
       //supprime le membre mentionné des administrateurs d'un serveur unique
@@ -394,22 +386,7 @@ bot.on("message", message => {
         spliteMessage[0] == prefix + "supadminhere" &&
         spliteMessage[1] != null
       ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          noadmin = spliteMessage[1];
-          db.get("ministrateurs")
-            .remove({ guild: message.guild.id, story_value: noadmin })
-            .write();
-          message.reply(
-            noadmin + " supprimé des administrateurs de ce serveur."
-          );
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en révoquer un autre !"
-          );
-        }
+        return;
       }
 
       //fait durer le bot
@@ -1179,7 +1156,8 @@ bot.on("message", message => {
             );
             blep = setTimeout(function() {
               eux[message.guild.id].forEach(lui => {
-                lui.setVoiceChannel(lieu2);
+                if(lieu.members.includes(lui))
+                  lui.setVoiceChannel(lieu2);
                 lui.removeRole(role);
               });
             }, 3000);
@@ -1336,7 +1314,10 @@ bot.on("message", message => {
               getPlaceInDb("village", message);
               lieu = lieuDB[message.guild.id];
               message.guild.channels.get(lieu).send(lui + " a ressuscité !");
-              lui.setMute(false);
+              getPlaceInDb("vocal",message);
+              lieuVocal = lieuDB[message.guild.id];
+              if(lieuVocal.members.includes(lui))
+                lui.setMute(false);
             }
           } else {
             message.reply(
@@ -1558,10 +1539,11 @@ bot.on("message", message => {
           Listvivants[message.guild.id] = message.guild.roles
             .get(roleDB[message.guild.id])
             .members.map(m => m.user.username);
-
+            
           village.overwritePermissions(amute, { SEND_MESSAGES: false });
           amute.members.forEach(mute => {
-            mute.setMute(true);
+            if(vocal.members.includes(mute))
+              mute.setMute(true);
           });
 
           vivants[message.guild.id] = "";
@@ -1824,7 +1806,7 @@ bot.on("message", message => {
                       ConfSoso[message.guild.id] = mess;
                       mess.react("✅");
                       mess.react("❌");
-                      const collectorSoso = mess.createReactionCollector(
+                      var collectorSoso = mess.createReactionCollector(
                         filterSoso
                       );
                       collectorSoso.on("collect", reac => {
@@ -1840,7 +1822,7 @@ bot.on("message", message => {
                                 "** mourra."
                             );
                             salonLog[message.guild.id].send(
-                              Soso[message.guild.id] + "n'a protégé personne."
+                              Soso[message.guild.id] + " n'a protégé personne."
                             );
                             next[message.guild.id] = true;
                             collectorSoso.stop();
@@ -2353,6 +2335,8 @@ bot.on("messageReactionAdd", (reac, lui) => {
               reac.remove(lui);
             }
             var membre = reac.message.content.split("<@!");
+            if(membre[1] === undefined)
+              membre = reac.message.content.split("<@")
             membre = membre[1].split(">")
             var item2 = findObjectInList(voted[reac.message.guild.id],"contenu",reac.message.guild.members.get(membre[0]))
             item2.votes += 1;
@@ -2728,6 +2712,8 @@ function Charme(message, lui, welcome) {
 function reviveAll(message) {
   getRoleInDb("morts", message);
   role = roleDB[message.guild.id];
+  getPlaceInDb("vocal",message);
+  vocal = lieuDB[message.guild.id];
 
   eux = message.guild.roles.get(role).members;
   eux.forEach(lui => {
@@ -2736,7 +2722,8 @@ function reviveAll(message) {
       role2 = roleDB[message.guild.id];
       lui.addRole(role2);
     }, 500);
-    lui.setMute(false);
+    if(vocal.members.includes(lui))
+      lui.setMute(false);
     //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
     setTimeout(() => {
       lui.removeRole(role);
@@ -2746,14 +2733,20 @@ function reviveAll(message) {
 }
 
 function mute(role, message) {
+  getPlaceInDb("vocal",message);
+  vocal = lieuDB[message.guild.id];
   message.guild.roles.get(role).members.forEach(membre => {
-    membre.setMute(true);
+    if(vocal.members.includes(membre))
+      membre.setMute(true);
   });
 }
 
 function unmute(role, message) {
+  getPlaceInDb("vocal",message);
+  vocal = lieuDB[message.guild.id];
   message.guild.roles.get(role).members.forEach(membre => {
-    membre.setMute(false);
+    if(vocal.members.includes(membre))
+      membre.setMute(false);
   });
 }
 
@@ -2775,7 +2768,7 @@ function Kill(message, lui) {
   lieu = lieuDB[message.guild.id];
 
   getPlaceInDb("vocal", message);
-  lieu3 = lieuDB[message.guild.id];
+  vocal = lieuDB[message.guild.id];
 
   var item = findObjectInList(distribRoles[message.guild.id],"GuildMember",lui)
   if (item != undefined) {
@@ -2792,7 +2785,8 @@ function Kill(message, lui) {
     rolmort = ".";
   }
 
-  lui.setMute(true);
+  if(vocal.members.inclduess(lui))
+    lui.setMute(true);
   message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
   getPlaceInDb("charmed", message);
   lieu2 = lieuDB[message.guild.id];
@@ -3284,26 +3278,6 @@ function Recap(channel) {
   });
 
   channel.send(embedRecap);
-}
-
-function checkmin(message) {
-  if (message.channel.type != "dm") {
-    var lui = db
-      .get("ministrateurs")
-      .map("story_value")
-      .value()
-      .toString();
-    if (lui.includes(message.author)) {
-      var lui2 = db
-        .get("ministrateurs")
-        .map("story_value")
-        .value()
-        .indexOf(message.author.toString());
-      if (db.get(`ministrateurs[${lui2}].guild`).value() === message.guild.id) {
-        mini[message.guild.id] = true;
-      }
-    }
-  }
 }
 
 function helpGen(message, lui) {
