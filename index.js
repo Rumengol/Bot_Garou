@@ -366,76 +366,22 @@ bot.on("message", message => {
       if (
         spliteMessage[0] == prefix + "defadmin" &&
         spliteMessage[1] != null
-      ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          admin = spliteMessage[1];
-          var number = db
-            .get("administrateurs")
-            .map("id")
-            .value().length;
-          db.get("administrateurs")
-            .push({ id: number, story_value: admin, user: admin.id })
-            .write();
-          message.channel.send(
-            "Enregistré, " + admin + " est désormais administrateur."
-          );
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en nommer un autre !"
-          );
-        }
-      }
+      ) 
+      return;
 
       //supprime le membre mentionné des administrateurs
       else if (
         spliteMessage[0] == prefix + "supadmin" &&
         spliteMessage[1] != null
       ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          noadmin = spliteMessage[1];
-          db.get("administrateurs")
-            .remove({ story_value: noadmin })
-            .write();
-          message.reply(noadmin + " supprimé des administrateurs.");
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en révoquer un autre !"
-          );
-        }
+        return;
       }
       //initialisation des rôles admins sur un serveur unique
       else if (
         spliteMessage[0] == prefix + "defadminhere" &&
         spliteMessage[1] != null
       ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          admin = spliteMessage[1];
-          var number = db
-            .get("ministrateurs")
-            .map("id")
-            .value().length;
-          db.get("ministrateurs")
-            .push({ guild: message.guild.id, id: number, story_value: admin })
-            .write();
-          message.channel.send(
-            "Enregistré, " +
-              admin +
-              " est désormais administrateur sur ce serveur."
-          );
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en nommer un autre !"
-          );
-        }
+        return;
       }
 
       //supprime le membre mentionné des administrateurs d'un serveur unique
@@ -443,22 +389,7 @@ bot.on("message", message => {
         spliteMessage[0] == prefix + "supadminhere" &&
         spliteMessage[1] != null
       ) {
-        if (
-          adminlist.includes(message.author) ||
-          mini[message.guild.id] === true
-        ) {
-          noadmin = spliteMessage[1];
-          db.get("ministrateurs")
-            .remove({ guild: message.guild.id, story_value: noadmin })
-            .write();
-          message.reply(
-            noadmin + " supprimé des administrateurs de ce serveur."
-          );
-        } else {
-          message.reply(
-            "Nahmaisho ! Seul un administrateurs peut en révoquer un autre !"
-          );
-        }
+        return;
       }
 
       //fait durer le bot
@@ -3350,26 +3281,6 @@ function Recap(channel) {
   });
 
   channel.send(embedRecap);
-}
-
-function checkmin(message) {
-  if (message.channel.type != "dm") {
-    var lui = db
-      .get("ministrateurs")
-      .map("story_value")
-      .value()
-      .toString();
-    if (lui.includes(message.author)) {
-      var lui2 = db
-        .get("ministrateurs")
-        .map("story_value")
-        .value()
-        .indexOf(message.author.toString());
-      if (db.get(`ministrateurs[${lui2}].guild`).value() === message.guild.id) {
-        mini[message.guild.id] = true;
-      }
-    }
-  }
 }
 
 function helpGen(message, lui) {
