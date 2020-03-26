@@ -2,7 +2,7 @@ const low = require("lowdb")
 const adapter = new FileSync("adminrole.json")
 const db = low(adapter)
 const identifiers = require("../../identifiers.json")
-const shared = require("../Shared")
+const shared = require("../Shared.js")
 
 exports.run = (client, message, args) => {
     maxP[message.guild.id] = args[1];
