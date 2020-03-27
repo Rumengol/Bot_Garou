@@ -1,30 +1,11 @@
-const Discord = require("discord.js")
-const low = require("lowdb")
-const adapter = new FileSync("adminrole.json")
-const db = low(adapter)
+const Discord = require("discord.js");
+const FileSync = require("lowdb/adapters/FileSync");
+const low = require("lowdb");
+const adapter = new FileSync("adminrole.json");
+const db = low(adapter);
 
-class Auth{
-    constructor(data = {}){
-        /**
-         * Indique si l'auteur du message est administrateur local
-         * @type {Discord.Message}
-         */
-        this.isLocalAdmin = checkmin(data.message)
-
-        /**
-         * Indique si l'auteur du message est administrateur
-         * @type {Discord.Message}
-         */
-        this.isAdmin = adminlist.includes(data.message.author)
-    }
-
-/**
- * Vérifie si l'auteur d'un message est administrateur local
- * @param {Discord.Message} message
- * @returns {Boolean} Vrai si l'auteur est administrateur local, faux sinon
- */
- checkmin(message){
-    var lui = db
+var checkmin = function(message) {
+  var lui = db
     .get("ministrateurs")
     .map("story_value")
     .value()
@@ -40,9 +21,6 @@ class Auth{
     }
   }
   return false;
-}
+};
 
-}
-module.exports = {
-
-}
+module.exports = checkmin;

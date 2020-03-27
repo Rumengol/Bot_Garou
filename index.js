@@ -34,7 +34,8 @@ const Role = require("./themes/Role.js");
 const Presets = require("./themes/Presets.json")
 const Enmap = require("enmap");
 const fs = require("fs");
-const global = require("./src/global.js")
+const global = require("./src/global.js");
+const auth = require("./src/auth.js");
 
 const adeupter = new FileSync("composition.json");
 const comp = low(adeupter);
@@ -89,15 +90,6 @@ fs.readdir("./src/commands/", (err, files) => {
 });
 
 
-
-
-
-var adminlist = db
-  .get("administrateurs")
-  .map("story_value")
-  .value()
-  .toString();
-
 db.defaults({ administrateurs: [] }).write();
 db.defaults({ ministrateurs: [] }).write();
 db.defaults({ salons: [] }).write();
@@ -108,7 +100,6 @@ comp.defaults({ composition: [] }).write();
 bot.on("ready", () => {
   Activity();
   for (const guild of bot.guilds.values()) {
-    console.log(global);
     global.init(guild.id);
   }
   console.log("GRAOU est prêt!");
@@ -157,7 +148,8 @@ bot.on("message", message => {
         logs = message.guild.channels.get(lieuDB[message.guild.id]);
         salonLog[message.guild.id] = logs;
         mini[message.guild.id] = false;
-        checkmin(message);
+        global.Auth(message);
+        console.log(global.mini[message.guild.id])
 
 
         /*if (spliteMessage[0] === prefix + "ping") {
@@ -2830,3 +2822,188 @@ function cleanArray(array) {
 
 let poem =
   "Quand la lune blanche \nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir,\nFol alors qui livre\nA la nuit son livre\nSavant,\nSon pied aux collines,\nEt ses mandolines\nAu vent ;\nFol qui dit un conte,\nCar minuit qui compte\nLe temps,\nPasse avec le prince\nDes sabbats qui grince\nDes dents.\nL’amant qui compare\nQuelque beauté rare\nAu jour,\nTire une ballade\nDe son coeur malade\nD’amour.\nMais voici dans l’ombre\nQu’une ronde sombre\nSe fait,\nL’enfer autour danse,\nTous dans un silence\nParfait.\nTout pendu de Grève,\nTout Juif mort soulève\nSon front,\nTous noyés des havres\nPressent leurs cadavres\nEn rond.\nEt les âmes feues\nJoignent leurs mains bleues\nSans os ;\nLui tranquille chante\nD’une voix touchante\nSes maux.\nMais lorsque sa harpe,\nOù flotte une écharpe,\nSe tait,\nIl veut fuir… La danse\nL’entoure en silence\nParfait.\nLe cercle l’embrasse,\nSon pied s’entrelace\nAux morts,\nSa tête se brise\nSur la terre grise !\nAlors\nLa ronde contente,\nEn ris éclatante,\nLe prend ;\nTout mort sans rancune\nTrouve au clair de lune\nSon rang.\nCar la lune blanche\nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir.\nAlfred de Musset, Poésies posthumes";
+
+
+  var admin = {};
+  var mini = {};
+  var gameOn = {};
+  var messCompo = {};
+  var compoDone = {};
+  var inscrEmbed = {};
+
+  var maxP = {};
+  var inscr = {};
+
+  var nbRole = {};
+  var inscrits = {};
+  var inscrep = {};
+  //{GuildMember,Role,User,Victoire}
+  var distribRoles = {};
+  var distribRolMorts = {};
+  var charmes = {};
+  var votes = {};
+  var avote = {};
+  //{user,votes,contenu}
+  var voted = {};
+  var joueursLG = {};
+  var Listvivants = {};
+  var vivants = {};
+  var win = {};
+  var embedRecap = {};
+
+  var distribution = {};
+  //Représente l'état de la partie, avec nuit ou jour en première clef, le nombre en deuxième
+  var StateOfTheGame = {}
+
+  var listeRoles = {}
+
+  let theme = {};
+
+  let IDlg = {}
+  let LG = {}
+  let emoteLG = {}
+  let IDcupi = {}
+  let Cupi = {}
+  let emoteCupi = {}
+  let IDsoso = {}
+  let Soso = {}
+  let emoteSoso = {};
+  let IDvovo = {}
+  let Vovo = {}
+  let emoteVovo = {}
+  let IDchassou = {}
+  let Chassou = {}
+  let emoteChassou = {}
+  let IDidv = {}
+  let IDV = {}
+  let emoteIDV = {}
+  let Ancien = {}
+  let emoteAncien = {}
+  let IDancien = {}
+  let IDjdf = {}
+  let JDF = {}
+  let emoteJDF = {}
+  let IDsalva = {}
+  let Salva = {}
+  let emoteSalva = {}
+  let IDsv = {}
+  let SV = {}
+  let emoteSV = {}
+  let BE = {}
+  let IDbe = {}
+  let emoteBE = {}
+  let PF = {}
+  let IDpf = {}
+  let emotePF = {}
+
+  var rolesDeNuit = {};
+  var potVie = {};
+  var potMort = {};
+  var Lovers = {};
+
+  //{Name,Quantite,Emote}
+  var compo = {};
+
+  var banniDeVote = {};
+  let IDVcache = {};
+  var jourBE = {};
+
+  //Cupidon messages
+  let eux = {};
+  var ConfCupi = {};
+
+  //Sorcière messages
+  var ConfSoso = {};
+  var victime = {};
+  var next = {};
+  var salonLog = {};
+  var guildId = {};
+
+  var votedejour = {};
+
+  var roleDB = {};
+  var lieuDB = {};
+  var x = {};
+  var y = {};
+  var z = {};
+  var pouet = {};
+
+  function init(id) {
+      mini[id] = false;
+      gameOn[id] = false;
+      compoDone[id] = false;
+      nbRole[id] = 0;
+      inscrits[id] = [];
+      inscrep[id] = [];
+      distribRoles[id] = [];
+      distribRolMorts[id] = [];
+      charmes[id] = [];
+      votes[id] = [];
+      avote[id] = [];
+      voted[id] = [];
+      joueursLG[id] = [];
+      vivants[id] = "";
+      win[id] = null;
+
+      distribution[id] = [];
+      StateOfTheGame[id] = ["", 0];
+
+      theme[id] = "classique";
+      rolesDeNuit[id] = [];
+      potVie[id] = true;
+      potMort[id] = true;
+      Lovers[id] = [];
+      compo[id] = [];
+
+      listeRoles[id] = [];
+
+      IDlg[id] = []
+      LG[id] = ""
+      emoteLG[id] = ""
+      IDcupi[id] = []
+      Cupi[id] = ""
+      emoteCupi[id] = ""
+      IDsoso[id] = []
+      Soso[id] = ""
+      emoteSoso[id] = ""
+      IDvovo[id] = []
+      Vovo[id] = ""
+      emoteVovo[id] = ""
+      IDchassou[id] = []
+      Chassou[id] = ""
+      emoteChassou[id] = ""
+      IDidv[id] = []
+      IDV[id] = ""
+      emoteIDV[id] = ""
+      Ancien[id] = ""
+      emoteAncien[id] = ""
+      IDancien[id] = []
+      IDjdf[id] = []
+      JDF[id] = ""
+      emoteJDF[id] = ""
+      IDsalva[id] = []
+      Salva[id] = ""
+      emoteSalva[id] = []
+      IDsv[id] = []
+      SV[id] = ""
+      emoteSV[id] = ""
+      BE[id] = ""
+      IDbe[id] = []
+      emoteBE[id] = ""
+      PF[id] = ""
+      IDpf[id] = []
+      emotePF[id] = ""
+
+      banniDeVote[id] = [];
+      IDVcache[id] = true;
+      jourBE[id] = false;
+      //Cupidon messages
+      eux[id] = [];
+
+      //Sorcière messages
+      victime[id] = "";
+      next[id] = false;
+      guildId[id] = id;
+
+      votedejour[id] = false;
+  }
