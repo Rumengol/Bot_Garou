@@ -1,13 +1,14 @@
 const low = require("lowdb")
+const FileSync = require("lowdb/adapters/FileSync");
 const adapter = new FileSync("adminrole.json")
 const db = low(adapter)
 const identifiers = require("../../identifiers.json")
-const shared = require("../Shared")
+const utils = require("../Utils.js")
 
 exports.run = (client, message, args) => {
     if (args[2] != null) {
         if (identifiers.roles.split(",").includes(args[2])) {
-            var role = shared.getRoleInDb(args[2], message);
+            var role = utils.getRoleInDb(args[2], message);
             //Si c'est le cas
             if (role != null) {
                 //Demande si le salon doit être remplacé
