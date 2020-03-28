@@ -2315,59 +2315,8 @@ function voteJour(message, egalite = null) {
   }
 }
 
-function getRoleInDb(role, message) {
-  junk = [];
-  while (true) {
-    var truc = db
-      .get(`roles`)
-      .map("id")
-      .value()
-      .indexOf(role, truc);
-    if (truc === -1) {
-      break;
-    } else {
-      junk.push(truc);
-      truc += 1;
-    }
-  }
-  junk.forEach(minijunk => {
-    if (db.get(`roles[${minijunk}].guild`).value() === message.guild.id) {
-      roleDB[message.guild.id] = db
-        .get(`roles[${minijunk}].story_value`)
-        .value();
-      return db.get(`roles[${minijunk}].story_value`).value();
-    } else {
-      return false;
-    }
-  });
-}
 
-function getPlaceInDb(salon, message) {
-  var junk = [];
-  while (true) {
-    var truc = db
-      .get(`salons`)
-      .map("id")
-      .value()
-      .indexOf(salon, truc);
-    if (truc === -1) {
-      break;
-    } else {
-      junk.push(truc);
-      truc += 1;
-    }
-  }
-  junk.forEach(minijunk => {
-    if (db.get(`salons[${minijunk}].guild`).value() === message.guild.id) {
-      lieuDB[message.guild.id] = db
-        .get(`salons[${minijunk}].story_value`)
-        .value();
-      return lieuDB[message.guild.id];
-    } else {
-      return false;
-    }
-  });
-}
+
 
 function prolongations(message, finpouet) {
   getRoleInDb("vivants", message);
