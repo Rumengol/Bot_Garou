@@ -260,7 +260,7 @@ bot.on("message", message => {
             adminlist.includes(message.author) ||
             mini[message.guild.id] === true
           ) {
-            if (gameOn === false) {
+            if (gameOn[message.guild.id] === false) {
               gameOn[message.guild.id] = true;
               message.channel.send("Partie lancée, bon appétit !");
             } else {
@@ -271,7 +271,9 @@ bot.on("message", message => {
               "commande refusée. Seuls les administrateurs peuvent lancer les parties."
             );
           }
-        } else if (spliteMessage[0] == prefix + "win") {
+        } 
+        
+        else if (spliteMessage[0] == prefix + "win") {
           if (
             adminlist.includes(message.author) ||
             mini[message.guild.id] === true
@@ -1726,260 +1728,7 @@ function UsePotMort(message, guild, theme) {
   }
 }
 
-function prepCompo(collector) {
-  collector.on("collect", message => {
-    const filter = m =>
-      m.author === message.author || adminlist.includes(m.author);
-    splitemess = message.content.toLowerCase().split(" ");
-    var qte = 1;
-    var pluriel = "";
 
-    if (!isNaN(parseInt(splitemess[2]))) {
-      if (parseInt(splitemess[2]) > 1) {
-        pluriel = "s";
-      }
-      qte = parseInt(splitemess[2]);
-    }
-
-    if (splitemess[0] === "+") {
-      if (IDlg[message.guild.id].includes(splitemess[1])) {
-        onAddRole(LG[message.guild.id], emoteLG[message.guild.id]);
-      } else if (IDcupi[message.guild.id].includes(splitemess[1])) {
-        onAddRole(Cupi[message.guild.id], emoteCupi[message.guild.id]);
-      } else if (IDsalva[message.guild.id].includes(splitemess[1])) {
-        onAddRole(Salva[message.guild.id], emoteSalva[message.guild.id]);
-      } else if (IDsoso[message.guild.id].includes(splitemess[1])) {
-        onAddRole(Soso[message.guild.id], emoteSoso[message.guild.id]);
-      } else if (IDancien[message.guild.id].includes(splitemess[1])) {
-        onAddRole(Ancien[message.guild.id], emoteAncien[message.guild.id]);
-      } else if (IDchassou[message.guild.id].includes(splitemess[1])) {
-        onAddRole(Chassou[message.guild.id], emoteChassou[message.guild.id]);
-      } else if (IDidv[message.guild.id].includes(splitemess[1])) {
-        onAddRole(IDV[message.guild.id], emoteIDV[message.guild.id]);
-      } else if (IDjdf[message.guild.id].includes(splitemess[1])) {
-        onAddRole(JDF[message.guild.id], emoteJDF[message.guild.id]);
-      } else if (IDvovo[message.guild.id].includes(splitemess[1])) {
-        onAddRole(Vovo[message.guild.id], emoteVovo[message.guild.id]);
-      } else if (IDsv[message.guild.id].includes(splitemess[1])) {
-        onAddRole(SV[message.guild.id], emoteSV[message.guild.id]);
-      } else if (IDbe[message.guild.id].includes(splitemess[1])) {
-        onAddRole(BE[message.guild.id], emoteBE[message.guild.id])
-      } else if (IDpf[message.guild.id].includes(splitemess[1])) {
-        onAddRole(PF[message.guild.id], emotePF[message.guild.id])
-      }
-      else {
-        nbRole[message.guild.id] -= qte;
-      }
-      nbRole[message.guild.id] += qte;
-      message.delete();
-    } else if (splitemess[0] === "-") {
-      if (IDlg[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(LG[message.guild.id]);
-      } else if (IDcupi[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(Cupi[message.guild.id]);
-      } else if (IDsalva[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(Salva[message.guild.id]);
-      } else if (IDsoso[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(Soso[message.guild.id]);
-      } else if (IDancien[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(Ancien[message.guild.id]);
-      } else if (IDchassou[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(Chassou[message.guild.id]);
-      } else if (IDidv[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(IDV[message.guild.id]);
-      } else if (IDjdf[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(JDF[message.guild.id]);
-      } else if (IDvovo[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(Vovo[message.guild.id]);
-      } else if (IDsv[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(SV[message.guild.id]);
-      } else if (IDbe[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(BE[message.guild.id], emoteBE[message.guild.id])
-      } else if (IDpf[message.guild.id].includes(splitemess[1])) {
-        onSuppRole(PF[message.guild.id], emotePF[message.guild.id])
-      } else {
-        nbRole[message.guild.id] += qte;
-      }
-      nbRole[message.guild.id] -= qte;
-      message.delete();
-    } else if (message.content === "roles?") {
-      message.channel.send("**Liste des rôles reconnus **: \n" + listeRoles[message.guild.id]);
-    } else if (message.content === "annuler") {
-      collector.stop();
-      compo[message.guild.id] = [];
-      message.channel.send("Composition de la partie annulée.");
-    } else if (message.content === "check") {
-      message.channel.send(
-        "__Composition actuelle de la partie__ : " + compo[message.guild.id]
-      );
-    }
-    else if (message.content === "terminé") {
-      //S'il y a moins de rôles attribués que d'inscrits
-      if (nbRole[message.guild.id] < inscrits[message.guild.id].length) {
-        var diffSV = inscrits[message.guild.id].length - nbRole[message.guild.id];
-        message.channel.send(
-          "Il n'y a pas assez de rôles pour tout le monde. **" +
-          diffSV +
-          "** joueurs seront de **Simples Villageois**, continuer ? (Oui/Non)"
-        );
-        //attente de la réponse
-        collector11 = message.channel.createCollector(filter);
-        collector11.on("collect", message => {
-          //Si c'est validé, on complète la composition avec de simples villageois
-          if (message.content === "oui" || message.content === "o") {
-            //Et on peut arrêter le collecteur de la composition ainsi que celui-là
-            collector.stop();
-            collector11.stop();
-
-            //La grammaire, très important
-            if (diffSV > 1) {
-              pluriel = "s";
-            }
-            //Fill de la composition
-            qte = diffSV;
-            onAddRole(SV[message.guild.id], emoteSV[message.guild.id]);
-            annonceCompo(message);
-          } else if (message === "non" || message === "n") {
-            message.channel.send("Il reste " + diffSV + " rôles à attribuer.");
-            collector11.stop();
-          }
-        });
-      } else if (nbRole[message.guild.id] > inscrits[message.guild.id].length) {
-        var diff = nbRole[message.guild.id] - inscrits[message.guild.id].length;
-        message.channel.send(
-          "Il y a trop de rôles par rapport au nombre d'inscrits. Veuillez retirer **" +
-          diff +
-          "** rôles en utilisant ``- [rôle] [nombre]``"
-        );
-      } else {
-        collector.stop();
-        annonceCompo(message);
-      }
-
-      function annonceCompo(message) {
-        //Préparation du message final
-        var embed = new Discord.RichEmbed()
-          .setTitle("Composition de la partie")
-          .setDescription(
-            "Composition pour une partie de **" +
-            nbRole[message.guild.id] +
-            "** joueurs."
-          )
-          .setThumbnail(
-            "https://images.ecosia.org/usDAmTwJGwk-iLDbV9SuUYP6Tz4=/0x390/smart/http%3A%2F%2Fgusandcodotnet.files.wordpress.com%2F2011%2F03%2Floups-garous-loup-large.jpg"
-          );
-        //Va, pour chaque rôle présent dans la liste compo, créer un champs pour l'afficher
-        compo[message.guild.id].forEach(role => {
-          embed.addField(
-            role.Quantite +
-            " " +
-            role.Name,
-            role.Emote
-          );
-        });
-        message.channel.send(embed);
-        message.channel.send(
-          "Pour envoyer la composition dans le salon de discussion du jour, tapez ``send``. Elle y sera aussi épinglée et les rôles automatiquement distribués. Sinon, tapez ``fin``."
-        );
-        compoDone[message.guild.id] = true;
-        //Création d'un collecteur pour attendre la réponse
-        collector22 = message.channel.createCollector(filter);
-        collector22.on("collect", message => {
-          //Si c'est validé
-          if (message.content === "send") {
-            //On récupère le salon de la place du village
-            getPlaceInDb("village", message);
-            lieu = lieuDB[message.guild.id];
-            //Et on y envoie l'embed
-            message.guild.channels
-              .get(lieu)
-              .send(embed)
-              .then(function (message) {
-                //Avant de la pin, et de récupérer le message pour pouvoir l'unpin
-                message.pin();
-                messCompo = message;
-                collector22.stop();
-                //Et on lance la distribution des rôles
-                Distribution(message)
-              });
-          } else if (message.content === "fin") {
-            collector22.stop();
-          } else {
-            message.channel.send("Veuillez répondre avec ``send`` ou ``fin``");
-          }
-        });
-      }
-    } else {
-      message.channel.send(
-        "Commande non reconnue. Veuillez réessayer, ou ``annuler`` pour quitter."
-      );
-    }
-
-    function onAddRole(role, emote) {
-      if (compo[message.guild.id].length === 0) {
-        compo[message.guild.id].push({ Name: role, Quantite: qte, Emote: emote });
-      } else {
-        var i = 0;
-        compo[message.guild.id].forEach(Role => {
-          if (Role.Name === role) {
-            var item = findObjectInList(compo[message.guild.id], "Name", Role.Name);
-            try {
-              item.Quantite += 1;
-            }
-            catch (e) {
-              message.channel.send(`Erreur : le rôle ${role} n'a pas été trouvé dans la liste. Merci de reporter cette erreur aux administrateurs. Détail : **${e.message}**`)
-            }
-          } else {
-            i++;
-          }
-        });
-        if (i === compo[message.guild.id].length) {
-          compo[message.guild.id].push({ Name: role, Quantite: qte, Emote: emote });
-        }
-      }
-
-      message.channel.send(
-        "**" +
-        qte +
-        " " +
-        role +
-        pluriel +
-        "** ajouté" +
-        pluriel +
-        " à la composition de la partie."
-      );
-    }
-    function onSuppRole(role) {
-      compo[message.guild.id].forEach(Role => {
-        if (Role.Name === role) {
-          var item = findObjectInList(compo[message.guild.id], "Name", Role.Name);
-          try {
-            item.Quantite += 1;
-          }
-          catch (e) {
-            message.channel.send(`Erreur : le rôle ${role} n'a pas été trouvé dans la liste. Merci de reporter cette erreur aux administrateurs. Détail : **${e.message}**`)
-          }
-          if (item.Quantite <= 0) {
-            compo[message.guild.id].splice(
-              compo[message.guild.id].indexOf(item), 1
-            );
-          }
-        }
-      });
-
-      message.channel.send(
-        "**" +
-        qte +
-        " " +
-        role +
-        pluriel +
-        "** supprimé" +
-        pluriel +
-        " de la composition de la partie."
-      );
-    }
-  });
-}
 
 
 function Charme(message, lui, welcome) {
@@ -2202,81 +1951,6 @@ function deathBE(message, item) {
   }
 }
 
-function setTheme(theme, message) {
-  theme.roles.forEach(role => {
-    if (role.nuit) {
-      rolesDeNuit[message.guild.id].push(role.name);
-    }
-    listeRoles[message.guild.id].push(role.name)
-    switch (role.title) {
-      case "Loup-Garou":
-        LG[message.guild.id] = role.name
-        IDlg[message.guild.id] = role.ID;
-        emoteLG[message.guild.id] = role.emote;
-        break;
-      case "Simple Villageois":
-        SV[message.guild.id] = role.name
-        IDsv[message.guild.id] = role.ID;
-        emoteSV[message.guild.id] = role.emote;
-        break;
-      case "Cupidon":
-        Cupi[message.guild.id] = role.name
-        IDcupi[message.guild.id] = role.ID;
-        emoteCupi[message.guild.id] = role.emote;
-        break;
-      case "Salvateur":
-        Salva[message.guild.id] = role.name
-        IDsalva[message.guild.id] = role.ID;
-        emoteSalva[message.guild.id] = role.emote;
-        break;
-      case "Chasseur":
-        Chassou[message.guild.id] = role.name
-        IDchassou[message.guild.id] = role.ID;
-        emoteChassou[message.guild.id] = role.emote;
-        break;
-      case "Sorcière":
-        Soso[message.guild.id] = role.name
-        IDsoso[message.guild.id] = role.ID;
-        emoteSoso[message.guild.id] = role.emote;
-        break;
-      case "Voyante":
-        Vovo[message.guild.id] = role.name
-        IDvovo[message.guild.id] = role.ID;
-        emoteVovo[message.guild.id] = role.emote;
-        break;
-      case "Idiot Du Village":
-        IDV[message.guild.id] = role.name
-        IDidv[message.guild.id] = role.ID;
-        emoteIDV[message.guild.id] = role.emote;
-        break;
-      case "Joueur De Flûte":
-        JDF[message.guild.id] = role.name
-        IDjdf[message.guild.id] = role.ID;
-        emoteJDF[message.guild.id] = role.emote;
-        break;
-      case "Ancien":
-        Ancien[message.guild.id] = role.name
-        IDancien[message.guild.id] = role.ID;
-        emoteAncien[message.guild.id] = role.emote;
-        break;
-      case "Bouc émissaire":
-        BE[message.guild.id] = role.name
-        IDbe[message.guild.id] = role.ID;
-        emoteBE[message.guild.id] = role.emote;
-        break;
-      case "Petite Fille":
-        PF[message.guild.id] = role.name;
-        IDpf[message.guild.id] = role.ID;
-        emotePF[message.guild.id] = role.emote;
-        break;
-
-      default:
-        throw new ReferenceError("Erreur dans le titre du rôle.")
-        break;
-    }
-  });
-}
-
 function voteJour(message, egalite = null) {
   votes[message.guild.id] = [];
   avote[message.guild.id] = [];
@@ -2350,18 +2024,6 @@ function prolongations(message, finpouet) {
   }, finpouet);
 }
 
-function findObjectInList(list, property, name) {
-  var temp = list.find((item) => {
-    return item[property] === name;
-  })
-  if (temp != undefined) {
-    return temp;
-  }
-  else {
-    return undefined;
-    throw new ReferenceError("L'objet n'a pas été trouvé dans  la liste. Détail : Propriétée fournie : " + property + ", objet recherché : " + name)
-  }
-}
 
 function findItemInList(list, item) {
   var fail = 0;

@@ -53,5 +53,16 @@ var methods = {
         return false;
       }
     });
+  },
+
+  findObjectInList: function(list, property, name) {
+    var temp = list.find(item => {
+      return item[property] === name;
+    });
+    if (temp != undefined) {
+      return temp;
+    } else {
+      return undefined;
+    }
   }
 };
