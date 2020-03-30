@@ -1,22 +1,14 @@
 const Discord = require("discord.js");
-const FileSync = require("lowdb/adapters/FileSync");
-const low = require("lowdb");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
+const dbutils = require("./Utils/dbUtils.js");
 
 var checkmin = function(message) {
-  var lui = db
-    .get("ministrateurs")
-    .map("story_value")
-    .value()
-    .toString();
-  if (lui.includes(message.author)) {
-    var lui2 = db
-      .get("ministrateurs")
-      .map("story_value")
-      .value()
-      .indexOf(message.author.toString());
-    if (db.get(`ministrateurs[${lui2}].guild`).value() === message.guild.id) {
+  var minis = dbutils.getAllValuesInDb("db", "ministrateurs", "story_value");
+
+  if (minis.toString().includes(message.author)) {
+    var lui = minis.indexOf(message.author.toString());
+
+    //lui.guild correspond à l'ID de la guild stockée dans la db
+    if (lui.guild === message.guild.id) {
       return true;
     }
   }

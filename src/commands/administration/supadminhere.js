@@ -1,15 +1,11 @@
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
+const dbutils = require("../../Utils/dbUtils.js");
 
 exports.run = (client, message, args) => {
   if (args == null) {
     message.channel.send("Il faut préciser un utilisateur.");
   }
   noadmin = args[0];
-  db.get("ministrateurs")
-    .remove({ guild: message.guild.id, story_value: noadmin })
-    .write();
+  var obj = { guild: message.guild.id, story_value: noadmin };
+  dbutils.removeFromDb("db", "ministrateurs", obj);
   message.reply(noadmin + " supprimé des administrateurs de ce serveur.");
 };

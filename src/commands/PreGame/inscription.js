@@ -1,8 +1,3 @@
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
-const identifiers = require("../../identifiers.json");
 const datas = require("../../global.js");
 
 exports.run = (client, message, args) => {

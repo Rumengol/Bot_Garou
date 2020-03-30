@@ -1,7 +1,4 @@
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
+const dbutils = require("./Utils/dbUtils.js");
 
 var datas = {
   admin: {},
@@ -185,10 +182,8 @@ var datas = {
 
     datas.votedejour[id] = false;
   },
-  adminlist: db
-    .get("administrateurs")
-    .map("story_value")
-    .value()
+  adminlist: dbutils
+    .getAllValuesInDb("db", "administrateurs", "story_value")
     .toString(),
 
   Auth: function(message) {
