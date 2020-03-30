@@ -37,8 +37,7 @@ const fs = require("fs");
 const global = require("./src/global.js");
 const auth = require("./src/auth.js");
 
-const adeupter = new FileSync("composition.json");
-const comp = low(adeupter);
+
 
 express().listen(PORT);
 
