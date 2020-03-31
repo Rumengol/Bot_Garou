@@ -20,7 +20,7 @@ var methods = {
       
         var distribText = "";
         datas.compo[message.guild.id].forEach(role => {
-          var item = findObjectInList(datas.compo[message.guild.id], "Name", role.Name);
+          var item = utils.findObjectInList(datas.compo[message.guild.id], "Name", role.Name);
           for (
             let i = 0;
             i <

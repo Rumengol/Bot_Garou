@@ -456,74 +456,17 @@ bot.on("message", message => {
 
         //clear le channel - admin
         else if (spliteMessage[0] === prefix + "clear") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage.length === 2) {
-              if (spliteMessage[1].match(/^\d+$/)) {
-                var nombre = parseInt(spliteMessage[1]);
-                message.channel.bulkDelete(nombre + 1);
-              } else {
-                message.channel.send(
-                  "Erreur, il me faut un nombre de message à nettoyer! "
-                );
-              }
-            } else {
-              message.channel.send("Erreur, je ne peux pas nettoyer ça.");
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
         }
 
         //Mute (vocal) la personne mentionnée
         else if (spliteMessage[0] === prefix + "mute") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage.length === 2) {
-              message.guild.member(message.mentions.users.first()).setMute(true);
-              message.channel.send(
-                message.guild.member(message.mentions.users.first()) +
-                " est mute !"
-              );
-            } else {
-              message.reply("Qui dois-je mute ?");
-            }
-            message.delete();
-          } else {
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
         }
 
         //Unmute (vocal) la personne mentionnée
         else if (spliteMessage[0] === prefix + "unmute") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage.length === 2) {
-              message.guild.member(message.mentions.users.first()).setMute(false);
-              message.channel.send(
-                message.guild.member(message.mentions.users.first()) +
-                " n'est plus mute !"
-              );
-            } else {
-              message.reply("Qui dois-je unmute ?");
-            }
-            message.delete();
-          } else {
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
         }
 
         //check qui sont les admins
@@ -1335,57 +1278,16 @@ bot.on("message", message => {
 
         //Prépare la composition de la partie
         else if (spliteMessage[0] === prefix + "compo") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            //Définie un thème pour la partie. Par défaut, il s'agit du thème classique.
-            var themeAct = new Theme().preset(theme[message.guild.id])
-            gameOn[message.guild.id] = true;
-            message.delete();
-            compo[message.guild.id] = [];
-            var embed = new Discord.RichEmbed()
-              .setTitle("Composition de la partie :")
-              .setDescription(
-                "Préparez la composition de la partie à l'aide des commandes ci-dessous."
-              )
-              .addField("Le thème sélectionné pour cette partie est le thème **" + themeAct.name + "**. ", themeAct.description)
-              .addField(
-                "**__Informations__**",
-                " Vous pouvez ajouter des rôles en tapant ``+ [rôle] [nombre]`` et en retirer en tapant ``- [rôle] [nombre]``. Par défaut, le nombre est de 1.\n Vous pouvez vérifier la liste des rôles reconnus en tapant ``roles?``, annuler en tapant ``annuler``, et si vous avez terminé, tapez ``terminé``."
-              );
-
-            setTheme(themeAct, message)
-            message.channel.send(embed);
-            collector2 = message.channel.createCollector(filter);
-            prepCompo(collector2);
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          
+          return;
         }
 
         //Envoie les rôles à tous les inscrits
         else if (spliteMessage[0] === prefix + "distribution") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (compoDone[message.guild.id]) {
-              Distribution(message);
-            }
-            else {
-              message.reply("La composition n'est pas terminée !")
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
-        } else if (spliteMessage[0] === prefix + "charme") {
+          return;
+        } 
+        
+        else if (spliteMessage[0] === prefix + "charme") {
           if (
             adminlist.includes(message.author) ||
             mini[message.guild.id] === true
