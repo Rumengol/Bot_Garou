@@ -64,6 +64,22 @@ var methods = {
     } else {
       return undefined;
     }
+  },
+
+  mute: function(role, message) {
+    var vocalID = this.getPlaceInDb("vocal", message);
+    var vocal = message.guild.channels.get(vocalID);
+    role.members.forEach(membre => {
+      if (vocal.members.has(membre)) membre.setMute(true);
+    });
+  },
+
+  unmute: function(role, message) {
+    var vocalID = this.getPlaceInDb("vocal", message);
+    var vocal = message.guild.channels.get(vocalID);
+    role.members.forEach(membre => {
+      if (vocal.members.has(membre)) membre.setMute(false);
+    });
   }
 };
 

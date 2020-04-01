@@ -556,128 +556,17 @@ bot.on("message", message => {
 
         //Commence la journée
         else if (spliteMessage[0] === prefix + "daystart") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage[1] != null && spliteMessage[1].match(/^\d+$/)) {
-              pouet[message.guild.id] = parseInt(spliteMessage[1]);
-            } else {
-              pouet[message.guild.id] = 5;
-            }
-            var finpouet = pouet[message.guild.id] * 60000;
-            StateOfTheGame[message.guild.id][0] = Presets[theme[message.guild.id]].time.Day;
-
-            message.delete();
-            getRoleInDb("vivants", message);
-            role = roleDB[message.guild.id];
-
-            message.channel.overwritePermissions(role, { SEND_MESSAGES: true });
-            unmute(role, message);
-            message.channel.send("Une nouvelle journée commence. (" + StateOfTheGame[message.guild.id].join(" ") + ")");
-            getPlaceInDb("votes", message);
-            lieu = lieuDB[message.guild.id];
-            getPlaceInDb("vocal", message);
-            lieu2 = lieuDB[message.guild.id];
-            if (lieu == null || lieu2 == null) {
-              message.reply("Salon de vote ou vocal non défini");
-            } else {
-              message.guild.channels
-                .get(lieu)
-                .overwritePermissions(role, { VIEW_CHANNEL: true });
-              unmute(role, message);
-              x[message.guild.id] = setInterval(function () {
-                message.channel.send(
-                  pouet[message.guild.id] + " minutes restantes."
-                );
-                pouet[message.guild.id] -= 1;
-              }, 60000);
-              y[message.guild.id] = setTimeout(function () {
-                message.channel.send("30 secondes restantes.");
-                clearInterval(x[message.guild.id]);
-              }, finpouet - 30000);
-              z[message.guild.id] = setTimeout(function () {
-                message.channel.overwritePermissions(role, {
-                  SEND_MESSAGES: false
-                });
-                message.channel.send("La journée s'achève. Bonne nuit.");
-                message.guild.channels
-                  .get(lieu)
-                  .overwritePermissions(role, { VIEW_CHANNEL: false });
-                mute(role, message);
-              }, finpouet);
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+         return;
         }
 
         //prolongations
         else if (spliteMessage[0] === prefix + "prolong") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage[1] != null && spliteMessage[1].match(/^\d+$/)) {
-              pouet[message.guild.id] = parseInt(spliteMessage[1]);
-            } else {
-              pouet[message.guild.id] = 90;
-            }
-            var finpouet = pouet[message.guild.id] * 6000;
-
-            message.delete();
-            message.channel.send(
-              "Une égalité dans les votes mène toujours à des débats supplémentaires."
-            );
-            prolongations(message, finpouet)
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
         }
 
         //Achève la journée
         else if (spliteMessage[0] === prefix + "dayend") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            message.delete();
-            endVote(message);
-            getRoleInDb("vivants", message);
-            role = roleDB[message.guild.id];
-            getPlaceInDb("votes", message);
-            lieu = lieuDB[message.guild.id];
-            getPlaceInDb("vocal", message);
-            lieu2 = lieuDB[message.guild.id];
-
-            clearInterval(x[message.guild.id]);
-            clearTimeout(y[message.guild.id]);
-            clearTimeout(z[message.guild.id]);
-            message.channel.overwritePermissions(role, { SEND_MESSAGES: false });
-            message.guild.channels
-              .get(lieu)
-              .overwritePermissions(role, { VIEW_CHANNEL: false });
-            mute(role, message);
-            message.channel.send("La journée s'achève. Bonne nuit.");
-            if (jourBE[message.guild.id]) {
-              var item;
-              if (!IDVcache[message.guild.id]) {
-                item = findObjectInList(distribRoles[message.guild.id], "Role", IDV[message.guild.id])
-              }
-              banniDeVote[message.guild.id] = [item]
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
         }
 
         //Annonce une commande de nuit
@@ -1609,21 +1498,11 @@ function reviveAll(message) {
 }
 
 function mute(role, message) {
-  getPlaceInDb("vocal", message);
-  vocal = lieuDB[message.guild.id];
-  message.guild.roles.get(role).members.forEach(membre => {
-    if (vocal.members.includes(membre))
-      membre.setMute(true);
-  });
+  return;
 }
 
 function unmute(role, message) {
-  getPlaceInDb("vocal", message);
-  vocal = lieuDB[message.guild.id];
-  message.guild.roles.get(role).members.forEach(membre => {
-    if (vocal.members.includes(membre))
-      membre.setMute(false);
-  });
+  
 }
 
 
@@ -1694,177 +1573,20 @@ function Kill(message, lui) {
   }
 }
 
-function endVote(message) {
-  var pendu = { user: null, votes: -1, contenu: "personne" }
-  var egalite = false;
-  getPlaceInDb("village", message);
-  var village = message.guild.channels.get(lieuDB[message.guild.id]);
-
-  voted[message.guild.id].forEach(vote => {
-    if (vote.votes > pendu.votes && vote.votes != 0) {
-      pendu = vote;
-      egalite = false;
-    }
-    else if (vote.votes === pendu.votes) {
-      pendu.user = pendu.user + " " + vote.user
-      pendu.contenu = pendu.contenu + " " + vote.user
-      egalite = true;
-    }
-    //console.log("Vote maximal : " + pendu.votes + ", vote proposé " + vote.votes)
-  })
-
-  if (pendu.votes === -1) {
-    egalite = true;
-  }
-
-  if (egalite) {
-    if (distribRoles[message.guild.id].map(getItem).includes(BE[message.guild.id])) {
-      var bouc = findObjectInList(distribRoles[message.guild.id], "Role", BE[message.guild.id]);
-      console.log(bouc)
-      console.log(BE[message.guild.id]);
-      village.send(`Vous hésitez, ne sachant trop que faire. Puis tous les regards convergent vers le ${bouc.GuildMember}. Le ${bouc.Role}, il n'y a qu'à l'éliminer lui ! \n *Il va décider qui pourra voter le lendemain.*`)
-      Kill(message, bouc.GuildMember)
-      deathBE(message, bouc)
-    } else {
-      if (pendu.user != null) {
-        village.send(`Vous n'avez pas pu vous décider, il y aura donc des prolongations (1min30).`).then(message => {
-          voteJour(message, pendu.user.split(" "));
-          prolongations(message, 90000)
-        })
-      }
-      else
-        village.send("Aucun vote ? Quelle déception...")
-    }
-    function getItem(item) {
-      return item.Role;
-    }
-  }
-  else {
-    village.send(`Après concertation, il est clair que ${pendu.contenu} était indigne de vivre.`)
-    var item = findObjectInList(distribRoles[message.guild.id], "User", pendu.user)
-    if (item === undefined)
-      item = { User: pendu.user, Role: "dérangé", GuildMember: pendu.contenu }
-    if (item.Role === IDV[message.guild.id] && IDVcache[message.guild.id]) {
-      village.send(`Au moment d'éliminer ${pendu.contenu}, il devient clair qu'il est en fait ${item.Role} ! Quelqu'un comme lui n'a aucune chance d'être ${LG[message.guild.id]}. Mais d'un autre côté, le vote de quelqu'un comme lui n'a aucune valeur désormais...`);
-      banniDeVote[message.guild.id].push(item);
-      IDVcache[message.guild.id] = false;
-      return;
-    }
-    Kill(message, item.GuildMember)
-  }
+function endVote(){
+  return;
 }
 
 function deathBE(message, item) {
-  var chan = item.User.dmChannel;
-  const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
-  chan.send(
-    "Tu as été éliminé par défaut, " + BE[message.guild.id] + " ! Mais dans ton dernier souffle, tu peux décider qui est digne de voter demain. \n **0.** Personne \n" +
-    vivants[message.guild.id] +
-    " \n *N'indiquez que les numéros sous la forme X-Y-... Par exemple, ``1-2`` pour permettre à " +
-    distribRoles[message.guild.id][0].User.username +
-    " et " +
-    distribRoles[message.guild.id][1].User.username +
-    " de voter.*"
-  );
-  var collector = chan.createCollector(filter2);
-  eux[message.guild.id] = [];
-
-  collector.on("collect", mess => {
-    var choix = [];
-    var splitemess = mess.content.toLowerCase().split("-");
-    for (var i = 0; i < splitemess.length; i++) {
-      choix.push(distribRoles[message.guild.id][splitemess[i] - 1])
-    }
-    var reply = choix.map(getUser).join(", ");
-    mess.channel.send("Voici ceux qui peuvent voter demain : " + reply)
-
-    var annonce = choix.map(getMember).join(", ")
-    message.channel.send(`Le ${BE[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
-    banniDeVote[message.guild.id].concat(choix);
-    //console.log(banniDeVote[message.guild.id]);
-    //console.log(choix)
-    jourBE[message.guild.id] = true
-    collector.stop();
-  })
-  function getUser(item) {
-    return item.User.username;
-  }
-  function getMember(item) {
-    return item.GuildMember;
-  }
+  return
 }
 
 function voteJour(message, egalite = null) {
-  votes[message.guild.id] = [];
-  avote[message.guild.id] = [];
-  voted[message.guild.id] = [];
-  votedejour[message.guild.id] = true;
-
-  getRoleInDb("vivants", message);
-  Jvivants = roleDB[message.guild.id];
-
-  getPlaceInDb("votes", message);
-  lieu = lieuDB[message.guild.id];
-
-  var vivants;
-
-  if (egalite === null) {
-    vivants = Array.from(
-      message.guild.roles.get(Jvivants).members.values()
-    );
-    //console.log(vivants)
-  }
-  else {
-    egalite.forEach(user => {
-      vivants.push(message.guild.members.get(user));
-    })
-  }
-  for (var i = 0; i < vivants.length; i++) {
-    var temp = vivants[i].user
-    voted[message.guild.id].push({ user: temp, votes: 0, contenu: message.guild.members.get(temp.id) })
-    message.guild.channels
-      .get(lieu)
-      .send(" " + vivants[i])
-      .then(function (mess) {
-        mess.react("👎");
-        votes[message.guild.id].push(mess);
-      });
-  }
+  return;
 }
 
-
-
-
 function prolongations(message, finpouet) {
-  getRoleInDb("vivants", message);
-  role = roleDB[message.guild.id];
-  message.channel.overwritePermissions(role, { SEND_MESSAGES: true });
-  getPlaceInDb("votes", message);
-  lieu = lieuDB[message.guild.id];
-  getPlaceInDb("vocal", message);
-  lieu2 = lieuDB[message.guild.id];
-  message.guild.channels
-    .get(lieu)
-    .overwritePermissions(role, { VIEW_CHANNEL: true });
-  unmute(role, message);
-  var limite = 90;
-  x[message.guild.id] = setInterval(function () {
-    message.channel.send(
-      limite + " secondes restantes."
-    );
-    limite -= 30;
-  }, 30000);
-  z[message.guild.id] = setTimeout(function () {
-    message.channel.overwritePermissions(role, {
-      SEND_MESSAGES: false
-    });
-    message.channel.send("La journée s'achève. Bonne nuit.");
-    message.guild.channels
-      .get(lieu)
-      .overwritePermissions(role, { VIEW_CHANNEL: false });
-    mute(role, message);
-    clearInterval(x[message.guild.id]);
-  }, finpouet);
+  return
 }
 
 
