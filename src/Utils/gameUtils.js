@@ -77,6 +77,29 @@ var methods = {
           this.Kill(mess, amorreux);
         });
     }
+  },
+
+  reviveAll = function(message){
+    var roleMortID = utils.getRoleInDb("morts", message);
+    var roleMort = message.guild.roles.get(roleMortID);
+    var roleVivID = utils.getRoleInDb("vivants", message);
+    var roleViv = message.guild.roles.get(roleVivID);
+
+    var vocalID = utils.getPlaceInDb("vocal", message);
+
+  eux = roleMort.members;
+  eux.forEach(lui => {
+    setTimeout(() => {
+      lui.addRole(roleViv);
+    }, 500);
+    if (vocal.members.has(lui))
+      lui.setMute(false);
+    //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
+    setTimeout(() => {
+      lui.removeRole(roleMort);
+    }, 1000);
+  });
+  console.log("Réussite du reviveall");
   }
 };
 

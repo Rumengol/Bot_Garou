@@ -495,69 +495,11 @@ bot.on("message", message => {
 
         // Tue le joueur mentionné.
         else if (spliteMessage[0] === prefix + "kill") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage.length === 2) {
-              let lui = message.guild.member(message.mentions.users.first());
-              if (lui === null) {
-                message.reply(
-                  "Formulation incorrecte. La bonne syntaxe est : /Kill @[utilisateur]."
-                );
-              } else {
-                Kill(message, lui);
-              }
-            } else {
-              message.reply(
-                "Formulation incorrecte. La bonne syntaxe est : /Kill @[utilisateur]."
-              );
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
-        } else if (spliteMessage[0] === prefix + "revive") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage.length === 2) {
-              let lui = message.guild.member(message.mentions.users.first());
-              if (lui === null) {
-                message.reply(
-                  "Formulation incorrecte. La bonne syntaxe est : /revive @[utilisateur] ou /reviveall."
-                );
-              } else {
-                getRoleInDb("morts", message);
-                role = roleDB[message.guild.id];
-                getRoleInDb("vivants", message);
-                role2 = roleDB[message.guild.id];
-                lui.addRole(role2);
-                setTimeout(() => {
-                  lui.removeRole(role);
-                }, 1000);
-                getPlaceInDb("village", message);
-                lieu = lieuDB[message.guild.id];
-                message.guild.channels.get(lieu).send(lui + " a ressuscité !");
-                getPlaceInDb("vocal", message);
-                lieuVocal = lieuDB[message.guild.id];
-                if (lieuVocal.members.includes(lui))
-                  lui.setMute(false);
-              }
-            } else {
-              message.reply(
-                "Formulation incorrecte. La bonne syntaxe est : /revive @[utilisateur]."
-              );
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
+        } 
+        
+        else if (spliteMessage[0] === prefix + "revive") {
+          return;
         }
 
         //Revive de masse
