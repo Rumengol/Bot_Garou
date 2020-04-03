@@ -543,29 +543,7 @@ bot.on("message", message => {
 
         //Détermine un rôle pour la prochaine partie
         else if (spliteMessage[0] === prefix + "theme") {
-          if (adminlist.includes(message.author) || mini[message.guild.id]) {
-            message.delete();
-            if (!gameOn[message.guild.id]) {
-              if (spliteMessage[1] != null) {
-                if (Presets[spliteMessage[1]] != undefined) {
-                  theme[message.guild.id] = spliteMessage[1];
-                  message.channel.send("Thème de la prochaine partie : " + spliteMessage[1]);
-                }
-                else {
-                  message.reply("Merci d'indiquer un thème valide")
-                }
-              }
-              else {
-                message.reply("Merci de préciser le thème désiré !")
-              }
-            }
-            else {
-              message.reply("Impossible de changer le thème lorsqu'une partie est en cours !")
-            }
-          }
-          else {
-            message.reply("Seuls les administrateurs peuvent déterminer le thème de la prochaine partie.")
-          }
+          return;
         }
 
         //Prépare la composition de la partie
@@ -584,30 +562,7 @@ bot.on("message", message => {
             adminlist.includes(message.author) ||
             mini[message.guild.id] === true
           ) {
-            if (spliteMessage.length <= 2) {
-              message.delete();
-              let lui = message.guild.member(message.mentions.users.first());
-              if (lui === null) {
-                message.reply("Veuillez mentionner un utilisateur valide.");
-              } else {
-                getPlaceInDb("charmed", message);
-                lieu = lieuDB[message.guild.id];
-
-                message.guild.channels.get(lieu).overwritePermissions(lui, {
-                  VIEW_CHANNEL: true,
-                  SEND_MESSAGES: false
-                });
-                message.guild.channels
-                  .get(lieu)
-                  .send(lui + " vient de se faire charmer !");
-                charmes[message.guild.id].push(lui);
-              }
-            } else {
-              message.delete();
-              message.channel.send(
-                "Formulation incorrecte. La bonne syntaxe est ``/charme @[utilisateur]``"
-              );
-            }
+            
           } else {
             message.delete();
             message.reply(
@@ -615,53 +570,12 @@ bot.on("message", message => {
             );
           }
         } else if (spliteMessage[0] === prefix + "decharme") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage.length <= 2) {
-              message.delete();
-              let lui = message.guild.member(message.mentions.users.first());
-              if (lui === null) {
-                message.reply("Veuillez mentionner un utilisateur valide.");
-              } else {
-                getPlaceInDb("charmed", message);
-                lieu = lieuDB[message.guild.id];
-
-                message.guild.channels.get(lieu).overwritePermissions(lui, {
-                  VIEW_CHANNEL: false,
-                  SEND_MESSAGES: false
-                });
-                charmes[message.guild.id].splice(charmes.indexOf(lui), 1);
-              }
-            } else {
-              message.delete();
-              message.channel.send(
-                "Formulation incorrecte. La bonne syntaxe est ``/decharme @[utilisateur]``"
-              );
-            }
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
+          return;
         }
 
         //arrête toutes les actions en cours
         else if (spliteMessage[0] === prefix + "stop") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            message.delete();
-            clearInterval(x[message.guild.id]);
-            clearTimeout(y[message.guild.id]);
-            clearTimeout(z[message.guild.id]);
-            message.channel.send(
-              "Tous les décomptes ont été interrompus."
-            );
-          }
+          return;
         }
 
         //Casse le bot
