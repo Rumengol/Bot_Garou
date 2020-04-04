@@ -504,17 +504,7 @@ bot.on("message", message => {
 
         //Revive de masse
         else if (spliteMessage[0] == prefix + "reviveall") {
-          message.delete();
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            reviveAll(message);
-          } else {
-            message.reply(
-              "commande refusée. Seuls les administrateurs peuvent lancer les parties."
-            );
-          }
+          return;
         }
         //Mise en place des votes
         else if (spliteMessage[0] === prefix + "vote") {
@@ -596,30 +586,7 @@ bot.on("message", message => {
       }
       //aide sur les rôles
       if (spliteMessage[0] === prefix + "ask") {
-        spliteMessage.splice(0, 1);
-        var contenu = spliteMessage.join(" ");
-        sendHelp();
-        function sendHelp() {
-          for (var theme in Presets) {
-            var role = Presets[theme].roles;
-            for (var i = 0; i < role.length; i++) {
-              if (role[i].Id.split(",").includes(contenu)) {
-                role = role[i];
-                embedHelp = new Discord.RichEmbed()
-                  .setTitle(role.Name)
-                  .setDescription(role.Description)
-                  .setThumbnail(role.Thumbnail)
-                  .setColor(role.Color)
-                  .addField("Son but", role.Goal)
-                  .addField("Quand gagne-t-il ?", role.Win)
-                  .addField("Pouvoir", role.Power);
-
-                message.channel.send(embedHelp);
-                return;
-              }
-            }
-          }
-        }
+        return;
       }
       //aide générale
       else if (spliteMessage[0] === prefix + "help") {
@@ -834,75 +801,13 @@ function mute(role, message) {
 }
 
 function unmute(role, message) {
-  
+  return;
 }
 
 
 
 function Kill(message, lui) {
-  getRoleInDb("vivants", message);
-  role = roleDB[message.guild.id];
-  setTimeout(() => {
-    getRoleInDb("morts", message);
-    role2 = roleDB[message.guild.id];
-    lui.addRole(role2);
-  }, 500);
-
-  setTimeout(() => {
-    lui.removeRole(role);
-  }, 3000);
-  getPlaceInDb("village", message);
-  lieu = lieuDB[message.guild.id];
-
-  getPlaceInDb("vocal", message);
-  vocal = lieuDB[message.guild.id];
-
-  var item = findObjectInList(distribRoles[message.guild.id], "GuildMember", lui)
-  if (item != undefined) {
-    if (charmes[message.guild.id] != undefined)
-      charmes[message.guild.id].splice(charmes[message.guild.id].indexOf(item.GuildMember), 1);
-
-    rolmort = ", il/elle était " + item.Role + ".";
-    distribRolMorts[message.guild.id].push(item);
-    distribRoles[message.guild.id].splice(
-      distribRoles[message.guild.id].indexOf(item),
-      1
-    );
-  } else {
-    rolmort = ".";
-  }
-
-  if (vocal.members.inclduess(lui))
-    lui.setMute(true);
-  message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
-  getPlaceInDb("charmed", message);
-  lieu2 = lieuDB[message.guild.id];
-
-  message.guild.channels
-    .get(lieu2)
-    .overwritePermissions(lui, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
-
-  if (joueursLG[message.guild.id].includes(lui)) {
-    getPlaceInDb("loups", message)
-    lieu3 = lieuDB[message.guild.id];
-    message.guild.channels.get(lieu3).overwrittePermissions(lui, { SEND_MESSAGES: false });
-  }
-
-  if (Lovers[message.guild.id].includes(item)) {
-    var dead = Presets[theme[message.guild.id]].amour.OnDeath.split("|")
-    Lovers[message.guild.id].splice(Lovers[message.guild.id].indexOf(item), 1);
-    message.guild.channels
-      .get(lieu)
-      .send(
-        dead[0] +
-        Lovers[message.guild.id][0].User +
-        dead[1]
-      ).then(mess => {
-        var amorreux = Lovers[message.guild.id][0].GuildMember;
-        Lovers[message.guild.id] = [];
-        Kill(mess, amorreux);
-      })
-  }
+  return;
 }
 
 function endVote(){
@@ -1073,248 +978,7 @@ function Recap(channel) {
 }
 
 function helpGen(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  var embed = new Discord.RichEmbed()
-    .setTitle("Aide des commandes")
-    .setDescription("Commandes accessibles pour **" + lui.username + "**.")
-    .addField("Préfixe", "``/``")
-    .addField("► ``help``", "Affiche cette interface")
-    .addField("► ``ask [rôle]``", "Affiche les informations sur un rôle.")
-    .addField("► ``ping``", "Vérifie l'activité du bot.")
-    .addField(
-      "Quel type de commandes souhaitez-vous connaître ?",
-      ":video_game: pour les commandes en jeu\n :desktop: pour les commandes d'administration\n :tools: pour les commandes de configuration."
-    )
-    .setColor("#f1c40f");
-  if (message.author != bot.user) {
-    message.channel.send(embed).then(message => {
-      message.react("🎮");
-      message.react("🖥️");
-      message.react("🛠️");
-      var collectorHelp = message.createReactionCollector(filter);
-      collectorHelp.on("collect", reac => {
-        switch (reac.emoji.name) {
-          case "🖥️":
-            collectorHelp.stop();
-            helpAdmin(message, lui);
-            break;
-          case "🎮":
-            collectorHelp.stop();
-            helpGameGen(message, lui);
-            break;
-          case "🛠️":
-            collectorHelp.stop();
-            helpTools(message, lui);
-            break;
-
-          default:
-            break;
-        }
-      });
-    });
-  } else {
-    message.clearReactions();
-    message.edit(embed).then(message => {
-      message.react("🎮");
-      message.react("🖥️");
-      message.react("🛠️");
-      var collectorHelp = message.createReactionCollector(filter);
-      collectorHelp.on("collect", reac => {
-        switch (reac.emoji.name) {
-          case "🖥️":
-            collectorHelp.stop();
-            helpAdmin(message, lui);
-            break;
-          case "🎮":
-            collectorHelp.stop();
-            helpGameGen(message, lui);
-            break;
-          case "🛠️":
-            collectorHelp.stop();
-            helpTools(message, lui);
-            break;
-
-          default:
-            break;
-        }
-      });
-    });
-  }
-}
-
-function helpAdmin(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpAdmin1).then(message => {
-    message.react("◀️");
-    var collectorHadmin = message.createReactionCollector(filter);
-    collectorHadmin.on("collect", reac => {
-      if (reac.emoji.name === "◀️") {
-        collectorHadmin.stop();
-        helpGen(message, lui);
-      }
-    });
-  });
-}
-
-function helpGameGen(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpGameGen).then(message => {
-    message.react("1️⃣");
-    message.react("2️⃣");
-    message.react("3️⃣");
-    message.react("◀️");
-    var collectorGG = message.createReactionCollector(filter);
-    collectorGG.on("collect", reac => {
-      switch (reac.emoji.name) {
-        case "1️⃣":
-          collectorGG.stop();
-          helpGameOne(message, lui);
-          break;
-        case "2️⃣":
-          collectorGG.stop();
-          helpGameTwo(message, lui);
-          break;
-        case "3️⃣":
-          collectorGG.stop();
-          helpGameThree(message, lui);
-          break;
-        case "◀️":
-          collectorGG.stop();
-          helpGen(message, lui);
-          break;
-
-        default:
-          break;
-      }
-    });
-  });
-}
-
-function helpGameOne(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpGame1).then(message => {
-    message.react("◀️");
-    message.react("2️⃣");
-    message.react("3️⃣");
-    var collectorG1 = message.createReactionCollector(filter);
-    collectorG1.on("collect", reac => {
-      switch (reac.emoji.name) {
-        case "◀️":
-          collectorG1.stop();
-          helpGameGen(message, lui);
-          break;
-        case "2️⃣":
-          collectorG1.stop();
-          helpGameTwo(message, lui);
-          break;
-        case "3️⃣":
-          collectorG1.stop();
-          helpGameThree(message, lui);
-          break;
-
-        default:
-          break;
-      }
-    });
-  });
-}
-
-function helpGameTwo(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpGame2).then(message => {
-    message.react("◀️");
-    message.react("1️⃣");
-    message.react("3️⃣");
-    message.react("⚠️");
-    var collectorG2 = message.createReactionCollector(filter);
-    collectorG2.on("collect", reac => {
-      switch (reac.emoji.name) {
-        case "◀️":
-          collectorG2.stop();
-          helpGameGen(message, lui);
-          break;
-        case "1️⃣":
-          collectorG2.stop();
-          helpGameOne(message, lui);
-          break;
-        case "3️⃣":
-          collectorG2.stop();
-          helpGameThree(message, lui);
-          break;
-        case "⚠️":
-          collectorG2.stop();
-          helpGameWeird(message, lui);
-          break;
-
-        default:
-          break;
-      }
-    });
-  });
-}
-
-function helpGameWeird(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpGame2Chelou).then(message => {
-    message.react("◀️");
-    var collectorGW = message.createReactionCollector(filter);
-    collectorGW.on("collect", reac => {
-      if (reac.emoji.name === "◀️") {
-        collectorGW.stop();
-        helpGameTwo(message, lui);
-      }
-    });
-  });
-}
-
-function helpGameThree(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpGame3).then(message => {
-    message.react("◀️");
-    message.react("1️⃣");
-    message.react("2️⃣");
-    var collectorG3 = message.createReactionCollector(filter);
-    collectorG3.on("collect", reac => {
-      switch (reac.emoji.name) {
-        case "◀️":
-          collectorG3.stop();
-          helpGameGen(message, lui);
-          break;
-        case "1️⃣":
-          collectorG3.stop();
-          helpGameOne(message, lui);
-          break;
-        case "2️⃣":
-          collectorG3.stop();
-          helpGameTwo(message, lui);
-          break;
-
-        default:
-          break;
-      }
-    });
-  });
-}
-
-function helpTools(message, lui) {
-  var filter = reac => reac.users.map(u => u.username).includes(lui.username);
-  message.clearReactions();
-  message.edit(Embeds.helpTools).then(message => {
-    message.react("◀️");
-    var collectorT = message.createReactionCollector(filter);
-    collectorT.on("collect", reac => {
-      if (reac.emoji.name === "◀️") {
-        collectorT.stop();
-        helpGen(message, lui);
-      }
-    });
-  });
+  return;
 }
 
 function cleanArray(array) {
