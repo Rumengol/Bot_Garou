@@ -109,22 +109,7 @@ bot.login(token);
 
 
 bot.on("guildCreate", guild => {
-  admin = "<@" + guild.owner.id + ">";
-  var number = db
-    .get("ministrateurs")
-    .map("id")
-    .value().length;
-  db.get("ministrateurs")
-    .push({ guild: guild.id, id: number, story_value: admin })
-    .write();
-  init(guild.id);
-  guild.owner.createDM().then(channel => {
-    channel.send(
-      "Bonjour et merci de m'avoir ajouté à **" +
-      guild.name +
-      "** ! Vous pouvez utiliser la configuration automatique avec `/config auto` ou configurer les salons et rôles nécessaires en suivant _le manuel d'utilisation_. \n Vous pouvez également ajouter d'autres utilisateurs afin qu'ils puissent masteriser des parties en utilisant `/defadminhere [@user]`. \n Pour connaître la liste des commandes disponibles, utilisez la commande `/help` (vous ne verrez l'intégralité des commandes que sur votre serveur)."
-    );
-  });
+  return;
 });
 
 bot.on("message", message => {
@@ -240,16 +225,7 @@ bot.on("message", message => {
 
         //inscription
         else if (spliteMessage[0] === prefix + "inscription") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-
-          } else {
-            message.reply(
-              "commande refusée. Seuls les administrateurs peuvent lancer les parties."
-            );
-          }
+          return;
         }
 
         //lancer la partie
@@ -273,185 +249,17 @@ bot.on("message", message => {
         } 
         
         else if (spliteMessage[0] == prefix + "win") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            if (spliteMessage[1] != null) {
-              var victoire = "**VICTORIEUX** 👑";
-              var defaite = "Perdant";
-              var villageois = Presets[theme[message.guild.id]].villageois
-              var amoureux = Presets[theme[message.guild.id]].amour.Amoureux
-              var jdf = findObjectInList(Presets[theme[message.guild.id]].roles, "Title", "Joueur De Flûte")
-
-              if (IDlg[message.guild.id].includes(spliteMessage[1])) {
-                distribRoles[message.guild.id].forEach(role => {
-                  if (role.Role == LG[message.guild.id]) {
-                    role.Victoire = victoire
-                  } else {
-                    role.Victoire = defaite;
-                  }
-                });
-                win[message.guild.id] = LG[message.guild.id];
-                message.channel.send(
-                  `La victoire revient aux **${LG[message.guild.id]}** !`
-                );
-              } else if (spliteMessage[1] === "village") {
-                distribRoles[message.guild.id].forEach(role => {
-                  if (role.Role != LG[message.guild.id] && role.Role != JDF[message.guild.id]) {
-                    role.Victoire = victoire
-                  } else {
-                    role.Victoire = defaite;
-                  }
-                });
-                win[message.guild.id] = villageois;
-                message.channel.send(`La victoire revient aux **${villageois}** !`);
-              }
-              else if (spliteMessage[1] === "amoureux") {
-                distribRoles[message.guild.id].forEach(role => {
-                  if (Lovers[message.guild.id].includes(role)) {
-                    role.Victoire = victoire
-                  } else {
-                    role.Victoire = defaite;
-                  }
-                });
-
-                win[message.guild.id] = amoureux;
-                message.channel.send(`La victoire revient aux **${amoureux}** !`);
-              } else if (IDjdf[message.guild.id].includes(spliteMessage[1])) {
-                distribRoles[message.guild.id].forEach(role => {
-                  if (role.Role === JDF[message.guild.id]) {
-                    role.Victoire = victoire
-                  } else {
-                    role.Victoire = defaite;
-                  }
-                });
-
-                win[message.guild.id] = jdf.Name;
-                message.channel.send(
-                  `La victoire revient au **${jdf.Name}** !`
-                );
-              } else {
-                message.reply(
-                  "Je n'ai pas compris " + spliteMessage[1] + ". Qui a gagné ?"
-                );
-              }
-            } else {
-              message.reply("Je n'ai pas compris, qui a gagné ?");
-            }
-          } else {
-            message.reply(
-              "commande refusée. Seuls les administrateurs peuvent déclarer une victoire."
-            );
-          }
+          return;
         }
 
         //termine la partie
         else if (spliteMessage[0] == prefix + "gamend") {
-          message.delete();
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            getPlaceInDb("loups", message);
-            lieu = message.guild.channels.get(lieuDB[message.guild.id]);
-
-            getRoleInDb("vivants", message);
-            role = message.guild.roles.get(roleDB[message.guild.id]);
-
-            getPlaceInDb("charmed", message);
-            lieu2 = message.guild.channels.get(lieuDB[message.guild.id]);
-
-            getPlaceInDb("village", message);
-            village = message.guild.channels.get(lieuDB[message.guild.id]);
-
-            if ((win[message.guild.id] != null)) Recap(village);
-            else
-              message.channel.send(
-                "La victoire n'a pas été déclarée, le récapitulatif de la partie ne sera pas affiché."
-              );
-            reviveAll(message);
-            unmute(role, message);
-
-            setTimeout(() => {
-              getRoleInDb("vivants", message);
-              var role2 = message.guild.roles
-                .get(roleDB[message.guild.id])
-                .members.map(m => m.user);
-              role2.forEach(vivant => {
-                lieu.overwritePermissions(vivant, {
-                  VIEW_CHANNEL: false,
-                  SEND_MESSAGES: false
-                });
-                lieu2.overwritePermissions(vivant, {
-                  VIEW_CHANNEL: false,
-                  SEND_MESSAGES: false
-                });
-              });
-            }, 3000);
-
-            charmes[message.guild.id] = [];
-            if (messCompo[message.guild.id] != null) {
-              messCompo[message.guild.id].unpin();
-            }
-            init(message.guild)
-
-            console.log(gameOn[message.guild.id]);
-            gameOn[message.guild.id] = false;
-
-            clearInterval(x[message.guild.id]);
-            clearTimeout(y[message.guild.id]);
-            clearTimeout(z[message.guild.id]);
-
-            message.channel.send("Partie terminée, merci d'avoir joué !");
-          } else {
-            message.reply(
-              "commande refusée. Seuls les administrateurs peuvent terminer les parties."
-            );
-          }
+          return;
         }
 
         //termine la session
         else if (spliteMessage[0] == prefix + "allend") {
-          message.delete();
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            reviveAll(message);
-
-            gameOn[message.guild.id] = false;
-            getRoleInDb("vivants", message);
-            role = roleDB[message.guild.id];
-
-            getPlaceInDb("vocal", message);
-            lieu = lieuDB[message.guild.id];
-
-            getPlaceInDb("general", message);
-            lieu2 = lieuDB[message.guild.id];
-
-            eux[message.guild.id] = message.guild.roles.get(role).members;
-            if (lieu2 === lieu) {
-              message.channel.send(
-                "Session terminée, merci d'avoir joué ! A la prochaine fois !"
-              );
-            } else {
-              message.channel.send(
-                "Session terminée, merci d'avoir joué ! Les participants seront déplacés dans le salon vocal général d'ici 3 secondes..."
-              );
-              blep = setTimeout(function () {
-                eux[message.guild.id].forEach(lui => {
-                  if (lieu.members.includes(lui))
-                    lui.setVoiceChannel(lieu2);
-                  lui.removeRole(role);
-                });
-              }, 3000);
-            }
-          } else {
-            message.reply(
-              "commande refusée. Seuls les administrateurs peuvent terminer les sessions."
-            );
-          }
+          return;
         }
 
         //clear le channel - admin
