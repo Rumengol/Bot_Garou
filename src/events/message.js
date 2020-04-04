@@ -10,14 +10,38 @@ module.exports = (client, message) => {
     .slice(client.config.prefix.length)
     .trim()
     .split(/ +/g);
-  const command = args.shift().toLowerCase();
+  const commandName = args.shift().toLowerCase();
 
   // Grab the command data from the client.commands Enmap
-  const cmd = client.commands.get(command);
+  const cmd =
+    client.commands.get(commandName) ||
+    client.commands.find(
+      cmd => cmd.aliases && cmd.aliases.includes(commandName)
+    );
 
   // If that command doesn't exist, silently exit and do nothing
   if (!cmd) return;
 
-  // Run the command
-  cmd.run(client, message, args);
+  //If the command needs arguments and none is given, return
+  if (cmd.args && !args.length) {
+    let reply = "Merci de préciser les arguments de cette commande.";
+
+    if (cmd.usage) {
+      reply += `\n L'utilisation correcte est : \`${prefix}${cmd.name} ${cmd.usage}\``;
+    }
+
+    return message.channel.send(reply);
+  }
+
+  if (cmd.guildOnly && message.channel.type != "text") {
+    return message.reply("Impossible d'exécuter cette commande en privé !");
+  }
+
+  try {
+    // Run the command
+    cmd.run(client, message, args);
+  } catch (e) {
+    message.channel.send("Erreur dans l'éxecution de la commande");
+    console.log(e);
+  }
 };
