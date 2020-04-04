@@ -548,18 +548,10 @@ bot.on("message", message => {
         } 
         
         else if (spliteMessage[0] === prefix + "charme") {
-          if (
-            adminlist.includes(message.author) ||
-            mini[message.guild.id] === true
-          ) {
-            
-          } else {
-            message.delete();
-            message.reply(
-              "Désolé, cette commande est réservée aux maîtres du jeu."
-            );
-          }
-        } else if (spliteMessage[0] === prefix + "decharme") {
+          return;
+        }
+        
+        else if (spliteMessage[0] === prefix + "decharme") {
           return;
         }
 
@@ -590,32 +582,12 @@ bot.on("message", message => {
       }
       //aide générale
       else if (spliteMessage[0] === prefix + "help") {
-        if (mini[message.guild.id] || adminlist.includes(message.author)) {
-          if (message.channel.type === "dm") {
-            message.channel.send("Utilisez cette commande dans un serveur pour avoir la liste des commandes que vous pouvez utiliser sur ce serveur.")
-          }
-          var lui = message.author;
-          helpGen(message, lui);
-        }
+        return;
       }
 
       //Suggestions
       else if (spliteMessage[0] === prefix + "suggestion") {
-        spliteMessage.splice(0, 1)
-        var contenu = spliteMessage.join(" ");
-        bot.fetchUser("218701822670405633").then(moi => {
-          var embed = new Discord.RichEmbed()
-            .setTitle("Nouvelle suggestion")
-            .setDescription("Suggestion de " + message.author.tag)
-            .setThumbnail(message.author.avatarURL)
-            .addField("Suggestion :", contenu)
-            .setFooter("Suggestion faite le " + message.createdAt)
-          moi.createDM().then(channel => {
-            channel.send(embed);
-          })
-        })
-
-
+        return;
       }
     }
   } catch (e) {
