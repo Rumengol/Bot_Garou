@@ -89,13 +89,6 @@ fs.readdir("./src/commands/", (err, files) => {
 });
 
 
-db.defaults({ administrateurs: [] }).write();
-db.defaults({ ministrateurs: [] }).write();
-db.defaults({ salons: [] }).write();
-db.defaults({ roles: [] }).write();
-
-comp.defaults({ composition: [] }).write();
-
 bot.on("ready", () => {
   Activity();
   for (const guild of bot.guilds.values()) {
@@ -112,7 +105,7 @@ bot.on("guildCreate", guild => {
   return;
 });
 
-bot.on("message", message => {
+/*bot.on("message", message => {
   try {
     if (message.content[0] === prefix) {
       const args = message.content.slice(prefix.length).trim().split(/ +/g);
@@ -144,7 +137,7 @@ bot.on("message", message => {
           } else {
             message.reply("Pong.");
           }
-        }*/
+        }
 
         //initialisation des rôles admins
         if (
@@ -402,7 +395,7 @@ bot.on("message", message => {
     message.reply(e.message);
     console.error(e);
   }
-});
+});*/
 
 bot.on("messageReactionAdd", (reac, lui) => {
   try {

@@ -1,5 +1,5 @@
 const dbUtils = require("../Utils/dbUtils.js");
-const datas = require("../../global.js");
+const datas = require("../global.js");
 
 module.exports = (client, guild) => {
   admin = "<@" + guild.owner.id + ">";
