@@ -1,3 +1,5 @@
+const auth = require("../auth.js");
+
 module.exports = (client, message) => {
   // Ignore all bots
   if (message.author.bot) return;
@@ -37,9 +39,15 @@ module.exports = (client, message) => {
     return message.reply("Impossible d'exécuter cette commande en privé !");
   }
 
+  if (cmd.canDo && !auth.isAuthenticated) {
+    return message.channel.send(
+      "Vous n'êtes pas abilité à utiliser cette commande."
+    );
+  }
+
   try {
     // Run the command
-    cmd.run(client, message, args);
+    cmd.execute(client, message, args);
   } catch (e) {
     message.channel.send("Erreur dans l'éxecution de la commande");
     console.log(e);

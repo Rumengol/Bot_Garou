@@ -1,10 +1,17 @@
 const dbutils = require("../../Utils/dbUtils.js");
 
-exports.run = (client, message, args) => {
-  if (args == null) {
-    message.channel.send("Il faut préciser un utilisateur.");
+module.exports = {
+  name: "supadmin",
+  description:
+    "Supprime un administrateur général. Commande réservée au propriétaire.",
+  args: true,
+  usage: "[@Membre]",
+  guildOnly: false,
+  canDo: ["Owner"],
+  aliases: ["suppradmin"],
+  execute(client, message, args) {
+    noadmin = args[0];
+    dbutils.removeFromDb("db", "administrateur", { story_value: noadmin });
+    message.reply(noadmin + " supprimé des administrateurs.");
   }
-  noadmin = args[0];
-  dbutils.removeFromDb("db", "administrateur", { story_value: noadmin });
-  message.reply(noadmin + " supprimé des administrateurs.");
 };

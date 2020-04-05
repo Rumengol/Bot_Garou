@@ -7,6 +7,7 @@ module.exports = {
   args: true,
   usage: "[@Membre]",
   guildOnly: false,
+  canDo: ["Owner"],
   aliases: ["admin"],
   execute(client, message, args) {
     if (args == null) {

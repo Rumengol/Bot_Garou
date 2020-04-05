@@ -1,18 +1,15 @@
 var gameUtils = require("../../Utils/gameUtils.js");
 
-exports.run = (client, message, args) => {
-  if (args.length === 1) {
+module.exports = {
+  name: "kill",
+  description: "Tue le joueur mentionné",
+  args: true,
+  usage: "[@Membre]",
+  guildOnly: true,
+  canDo: ["Administrateur", "Ministrateur"],
+  aliases: [],
+  execute(client, message, args) {
     let lui = message.guild.member(message.mentions.users.first());
-    if (lui === null) {
-      message.reply(
-        "Formulation incorrecte. La bonne syntaxe est : /Kill @[utilisateur]."
-      );
-    } else {
-      gameUtils.Kill(message, lui);
-    }
-  } else {
-    message.reply(
-      "Formulation incorrecte. La bonne syntaxe est : /Kill @[utilisateur]."
-    );
+    gameUtils.Kill(message, lui);
   }
 };

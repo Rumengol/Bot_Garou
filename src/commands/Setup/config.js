@@ -4,8 +4,16 @@ const adapter = new FileSync("adminrole.json")
 const db = low(adapter)
 const identifiers = require("../../identifiers.json")
 
-exports.run = (client, message, args) => {
-    if (args[1] == "auto") {
+module.exports = {
+name: 'config',
+description:'Lance l\'assistant de configuration du serveur',
+args: true,
+usage: 'auto',
+guildOnly: true,
+canDo: ['Administrateur','Guildmaster'],
+aliases: [],
+execute(client, message, args){
+    if (args[0] == "auto") {
         var guild = message.guild;
         if (db.get("roles").map("guild").value().toString().includes(guild.id) || db.get("salons").map("guild").value().toString().includes(guild.id)) {
             message.reply("Attention, au moins un élément est configuré sur ce serveur. Veuillez le(s) retirer afin d'activer la configuration automatique.")
@@ -260,3 +268,4 @@ exports.run = (client, message, args) => {
         );
     }
 }
+};

@@ -5,12 +5,19 @@ const db = low(adapter);
 const identifiers = require("../../identifiers.json");
 const utils = require("../Utils.js");
 
-exports.run = (client, message, args) => {
-  if (args[2] != null) {
+module.exports = {
+  name: "addsalon",
+  description: "Ajoute un salon du serveur à l'identifiant spécifiqué",
+  args: true,
+  usage: "[ID Salon] [identifiant]",
+  guildOnly: true,
+  canDo: ["Administrateur", "Ministrateur"],
+  aliases: ["newsalon"],
+  execute(client, message, args) {
     //Vérification que l'identifiant fourni est reconnu
-    if (identifiers.salons.split(",").includes(args[2])) {
+    if (identifiers.salons.split(",").includes(args[1])) {
       //Récupère le lieu dans la base de données s'il est présent
-      var lieu = utils.getPlaceInDb(args[2], message);
+      var lieu = utils.getPlaceInDb(args[1], message);
       //Si c'est le cas
       if (lieu != null) {
         //Demande si le salon doit être remplacé
@@ -31,14 +38,14 @@ exports.run = (client, message, args) => {
             db.get("salons")
               .push({
                 guild: message.guild.id,
-                id: args[2],
-                story_value: args[1]
+                id: args[1],
+                story_value: args[0]
               })
               .write();
             db.get("salons")
               .remove({
                 guild: message.guild.id,
-                id: args[2],
+                id: args[1],
                 story_value: lieu
               })
               .write();
@@ -68,12 +75,12 @@ exports.run = (client, message, args) => {
         db.get("salons")
           .push({
             guild: message.guild.id,
-            id: args[2],
-            story_value: args[1]
+            id: args[1],
+            story_value: args[0]
           })
           .write();
         message.channel.send(
-          "<#" + args[1] + ">" + " ajouté comme salons " + args[2]
+          "<#" + args[0] + ">" + " ajouté comme salons " + args[1]
         );
       }
     }

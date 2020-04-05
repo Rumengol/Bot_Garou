@@ -1,8 +1,15 @@
 const datas = require("../../global.js");
 const utils = require("../../Utils/Utils.js");
 
-exports.run = (client, message, args) => {
-  if (args.length == 1) {
+module.exports = {
+  name: "decharme",
+  description: "Décharme manuellement le joueur mentionné",
+  args: true,
+  usage: "[@Membre]",
+  guildOnly: true,
+  canDo: ["Administrateur", "Ministrateur"],
+  aliases: [],
+  execute(client, message, args) {
     message.delete();
     let lui = message.guild.member(message.mentions.users.first());
     if (lui === null) {
@@ -20,10 +27,5 @@ exports.run = (client, message, args) => {
         1
       );
     }
-  } else {
-    message.delete();
-    message.channel.send(
-      "Formulation incorrecte. La bonne syntaxe est ``/decharme @[utilisateur]``"
-    );
   }
 };

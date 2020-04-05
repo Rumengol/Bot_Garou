@@ -1,8 +1,15 @@
 const datas = require("../../global.js");
 const utils = require("../../Utils/Utils.js");
 
-exports.run = (client, message, args) => {
-  if (args.length <= 1) {
+module.exports = {
+  name: "charme",
+  description: "Charme le joueur mentionné",
+  args: true,
+  usage: "[@Membre]",
+  guildOnly: true,
+  canDo: ["Administrateur", "Ministrateur"],
+  aliases: [],
+  execute(client, message, args) {
     message.delete();
     let lui = message.guild.member(message.mentions.users.first());
     if (lui === null) {
@@ -18,10 +25,5 @@ exports.run = (client, message, args) => {
       charmeChan.send(lui + " vient de se faire charmer !");
       datas.charmes[message.guild.id].push(lui);
     }
-  } else {
-    message.delete();
-    message.channel.send(
-      "Formulation incorrecte. La bonne syntaxe est ``/charme @[utilisateur]``"
-    );
   }
 };

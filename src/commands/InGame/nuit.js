@@ -4,7 +4,15 @@ const gameUtils = require("../../Utils/gameUtils.js");
 const Presets = require("../../theme/Presets.json");
 const nightUtils = require("../../Utils/nightUtils.js");
 
-exports.run = (client, message, args) => {
+module.exports = {
+name: 'nuit',
+description:'Lance la nuit, et l\'assistant automatique',
+args: false,
+usage: '',
+guildOnly: true,
+canDo: ['Administrateur','Ministrateur'],
+aliases: ["night"],
+execute(client, message, args){
   var theme = Presets[datas.theme[message.guild.id]];
   datas.StateOfTheGame[message.guild.id][0] =
     Presets[datas.theme[message.guild.id]].time.Night;
@@ -575,4 +583,5 @@ exports.run = (client, message, args) => {
       collectorLG.stop();
     }
   });
+}
 };

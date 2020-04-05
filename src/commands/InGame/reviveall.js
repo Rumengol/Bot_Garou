@@ -1,5 +1,14 @@
 var gameUtils = require("../../Utils/gameUtils.js");
 
-exports.run = (client, message, args) => {
-  gameUtils.reviveAll(message);
+module.exports = {
+  name: "reviveall",
+  description: "Ressuscite tous les joueurs morts",
+  args: false,
+  usage: "",
+  guildOnly: true,
+  canDo: ["Administrateur", "Ministrateur"],
+  aliases: [],
+  execute(client, message, args) {
+    gameUtils.reviveAll(message);
+  }
 };

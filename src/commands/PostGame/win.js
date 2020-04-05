@@ -2,8 +2,15 @@ const datas = require("../../global.js");
 const utils = require("../../Utils/Utils.js");
 const Presets = require("../../theme/Presets.json");
 
-exports.run = (client, message, args) => {
-  if (args[0] != null) {
+module.exports = {
+  name: "win",
+  description: "Détermine les vainqueurs",
+  args: true,
+  usage: "[village|LG|jdf|amoureux]",
+  guildOnly: true,
+  canDo: ["Administrateur", "Ministrateur"],
+  aliases: ["victoire"],
+  execute(client, message, args) {
     var victoire = "**VICTORIEUX** 👑";
     var defaite = "Perdant";
     var villageois = Presets[datas.theme[message.guild.id]].villageois;
@@ -64,7 +71,5 @@ exports.run = (client, message, args) => {
     } else {
       message.reply("Je n'ai pas compris " + args[0] + ". Qui a gagné ?");
     }
-  } else {
-    message.reply("Je n'ai pas compris, qui a gagné ?");
   }
 };
