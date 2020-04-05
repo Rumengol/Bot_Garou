@@ -1,4 +1,4 @@
-const Presets = require("../../theme/Presets.json");
+const Presets = require("../../../themes/Presets.json");
 const datas = require("../../global.js");
 
 module.exports = {

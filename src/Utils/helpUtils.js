@@ -1,4 +1,4 @@
-const Embed = require("./src/commands/embeds");
+const Embed = require("../commands/embeds");
 const Discord = require("discord.js");
 
 var methods = {
@@ -72,7 +72,7 @@ var methods = {
     }
   },
 
-   helpAdmin: function(message, lui) {
+  helpAdmin: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpAdmin1).then(message => {
@@ -86,8 +86,8 @@ var methods = {
       });
     });
   },
-  
-   helpGameGen: function(message, lui) {
+
+  helpGameGen: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpGameGen).then(message => {
@@ -114,15 +114,15 @@ var methods = {
             collectorGG.stop();
             this.helpGen(message, lui);
             break;
-  
+
           default:
             break;
         }
       });
     });
   },
-  
-   helpGameOne: function(message, lui) {
+
+  helpGameOne: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpGame1).then(message => {
@@ -144,15 +144,15 @@ var methods = {
             collectorG1.stop();
             this.helpGameThree(message, lui);
             break;
-  
+
           default:
             break;
         }
       });
     });
   },
-  
-   helpGameTwo: function(message, lui) {
+
+  helpGameTwo: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpGame2).then(message => {
@@ -179,15 +179,15 @@ var methods = {
             collectorG2.stop();
             this.helpGameWeird(message, lui);
             break;
-  
+
           default:
             break;
         }
       });
     });
   },
-  
-   helpGameWeird: function(message, lui) {
+
+  helpGameWeird: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpGame2Chelou).then(message => {
@@ -201,8 +201,8 @@ var methods = {
       });
     });
   },
-  
-   helpGameThree: function(message, lui) {
+
+  helpGameThree: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpGame3).then(message => {
@@ -224,15 +224,15 @@ var methods = {
             collectorG3.stop();
             this.helpGameTwo(message, lui);
             break;
-  
+
           default:
             break;
         }
       });
     });
   },
-  
-   helpTools : function(message, lui) {
+
+  helpTools: function(message, lui) {
     var filter = reac => reac.users.map(u => u.username).includes(lui.username);
     message.clearReactions();
     message.edit(Embed.helpTools).then(message => {

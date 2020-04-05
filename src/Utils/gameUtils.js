@@ -1,6 +1,6 @@
-var utils = require("./Utils.js");
-var datas = require("../global.js");
-const Presets = require("../../theme/Presets.json");
+const utils = require("./Utils.js");
+const datas = require("../global.js");
+const Presets = require("../../themes/Presets.json");
 
 var methods = {
   Kill: function(message, lui) {
@@ -79,7 +79,7 @@ var methods = {
     }
   },
 
-  reviveAll = function(message){
+  reviveAll: function(message) {
     var roleMortID = utils.getRoleInDb("morts", message);
     var roleMort = message.guild.roles.get(roleMortID);
     var roleVivID = utils.getRoleInDb("vivants", message);
@@ -87,39 +87,36 @@ var methods = {
 
     var vocalID = utils.getPlaceInDb("vocal", message);
 
-  eux = roleMort.members;
-  eux.forEach(lui => {
-    setTimeout(() => {
-      lui.addRole(roleViv);
-    }, 500);
-    if (vocal.members.has(lui))
-      lui.setMute(false);
-    //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
-    setTimeout(() => {
-      lui.removeRole(roleMort);
-    }, 1000);
-  });
-  console.log("Réussite du reviveall");
+    eux = roleMort.members;
+    eux.forEach(lui => {
+      setTimeout(() => {
+        lui.addRole(roleViv);
+      }, 500);
+      if (vocal.members.has(lui)) lui.setMute(false);
+      //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
+      setTimeout(() => {
+        lui.removeRole(roleMort);
+      }, 1000);
+    });
+    console.log("Réussite du reviveall");
   },
 
-  prolongations : function(message,endTimer){
+  prolongations: function(message, endTimer) {
     var vivantID = utils.getRoleInDb("vivants", message);
-    var vivantRole = message.guild.roles.get(vivantID)
+    var vivantRole = message.guild.roles.get(vivantID);
     message.channel.overwritePermissions(vivantRole, { SEND_MESSAGES: true });
     var votesID = utils.getPlaceInDb("votes", message);
-    var voteChan = message.guild.channels.get(votesID)
+    var voteChan = message.guild.channels.get(votesID);
     var vocalID = utils.getPlaceInDb("vocal", message);
-    var vocalChan = message.guild.channels.get(vocalID)
+    var vocalChan = message.guild.channels.get(vocalID);
     voteChan.overwritePermissions(vivantRole, { VIEW_CHANNEL: true });
     utils.unmute(vivantRole, message);
     var limite = 90;
-    datas.x[message.guild.id] = setInterval(function () {
-      message.channel.send(
-        limite + " secondes restantes."
-      );
+    datas.x[message.guild.id] = setInterval(function() {
+      message.channel.send(limite + " secondes restantes.");
       limite -= 30;
     }, 30000);
-    datas.z[message.guild.id] = setTimeout(function () {
+    datas.z[message.guild.id] = setTimeout(function() {
       message.channel.overwritePermissions(role, {
         SEND_MESSAGES: false
       });
@@ -127,21 +124,23 @@ var methods = {
       voteChan.overwritePermissions(role, { VIEW_CHANNEL: false });
       utils.mute(vivantRole, message);
       clearInterval(datas.x[message.guild.id]);
-      this.endVote(message)
+      this.endVote(message);
     }, finpouet);
   },
 
-  deathBE : function(message, item){
+  deathBE: function(message, item) {
     var chan = item.User.dmChannel;
     const filter2 = m => datas.inscrits[message.guild.id].includes(m.author.id);
     chan.send(
-      "Tu as été éliminé par défaut, " + datas.BE[message.guild.id] + " ! Mais dans ton dernier souffle, tu peux décider qui est digne de voter demain. \n **0.** Personne \n" +
-      datas.vivants[message.guild.id] +
-      " \n *N'indiquez que les numéros sous la forme X-Y-... Par exemple, ``1-2`` pour permettre à " +
-      datas.distribRoles[message.guild.id][0].User.username +
-      " et " +
-      datas.distribRoles[message.guild.id][1].User.username +
-      " de voter.*"
+      "Tu as été éliminé par défaut, " +
+        datas.BE[message.guild.id] +
+        " ! Mais dans ton dernier souffle, tu peux décider qui est digne de voter demain. \n **0.** Personne \n" +
+        datas.vivants[message.guild.id] +
+        " \n *N'indiquez que les numéros sous la forme X-Y-... Par exemple, ``1-2`` pour permettre à " +
+        datas.distribRoles[message.guild.id][0].User.username +
+        " et " +
+        datas.distribRoles[message.guild.id][1].User.username +
+        " de voter.*"
     );
     var collector = chan.createCollector(filter2);
     datas.eux[message.guild.id] = [];
@@ -150,19 +149,23 @@ var methods = {
       var choix = [];
       var splitemess = mess.content.toLowerCase().split("-");
       for (var i = 0; i < splitemess.length; i++) {
-        choix.push(datas.distribRoles[message.guild.id][splitemess[i] - 1])
+        choix.push(datas.distribRoles[message.guild.id][splitemess[i] - 1]);
       }
       var reply = choix.map(getUser).join(", ");
-      mess.channel.send("Voici ceux qui peuvent voter demain : " + reply)
+      mess.channel.send("Voici ceux qui peuvent voter demain : " + reply);
 
-      var annonce = choix.map(getMember).join(", ")
-      message.channel.send(`Le ${datas.BE[message.guild.id]} a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`)
+      var annonce = choix.map(getMember).join(", ");
+      message.channel.send(
+        `Le ${
+          datas.BE[message.guild.id]
+        } a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`
+      );
       datas.banniDeVote[message.guild.id].concat(choix);
       //console.log(banniDeVote[message.guild.id]);
       //console.log(choix)
-      datas.jourBE[message.guild.id] = true
+      datas.jourBE[message.guild.id] = true;
       collector.stop();
-    })
+    });
     function getUser(item) {
       return item.User.username;
     }

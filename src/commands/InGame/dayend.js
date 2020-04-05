@@ -1,7 +1,7 @@
 const utils = require("../../Utils/Utils.js");
 const datas = require("../../global.js");
-const gameUtils = require("../../Utils/gameUtils.js");
 const voteUtils = require("../../Utils/voteUtils.js");
+
 module.exports = {
   name: "dayend",
   description: "Achève le jour prématurément",
@@ -17,8 +17,6 @@ module.exports = {
     var vivantRole = message.guild.role.get(vivantID);
     var voteID = utils.getPlaceInDb("votes", message);
     var voteChan = message.guild.channels.get(voteID);
-    var vocalID = utils.getPlaceInDb("vocal", message);
-    var vocalChan = message.guild.channels.get(vocalID);
 
     clearInterval(datas.x[message.guild.id]);
     clearTimeout(datas.y[message.guild.id]);

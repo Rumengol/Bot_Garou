@@ -3,7 +3,7 @@ const FileSync = require("lowdb/adapters/FileSync");
 const adapter = new FileSync("adminrole.json");
 const db = low(adapter);
 const identifiers = require("../../identifiers.json");
-const utils = require("../Utils.js");
+const utils = require("../../Utils/Utils.js");
 
 module.exports = {
   name: "addsalon",

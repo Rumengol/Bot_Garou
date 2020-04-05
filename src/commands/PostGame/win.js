@@ -1,6 +1,6 @@
 const datas = require("../../global.js");
 const utils = require("../../Utils/Utils.js");
-const Presets = require("../../theme/Presets.json");
+const Presets = require("../../../themes/Presets.json");
 
 module.exports = {
   name: "win",

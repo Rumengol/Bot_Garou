@@ -29,7 +29,7 @@ module.exports = (client, message) => {
     let reply = "Merci de préciser les arguments de cette commande.";
 
     if (cmd.usage) {
-      reply += `\n L'utilisation correcte est : \`${prefix}${cmd.name} ${cmd.usage}\``;
+      reply += `\n L'utilisation correcte est : \`/${cmd.name} ${cmd.usage}\``;
     }
 
     return message.channel.send(reply);

@@ -1,4 +1,4 @@
-const datas = require("../../global.js");
+const datas = require("../global.js");
 const utils = require("./Utils.js")
 
 var methods = {

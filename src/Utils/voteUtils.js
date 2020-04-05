@@ -2,7 +2,7 @@ var utils = require("./Utils.js");
 var datas = require("../global.js");
 var gameUtils = require("./gameUtils.js");
 
-var methods = {
+module.exports = {
   endVote: function(message) {
     var pendu = { user: null, votes: -1, contenu: "personne" };
     var egalite = false;
@@ -131,4 +131,3 @@ var methods = {
   }
 };
 
-module.exports = methods;

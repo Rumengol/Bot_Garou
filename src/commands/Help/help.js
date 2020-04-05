@@ -1,4 +1,4 @@
-const helpUtils = require("./helpUtils.js");
+const helpUtils = require("../../Utils/helpUtils.js");
 
 exports.run = (client, message, args) => {
   if (message.channel.type === "dm") {

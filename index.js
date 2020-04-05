@@ -73,13 +73,19 @@ fs.readdir("./src/events/", (err, files) => {
 
 bot.commands = new Enmap();
 
-fs.readdir("./src/commands/", (err, files) => {
+getAllCommands("./src/commands/",false)
+
+function getAllCommands(path,isDir){
+fs.readdir(path, (err, files) => {
   if (err) return console.error(err);
   files.forEach(file => {
+    if(fs.lstatSync(`${path}${file}`).isDirectory()){
+      getAllCommands(`${path}${file}/`,true);
+    }
     console.log(file.toString())
     if (!file.endsWith(".js")) return;
     // Load the command file itself
-    let props = require(`./src/commands/${file}`);
+      let props = require(`${path}${file}`);
     // Get just the command name from the file name
     let commandName = file.split(".")[0];
     console.log(`Attempting to load command ${commandName}`);
@@ -87,6 +93,7 @@ fs.readdir("./src/commands/", (err, files) => {
     bot.commands.set(commandName, props);
   });
 });
+}
 
 
 bot.on("ready", () => {
