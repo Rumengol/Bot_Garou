@@ -1,6 +1,7 @@
 const datas = require("../../global.js");
 const utils = require("../../Utils/Utils.js");
 const gameUtils = require("../../Utils/gameUtils.js");
+const dbutils = require("../../Utils/dbUtils.js");
 
 module.exports = {
   name: "gamend",
@@ -11,13 +12,13 @@ module.exports = {
   canDo: ["Administrateur", "Ministrateur"],
   aliases: [],
   execute(client, message, args) {
-    var loupID = utils.getPlaceInDb("loups", message);
+    var loupID = dbutils.getPlaceInDb("loups", message);
     var loupChan = message.guild.channels.get(loupID);
 
-    var vivantID = utils.getRoleInDb("vivants", message);
+    var vivantID = dbutils.getRoleInDb("vivants", message);
     var vivantRole = message.guild.roles.get(vivantID);
 
-    var charmeID = utils.getPlaceInDb("charmed", message);
+    var charmeID = dbutils.getPlaceInDb("charmed", message);
     var charmeChan = message.guild.channels.get(charmeID);
 
     var townID = getPlaceInDb("village", message);

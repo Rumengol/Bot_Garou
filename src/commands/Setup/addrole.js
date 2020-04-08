@@ -1,6 +1,5 @@
 const identifiers = require("../../identifiers.json");
 const dbUtils = require("../../Utils/dbUtils.js");
-const utils = require("../../Utils/Utils.js");
 
 module.exports = {
   name: "addrole",
@@ -12,7 +11,7 @@ module.exports = {
   aliases: ["newrole"],
   execute(client, message, args) {
     if (identifiers.roles.split(",").includes(args[1])) {
-      var role = utils.getRoleInDb(args[1], message);
+      var role = dbutils.getRoleInDb(args[1], message);
       var obj = {
         guild: message.guild.id,
         id: args[1],

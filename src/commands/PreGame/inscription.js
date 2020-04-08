@@ -1,4 +1,5 @@
 const datas = require("../../global.js");
+const Discord = require("discord.js");
 
 module.exports = {
   name: "inscription",

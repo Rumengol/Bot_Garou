@@ -1,6 +1,7 @@
 const utils = require("../../Utils/Utils.js");
 const datas = require("../../global.js");
 const Presets = require("../../../themes/Presets.json");
+const dbutils = require("../../Utils/dbUtils.js");
 
 module.exports = {
   name: "daystart",
@@ -21,7 +22,7 @@ module.exports = {
       Presets[datas.theme[message.guild.id]].time.Day;
 
     message.delete();
-    var vivantID = utils.getRoleInDb("vivants", message);
+    var vivantID = dbutils.getRoleInDb("vivants", message);
     var vivantRole = message.guild.role.get(vivantID);
 
     message.channel.overwritePermissions(vivant, { SEND_MESSAGES: true });
@@ -31,9 +32,9 @@ module.exports = {
         datas.StateOfTheGame[message.guild.id].join(" ") +
         ")"
     );
-    var voteID = utils.getPlaceInDb("votes", message);
+    var voteID = dbutils.getPlaceInDb("votes", message);
     var voteChan = message.guild.channels.get(voteID);
-    var vocalID = utils.getPlaceInDb("vocal", message);
+    var vocalID = dbutils.getPlaceInDb("vocal", message);
     var vocalChan = message.guild.channels.get(vocalID);
     if (voteChan == null || vocalChan == null) {
       message.reply("Salon de vote ou vocal non défini");

@@ -1,12 +1,13 @@
 var utils = require("./Utils.js");
 var datas = require("../global.js");
 var gameUtils = require("./gameUtils.js");
+const dbutils = require("./dbUtils.js");
 
 module.exports = {
   endVote: function(message) {
     var pendu = { user: null, votes: -1, contenu: "personne" };
     var egalite = false;
-    var townID = utils.getPlaceInDb("village", message);
+    var townID = dbutils.getPlaceInDb("village", message);
     var village = message.guild.channels.get(townID);
 
     datas.voted[message.guild.id].forEach(vote => {
@@ -98,10 +99,10 @@ module.exports = {
     datas.voted[message.guild.id] = [];
     datas.votedejour[message.guild.id] = true;
 
-    var vivantID = utils.getRoleInDb("vivants", message);
+    var vivantID = dbutils.getRoleInDb("vivants", message);
     var vivantRole = message.guild.roles.get(vivantID);
 
-    var voteID = utils.getPlaceInDb("votes", message);
+    var voteID = dbutils.getPlaceInDb("votes", message);
     var voteChan = message.guild.channels.get(voteID);
 
     var vivants;
@@ -130,4 +131,3 @@ module.exports = {
     }
   }
 };
-

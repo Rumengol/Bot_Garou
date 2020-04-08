@@ -1,13 +1,15 @@
 const utils = require("./Utils.js");
 const datas = require("../global.js");
 const Presets = require("../../themes/Presets.json");
+const dbutils = require("./dbUtils.js");
+const Discord = require("discord.js");
 
 var methods = {
   Kill: function(message, lui) {
-    var roleID = utils.getRoleInDb("vivants", message);
+    var roleID = dbutils.getRoleInDb("vivants", message);
     var role = message.guild.roles.get(roleID);
     setTimeout(() => {
-      var roleID2 = utils.getRoleInDb("morts", message);
+      var roleID2 = dbutils.getRoleInDb("morts", message);
       var role2 = message.guild.roles.get(roleID2);
       lui.addRole(role2);
     }, 500);
@@ -15,10 +17,10 @@ var methods = {
     setTimeout(() => {
       lui.removeRole(role);
     }, 3000);
-    var lieuID = utils.getPlaceInDb("village", message);
+    var lieuID = dbutils.getPlaceInDb("village", message);
     var lieu = message.guild.channels.get(lieuID);
 
-    var lieuID2 = utils.getPlaceInDb("vocal", message);
+    var lieuID2 = dbutils.getPlaceInDb("vocal", message);
     var vocal = message.guild.channels.get(lieuID2);
 
     var item = utils.findObjectInList(
@@ -45,7 +47,7 @@ var methods = {
 
     if (vocal.members.has(lui)) lui.setMute(true);
     message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
-    var lieuID3 = utils.getPlaceInDb("charmed", message);
+    var lieuID3 = dbutils.getPlaceInDb("charmed", message);
     var charmeChannel = message.guild.channels.get(lieuID3);
 
     message.guild.channels
@@ -53,7 +55,7 @@ var methods = {
       .overwritePermissions(lui, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
 
     if (datas.joueursLG[message.guild.id].includes(lui)) {
-      var lieuID4 = utils.getPlaceInDb("loups", message);
+      var lieuID4 = dbutils.getPlaceInDb("loups", message);
       var loupChannel = message.guild.channels.get(lieuID4);
       message.guild.channels
         .get(loupChannel)
@@ -80,12 +82,12 @@ var methods = {
   },
 
   reviveAll: function(message) {
-    var roleMortID = utils.getRoleInDb("morts", message);
+    var roleMortID = dbutils.getRoleInDb("morts", message);
     var roleMort = message.guild.roles.get(roleMortID);
-    var roleVivID = utils.getRoleInDb("vivants", message);
+    var roleVivID = dbutils.getRoleInDb("vivants", message);
     var roleViv = message.guild.roles.get(roleVivID);
 
-    var vocalID = utils.getPlaceInDb("vocal", message);
+    var vocalID = dbutils.getPlaceInDb("vocal", message);
 
     eux = roleMort.members;
     eux.forEach(lui => {
@@ -102,12 +104,12 @@ var methods = {
   },
 
   prolongations: function(message, endTimer) {
-    var vivantID = utils.getRoleInDb("vivants", message);
+    var vivantID = dbutils.getRoleInDb("vivants", message);
     var vivantRole = message.guild.roles.get(vivantID);
     message.channel.overwritePermissions(vivantRole, { SEND_MESSAGES: true });
-    var votesID = utils.getPlaceInDb("votes", message);
+    var votesID = dbutils.getPlaceInDb("votes", message);
     var voteChan = message.guild.channels.get(votesID);
-    var vocalID = utils.getPlaceInDb("vocal", message);
+    var vocalID = dbutils.getPlaceInDb("vocal", message);
     var vocalChan = message.guild.channels.get(vocalID);
     voteChan.overwritePermissions(vivantRole, { VIEW_CHANNEL: true });
     utils.unmute(vivantRole, message);
@@ -172,6 +174,32 @@ var methods = {
     function getMember(item) {
       return item.GuildMember;
     }
+  },
+
+  Recap: function(channel) {
+    embedRecap = new Discord.RichEmbed()
+      .setTitle("Récapitulatif de la partie")
+      .setDescription("Victoire des **" + datas.win[channel.guild.id] + "** !")
+      .setThumbnail(
+        "https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png"
+      )
+      .setColor("#FFFF00");
+
+    datas.distribRoles[channel.guild.id].forEach(role => {
+      embedRecap.addField(
+        role.Victoire,
+        role.User + " était **" + role.Role + "** *(vivant)*."
+      );
+    });
+
+    datas.distribRolMorts[channel.guild.id].forEach(mort => {
+      embedRecap.addField(
+        "Perdant",
+        mort.User + " était **" + mort.Role + "** *(mort)*."
+      );
+    });
+
+    channel.send(embedRecap);
   }
 };
 

@@ -4,10 +4,10 @@ const dbUtils = require("./dbUtils.js");
 
 var methods = {
   Distribution: function(message) {
-    var lieu = utils.getPlaceInDb("logs", message);
+    var lieu = dbutils.getPlaceInDb("logs", message);
     var logs = message.guild.channels.get(lieu);
 
-    var lieu2 = utils.getPlaceInDb("loups", message);
+    var lieu2 = dbutils.getPlaceInDb("loups", message);
     var lieuLG = message.guild.channels.get(lieu2);
 
     //Garde en mémoire le message dans la guilde

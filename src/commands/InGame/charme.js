@@ -1,5 +1,6 @@
 const datas = require("../../global.js");
 const utils = require("../../Utils/Utils.js");
+const dbutils = require("../../Utils/dbUtils.js");
 
 module.exports = {
   name: "charme",
@@ -15,7 +16,7 @@ module.exports = {
     if (lui === null) {
       message.reply("Veuillez mentionner un utilisateur valide.");
     } else {
-      var charmeID = utils.getPlaceInDb("charmed", message);
+      var charmeID = dbutils.getPlaceInDb("charmed", message);
       var charmeChan = message.guild.channels.get(charmeID);
 
       charmeChan.overwritePermissions(lui, {

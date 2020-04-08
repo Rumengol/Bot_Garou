@@ -1,6 +1,5 @@
-var utils = require("./Utils.js");
-var datas = require("../global.js");
-var gameUtils = require("./gameUtils.js");
+const datas = require("../global.js");
+const dbutils = require("./dbUtils.js");
 
 var methods = {
   UsePotMort: function(message, guild, theme) {
@@ -51,7 +50,7 @@ var methods = {
   },
 
   Charme: function(message, lui, welcome) {
-    var charmeID = utils.getPlaceInDb("charmed", message);
+    var charmeID = dbutils.getPlaceInDb("charmed", message);
     var charmeChan = message.guild.channels.get(charmeID);
     charmeChan.overwritePermissions(lui, {
       VIEW_CHANNEL: true,

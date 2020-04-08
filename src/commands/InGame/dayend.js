@@ -1,6 +1,7 @@
 const utils = require("../../Utils/Utils.js");
 const datas = require("../../global.js");
 const voteUtils = require("../../Utils/voteUtils.js");
+const dbutils = require("../../Utils/dbUtils.js");
 
 module.exports = {
   name: "dayend",
@@ -13,9 +14,9 @@ module.exports = {
   execute(client, message, args) {
     message.delete();
     voteUtils.endVote(message);
-    var vivantID = utils.getRoleInDb("vivants", message);
+    var vivantID = dbutils.getRoleInDb("vivants", message);
     var vivantRole = message.guild.role.get(vivantID);
-    var voteID = utils.getPlaceInDb("votes", message);
+    var voteID = dbutils.getPlaceInDb("votes", message);
     var voteChan = message.guild.channels.get(voteID);
 
     clearInterval(datas.x[message.guild.id]);

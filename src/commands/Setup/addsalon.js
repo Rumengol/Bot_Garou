@@ -1,5 +1,4 @@
 const identifiers = require("../../identifiers.json");
-const utils = require("../../Utils/Utils.js");
 const dbUtils = require("../../Utils/dbUtils.js");
 
 module.exports = {
@@ -14,7 +13,7 @@ module.exports = {
     //Vérification que l'identifiant fourni est reconnu
     if (identifiers.salons.split(",").includes(args[1])) {
       //Récupère le lieu dans la base de données s'il est présent
-      var lieu = utils.getPlaceInDb(args[1], message);
+      var lieu = dbutils.getPlaceInDb(args[1], message);
       var obj = {
         guild: message.guild.id,
         id: args[1],
