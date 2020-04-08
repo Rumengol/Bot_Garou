@@ -1,4 +1,5 @@
 const datas = require("../global.js");
+const dbutils = require("../Utils/dbUtils.js");
 
 module.exports = {
   name: "ping",
@@ -10,5 +11,6 @@ module.exports = {
   aliases: [],
   execute(client, message, args) {
     message.channel.send("Pong !");
+    console.log(dbutils.getRoleInDb("vivants", message));
   }
 };

@@ -10,7 +10,7 @@ module.exports = {
   canDo: ["Administrateur", "Ministrateur"],
   aliases: [],
   execute(client, message, args) {
-    datas.maxP[message.guild.id] = args[1];
+    datas.maxP[message.guild.id] = args[0];
     message.delete();
     datas.inscrEmbed[message.guild.id] = new Discord.RichEmbed()
       .setTitle("Inscriptions pour les parties de loup Garou")

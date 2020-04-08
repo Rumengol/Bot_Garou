@@ -1,6 +1,8 @@
 const datas = require("../../global.js");
 const compo = require("../../Utils/compoUtils.js");
 const themes = require("../../Utils/themeUtils.js");
+const Theme = require("../../../themes/Themes.js");
+const Discord = require("discord.js");
 
 module.exports = {
   name: "compo",

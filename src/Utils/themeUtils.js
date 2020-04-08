@@ -14,7 +14,7 @@ var methods = {
           datas.emoteLG[message.guild.id] = role.emote;
           break;
         case "Simple Villageois":
-          datas.datas.SV[message.guild.id] = role.name;
+          datas.SV[message.guild.id] = role.name;
           datas.IDsv[message.guild.id] = role.ID;
           datas.emoteSV[message.guild.id] = role.emote;
           break;

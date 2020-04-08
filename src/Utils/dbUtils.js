@@ -47,6 +47,7 @@ var methods = {
 
   getPlaceInDb: function(salon, message) {
     var junk = [];
+    var lieuDB;
     while (true) {
       var truc = this.getAllValuesInDb("db", "salons", "id").indexOf(
         salon,
@@ -62,15 +63,15 @@ var methods = {
     junk.forEach(minijunk => {
       if (db.get(`salons[${minijunk}].guild`).value() === message.guild.id) {
         lieuDB = db.get(`salons[${minijunk}].story_value`).value();
-        return lieuDB;
-      } else {
-        return false;
       }
     });
+    return lieuDB;
   },
 
   getRoleInDb: function(role, message) {
     junk = [];
+    var roleDB;
+
     while (true) {
       var truc = this.getAllValuesInDb("db", "roles", "id").indexOf(role, truc);
       if (truc === -1) {
@@ -83,11 +84,9 @@ var methods = {
     junk.forEach(minijunk => {
       if (db.get(`roles[${minijunk}].guild`).value() === message.guild.id) {
         roleDB = db.get(`roles[${minijunk}].story_value`).value();
-        return roleDB;
-      } else {
-        return false;
       }
     });
+    return roleDB;
   }
 };
 

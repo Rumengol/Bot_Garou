@@ -33,8 +33,9 @@ module.exports = {
     var townID = dbutils.getPlaceInDb("village", message);
     var village = message.guild.channels.get(townID);
 
-    var vivantID = dbutils.getRoleInDb("vivants", message);
+    var vivantID = dbutils.getRoleInDb("vivants", message); 
     var vivantRole = message.guild.roles.get(vivantID);
+
     datas.Listvivants[message.guild.id] = vivantRole.members.map(
       m => m.user.username
     );

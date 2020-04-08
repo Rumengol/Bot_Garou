@@ -1,12 +1,13 @@
 const datas = require("../global.js");
 const utils = require("../Utils/Utils.js");
 const dbutils = require("../Utils/dbUtils.js");
+const Discord = require("discord.js");
 
 module.exports = (client, reac, user) => {
   try {
     if (reac.message.channel.type != "dm") {
       var vivantID = dbutils.getRoleInDb("vivants", reac.message);
-      var vivantRole = reac.message.guild.get(vivantID);
+      var vivantRole = reac.message.guild.roles.get(vivantID);
 
       //Gestion des réactions d'inscription
       if (reac.message === datas.inscr[reac.message.guild.id]) {
