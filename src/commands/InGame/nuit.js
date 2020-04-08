@@ -14,6 +14,13 @@ module.exports = {
   canDo: ["Administrateur", "Ministrateur"],
   aliases: ["night"],
   execute(client, message, args) {
+    const filter = m =>
+      m.author === message.author || datas.adminlist.includes(m.author);
+    const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
+    const filterSoso = reac =>
+      reac.emoji.name === "✅" || reac.emoji.name === "❌";
+    const filterLG = m => joueursLG[message.guild.id].includes(m.author);
+
     var theme = Presets[datas.theme[message.guild.id]];
     datas.StateOfTheGame[message.guild.id][0] =
       Presets[datas.theme[message.guild.id]].time.Night;
@@ -33,7 +40,7 @@ module.exports = {
     var townID = dbutils.getPlaceInDb("village", message);
     var village = message.guild.channels.get(townID);
 
-    var vivantID = dbutils.getRoleInDb("vivants", message); 
+    var vivantID = dbutils.getRoleInDb("vivants", message);
     var vivantRole = message.guild.roles.get(vivantID);
 
     datas.Listvivants[message.guild.id] = vivantRole.members.map(

@@ -1,11 +1,14 @@
 const datas = require("../global.js");
 const dbutils = require("./dbUtils.js");
+const Discord = require("discord.js");
+const utils = require("./Utils.js");
+const distrib = require("./distribUtils.js");
 
 var methods = {
   prepCompo: function(collector) {
+    const filter = m =>
+      m.author === message.author || datas.adminlist.includes(m.author);
     collector.on("collect", message => {
-      const filter = m =>
-        m.author === message.author || datas.adminlist.includes(m.author);
       splitemess = message.content.toLowerCase().split(" ");
       var qte = 1;
       var pluriel = "";
@@ -21,62 +24,86 @@ var methods = {
         if (datas.IDlg[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.LG[message.guild.id],
-            datas.emoteLG[message.guild.id]
+            datas.emoteLG[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDcupi[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.Cupi[message.guild.id],
-            datas.emoteCupi[message.guild.id]
+            datas.emoteCupi[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDsalva[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.Salva[message.guild.id],
-            datas.emoteSalva[message.guild.id]
+            datas.emoteSalva[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDsoso[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.Soso[message.guild.id],
-            datas.emoteSoso[message.guild.id]
+            datas.emoteSoso[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDancien[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.Ancien[message.guild.id],
-            datas.emoteAncien[message.guild.id]
+            datas.emoteAncien[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDchassou[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.Chassou[message.guild.id],
-            datas.emoteChassou[message.guild.id]
+            datas.emoteChassou[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDidv[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.IDV[message.guild.id],
-            datas.emoteIDV[message.guild.id]
+            datas.emoteIDV[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDjdf[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.JDF[message.guild.id],
-            datas.emoteJDF[message.guild.id]
+            datas.emoteJDF[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDvovo[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.Vovo[message.guild.id],
-            datas.emoteVovo[message.guild.id]
+            datas.emoteVovo[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDsv[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.SV[message.guild.id],
-            datas.emoteSV[message.guild.id]
+            datas.emoteSV[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDbe[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.BE[message.guild.id],
-            datas.emoteBE[message.guild.id]
+            datas.emoteBE[message.guild.id],
+            message,
+            qte
           );
         } else if (datas.IDpf[message.guild.id].includes(splitemess[1])) {
           this.onAddRole(
             datas.PF[message.guild.id],
-            datas.emotePF[message.guild.id]
+            datas.emotePF[message.guild.id],
+            message,
+            qte
           );
         } else {
           datas.nbRole[message.guild.id] -= qte;
@@ -85,33 +112,37 @@ var methods = {
         message.delete();
       } else if (splitemess[0] === "-") {
         if (datas.IDlg[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.LG[message.guild.id]);
+          this.onSuppRole(datas.LG[message.guild.id], message, qte);
         } else if (datas.IDcupi[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.Cupi[message.guild.id]);
+          this.onSuppRole(datas.Cupi[message.guild.id], message, qte);
         } else if (datas.IDsalva[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.Salva[message.guild.id]);
+          this.onSuppRole(datas.Salva[message.guild.id], message, qte);
         } else if (datas.IDsoso[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.Soso[message.guild.id]);
+          this.onSuppRole(datas.Soso[message.guild.id], message, qte);
         } else if (datas.IDancien[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.Ancien[message.guild.id]);
+          this.onSuppRole(datas.Ancien[message.guild.id], message, qte);
         } else if (datas.IDchassou[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.Chassou[message.guild.id]);
+          this.onSuppRole(datas.Chassou[message.guild.id], message, qte);
         } else if (datas.IDidv[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.IDV[message.guild.id]);
+          this.onSuppRole(datas.IDV[message.guild.id], message, qte);
         } else if (datas.IDjdf[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.JDF[message.guild.id]);
+          this.onSuppRole(datas.JDF[message.guild.id], message, qte);
         } else if (datas.IDvovo[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.Vovo[message.guild.id]);
+          this.onSuppRole(datas.Vovo[message.guild.id], message, qte);
         } else if (datas.IDsv[message.guild.id].includes(splitemess[1])) {
-          this.onSuppRole(datas.SV[message.guild.id]);
+          this.onSuppRole(datas.SV[message.guild.id], message, qte);
         } else if (datas.IDbe[message.guild.id].includes(splitemess[1])) {
           this.onSuppRole(
             datas.BE[message.guild.id],
+            message,
+            qte,
             datas.emoteBE[message.guild.id]
           );
         } else if (datas.IDpf[message.guild.id].includes(splitemess[1])) {
           this.onSuppRole(
             datas.PF[message.guild.id],
+            message,
+            qte,
             datas.emotePF[message.guild.id]
           );
         } else {
@@ -164,7 +195,8 @@ var methods = {
               qte = diffSV;
               this.onAddRole(
                 datas.SV[message.guild.id],
-                datas.emoteSV[message.guild.id]
+                datas.emoteSV[message.guild.id],
+                message
               );
               this.annonceCompo(message);
             } else if (message === "non" || message === "n") {
@@ -195,6 +227,8 @@ var methods = {
   },
 
   annonceCompo: function(message) {
+    const filter = m =>
+      m.author === message.author || datas.adminlist.includes(m.author);
     //Préparation du message final
     var embed = new Discord.RichEmbed()
       .setTitle("Composition de la partie")
@@ -232,7 +266,7 @@ var methods = {
             messCompo = message;
             collector22.stop();
             //Et on lance la distribution des rôles
-            Distribution(message);
+            distrib.Distribution(message);
           });
       } else if (message.content === "fin") {
         collector22.stop();
@@ -242,7 +276,7 @@ var methods = {
     });
   },
 
-  onAddRole: function(role, emote) {
+  onAddRole: function(role, emote, message, qte) {
     if (datas.compo[message.guild.id].length === 0) {
       datas.compo[message.guild.id].push({
         Name: role,
@@ -279,21 +313,14 @@ var methods = {
     }
 
     message.channel.send(
-      "**" +
-        qte +
-        " " +
-        role +
-        pluriel +
-        "** ajouté" +
-        pluriel +
-        " à la composition de la partie."
+      "**" + qte + " " + role + "** ajouté à la composition de la partie."
     );
   },
 
-  onSuppRole: function(role) {
+  onSuppRole: function(role, message, qte) {
     datas.compo[message.guild.id].forEach(Role => {
       if (Role.Name === role) {
-        var item = findObjectInList(
+        var item = utils.findObjectInList(
           datas.compo[message.guild.id],
           "Name",
           Role.Name
@@ -315,14 +342,7 @@ var methods = {
     });
 
     message.channel.send(
-      "**" +
-        qte +
-        " " +
-        role +
-        pluriel +
-        "** supprimé" +
-        pluriel +
-        " de la composition de la partie."
+      "**" + qte + " " + role + "** supprimé de la composition de la partie."
     );
   }
 };

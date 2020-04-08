@@ -13,6 +13,8 @@ module.exports = {
   canDo: ["Administrateur", "Ministrateur"],
   aliases: ["composition"],
   execute(client, message, args) {
+    const filter = m =>
+      m.author === message.author || datas.adminlist.includes(m.author);
     var themeAct = new Theme().preset(datas.theme[message.guild.id]);
     datas.gameOn[message.guild.id] = true;
     message.delete();

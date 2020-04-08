@@ -26,13 +26,18 @@ module.exports = (client, message) => {
 
   //If the command needs arguments and none is given, return
   if (cmd.args && !args.length) {
+    message.delete();
     let reply = "Merci de préciser les arguments de cette commande.";
 
     if (cmd.usage) {
       reply += `\n L'utilisation correcte est : \`/${cmd.name} ${cmd.usage}\``;
     }
 
-    return message.channel.send(reply);
+    return message.channel.send(reply).then(mess => {
+      setTimeout(function() {
+        mess.delete();
+      }, 10000);
+    });
   }
 
   if (cmd.guildOnly && message.channel.type != "text") {
