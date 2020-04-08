@@ -1,8 +1,5 @@
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
 const identifiers = require("../../identifiers.json");
+const dbUtils = require("../../Utils/dbUtils.js");
 
 module.exports = {
   name: "suppsalon",
@@ -14,13 +11,12 @@ module.exports = {
   aliases: [],
   execute(client, message, args) {
     if (identifiers.salons.split(",").includes(args[1])) {
-      db.get("salons")
-        .remove({
-          guild: message.guild.id,
-          id: args[1],
-          story_value: args[0]
-        })
-        .write();
+      var obj = {
+        guild: message.guild.id,
+        id: args[1],
+        story_value: args[0]
+      };
+      dbUtils.removeFromDb("db", "salons", obj);
       message.channel.send("<#" + args[0] + "> supprimé des salons.");
     }
   }

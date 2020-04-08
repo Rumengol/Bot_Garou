@@ -1,8 +1,5 @@
-const low = require("lowdb")
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json")
-const db = low(adapter)
-const identifiers = require("../../identifiers.json")
+const identifiers = require("../../identifiers.json");
+const dbUtils = require("../../Utils/dbUtils.js");
 
 module.exports = {
 name: 'config',
@@ -15,7 +12,7 @@ aliases: [],
 execute(client, message, args){
     if (args[0] == "auto") {
         var guild = message.guild;
-        if (db.get("roles").map("guild").value().toString().includes(guild.id) || db.get("salons").map("guild").value().toString().includes(guild.id)) {
+        if (dbUtils.getAllValuesInDb("db","roles","guild").toString().includes(guild.id) || dbUtils.getAllValuesInDb("db","salons","guild").toString().includes(guild.id)) {
             message.reply("Attention, au moins un élément est configuré sur ce serveur. Veuillez le(s) retirer afin d'activer la configuration automatique.")
         } else {
             message.channel.send(
@@ -28,14 +25,12 @@ execute(client, message, args){
                     mentionable: "true"
                 })
                 .then(roleJV => {
-
-                    db.get("roles")
-                        .push({
-                            guild: guild.id,
-                            id: "vivants",
-                            story_value: roleJV.id
-                        })
-                        .write();
+                    var obj = {
+                        guild: guild.id,
+                        id: "vivants",
+                        story_value: roleJV.id
+                    } 
+                    dbUtils.writeInDb("db","roles",obj);
                     message.channel.send(`Le rôle ${roleJV} a été créé...`);
 
                     guild
@@ -46,13 +41,12 @@ execute(client, message, args){
                             position: roleJV.position - 1
                         })
                         .then(roleJM => {
-                            db.get("roles")
-                                .push({
-                                    guild: guild.id,
-                                    id: "morts",
-                                    story_value: roleJM.id
-                                })
-                                .write();
+                            var obj = {
+                                guild: guild.id,
+                                id: "morts",
+                                story_value: roleJM.id
+                            } 
+                            dbUtils.writeInDb("db","roles",obj);
                             message.channel.send(`Le rôle ${roleJM} a été créé...`);
 
                             var game = guild.createChannel("Jeu Loup Garou", {
@@ -82,13 +76,12 @@ execute(client, message, args){
                                         }
                                     ]
                                 }).then(channel => {
-                                    db.get("salons")
-                                        .push({
-                                            guild: guild.id,
-                                            id: "village",
-                                            story_value: channel.id
-                                        })
-                                        .write();
+                                    var obj = {
+                                        guild: guild.id,
+                                        id: "village",
+                                        story_value: channel.id
+                                    }
+                                    dbUtils.writeInDb("db","salons",obj)
                                     channel.setParent(game.id)
                                     message.channel.send(`Le salon ${channel} a été créé...`)
 
@@ -112,13 +105,13 @@ execute(client, message, args){
                                             }
                                         ]
                                     }).then(channel => {
-                                        db.get("salons")
-                                            .push({
-                                                guild: guild.id,
-                                                id: "votes",
-                                                story_value: channel.id
-                                            })
-                                            .write();
+                                        
+                                    var obj = {
+                                        guild: guild.id,
+                                        id: "votes",
+                                        story_value: channel.id
+                                    }
+                                    dbUtils.writeInDb("db","salons",obj)
                                         channel.setParent(game.id)
                                         message.channel.send(`Le salon ${channel} a été créé...`)
 
@@ -137,13 +130,12 @@ execute(client, message, args){
                                                 }
                                             ]
                                         }).then(channel => {
-                                            db.get("salons")
-                                                .push({
-                                                    guild: guild.id,
-                                                    id: "cimetiere",
-                                                    story_value: channel.id
-                                                })
-                                                .write();
+                                            var obj = {
+                                                guild: guild.id,
+                                                id: "cimetiere",
+                                                story_value: channel.id
+                                            }
+                                            dbUtils.writeInDb("db","salons",obj)
                                             channel.setParent(game.id)
                                             message.channel.send(`Le salon ${channel} a été créé...`)
 
@@ -158,13 +150,12 @@ execute(client, message, args){
                                                     }
                                                 ]
                                             }).then(channel => {
-                                                db.get("salons")
-                                                    .push({
-                                                        guild: guild.id,
-                                                        id: "loups",
-                                                        story_value: channel.id
-                                                    })
-                                                    .write();
+                                                var obj = {
+                                                    guild: guild.id,
+                                                    id: "loups",
+                                                    story_value: channel.id
+                                                }
+                                                dbUtils.writeInDb("db","salons",obj)
                                                 channel.setParent(game.id)
                                                 message.channel.send(`Le salon ${channel} a été créé...`)
 
@@ -179,13 +170,12 @@ execute(client, message, args){
                                                         }
                                                     ]
                                                 }).then(channel => {
-                                                    db.get("salons")
-                                                        .push({
-                                                            guild: guild.id,
-                                                            id: "charmed",
-                                                            story_value: channel.id
-                                                        })
-                                                        .write();
+                                                    var obj = {
+                                                        guild: guild.id,
+                                                        id: "charmed",
+                                                        story_value: channel.id
+                                                    }
+                                                    dbUtils.writeInDb("db","salons",obj)
                                                     channel.setParent(game.id)
                                                     message.channel.send(`Le salon ${channel} a été créé...`)
                                                     var logs = guild.createChannel("logs-bot-garou", {
@@ -199,26 +189,24 @@ execute(client, message, args){
                                                             }
                                                         ]
                                                     }).then(channel => {
-                                                        db.get("salons")
-                                                            .push({
-                                                                guild: guild.id,
-                                                                id: "logs",
-                                                                story_value: channel.id
-                                                            })
-                                                            .write();
+                                                        var obj = {
+                                                            guild: guild.id,
+                                                            id: "logs",
+                                                            story_value: channel.id
+                                                        }
+                                                        dbUtils.writeInDb("db","salons",obj)
                                                         channel.setParent(game.id)
                                                         message.channel.send(`Le salon ${channel} a été créé...`)
                                                         var general = guild.createChannel("Vocal général", {
                                                             type: "voice",
                                                             position: 1
                                                         }).then(channel => {
-                                                            db.get("salons")
-                                                                .push({
-                                                                    guild: guild.id,
-                                                                    id: "general",
-                                                                    story_value: channel.id
-                                                                })
-                                                                .write();
+                                                            var obj = {
+                                                                guild: guild.id,
+                                                                id: "general",
+                                                                story_value: channel.id
+                                                            }
+                                                            dbUtils.writeInDb("db","salons",obj)
                                                             channel.setParent(game.id)
                                                             message.channel.send(`Le salon vocal **${channel.name}** a été créé...`)
                                                             var vocal = guild.createChannel("Place Du Village", {
@@ -240,13 +228,12 @@ execute(client, message, args){
                                                                     }
                                                                 ]
                                                             }).then(channel => {
-                                                                db.get("salons")
-                                                                    .push({
-                                                                        guild: guild.id,
-                                                                        id: "vocal",
-                                                                        story_value: channel.id
-                                                                    })
-                                                                    .write();
+                                                                var obj = {
+                                                                    guild: guild.id,
+                                                                    id: "vocal",
+                                                                    story_value: channel.id
+                                                                }
+                                                                dbUtils.writeInDb("db","salons",obj)
                                                                 channel.setParent(game.id)
                                                                 message.channel.send(`Le salon vocal **${channel.name}** a été créé...`).then(() =>
                                                                     message.channel.send("Tous les salons et les rôles ont étés créés. Vous pouvez librement les renommer, modifier et déplacer, mais faites attention à ne pas les supprimer par inadvertance, auquel cas je risquerais de dysfonctionner."))

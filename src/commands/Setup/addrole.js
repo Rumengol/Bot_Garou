@@ -1,8 +1,5 @@
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
 const identifiers = require("../../identifiers.json");
+const dbUtils = require("../../Utils/dbUtils.js");
 const utils = require("../../Utils/Utils.js");
 
 module.exports = {
@@ -16,6 +13,11 @@ module.exports = {
   execute(client, message, args) {
     if (identifiers.roles.split(",").includes(args[1])) {
       var role = utils.getRoleInDb(args[1], message);
+      var obj = {
+        guild: message.guild.id,
+        id: args[1],
+        story_value: args[0]
+      };
       //Si c'est le cas
       if (role != null) {
         //Demande si le salon doit être remplacé
@@ -30,22 +32,17 @@ module.exports = {
         collector.on("collect", message => {
           //S'il répond oui, alors le salon est remplacé
           if (message.content.toLowerCase() === "oui") {
-            db.get("roles")
-              .push({
-                guild: message.guild.id,
-                id: args[1],
-                story_value: args[0]
-              })
-              .write();
-            db.get("roles")
-              .remove({
-                guild: message.guild.id,
-                id: args[1],
-                story_value: role
-              })
-              .write();
+            dbUtils.writeInDb("db", "roles", obj);
+
+            var obj2 = {
+              guild: message.guild.id,
+              id: args[1],
+              story_value: role
+            };
+            dbUtils.removeFromDb("db", "roles", obj2);
+
             message.channel.send(
-              "<@&" + args[0] + ">" + " ajouté comme rôle des " + args[2]
+              "<@&" + args[0] + ">" + " ajouté comme rôle des " + args[1]
             );
             collector.stop();
           } else if (message.content.toLowerCase() === "non") {
@@ -62,15 +59,9 @@ module.exports = {
           }
         });
       } else {
-        db.get("roles")
-          .push({
-            guild: message.guild.id,
-            id: args[1],
-            story_value: args[0]
-          })
-          .write();
+        dbUtils.writeInDb("db", "roles", obj);
         message.channel.send(
-          "<@&" + args[1] + ">" + " ajouté comme rôle des " + args[2]
+          "<@&" + args[0] + ">" + " ajouté comme rôle des " + args[1]
         );
       }
     }

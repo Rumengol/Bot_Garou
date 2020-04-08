@@ -21,28 +21,17 @@
 
 const Discord = require("discord.js");
 const Embed = require("./src/commands/embeds");
-const Embeds = new Embed();
 const bot = new Discord.Client();
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
 const express = require("express");
 const PORT = process.env.PORT || 5000;
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
-const Theme = require("./themes/Themes.js");
-const Role = require("./themes/Role.js");
-const Presets = require("./themes/Presets.json")
 const Enmap = require("enmap");
 const fs = require("fs");
 const global = require("./src/global.js");
-const auth = require("./src/auth.js");
-
-
 
 express().listen(PORT);
 
 function Activity() {
-  actif = setInterval(function () {
+  actif = setInterval(function() {
     console.log("ping");
   }, 540000);
 }
@@ -51,7 +40,6 @@ const config = require("./config.json");
 const token = config.token;
 const prefix = config.prefix;
 bot.config = config;
-
 
 fs.readdir("./src/events/", (err, files) => {
   if (err) return console.error(err);
@@ -73,28 +61,27 @@ fs.readdir("./src/events/", (err, files) => {
 
 bot.commands = new Enmap();
 
-getAllCommands("./src/commands/",false)
+getAllCommands("./src/commands/", false);
 
-function getAllCommands(path,isDir){
-fs.readdir(path, (err, files) => {
-  if (err) return console.error(err);
-  files.forEach(file => {
-    if(fs.lstatSync(`${path}${file}`).isDirectory()){
-      getAllCommands(`${path}${file}/`,true);
-    }
-    console.log(file.toString())
-    if (!file.endsWith(".js")) return;
-    // Load the command file itself
+function getAllCommands(path, isDir) {
+  fs.readdir(path, (err, files) => {
+    if (err) return console.error(err);
+    files.forEach(file => {
+      if (fs.lstatSync(`${path}${file}`).isDirectory()) {
+        getAllCommands(`${path}${file}/`, true);
+      }
+      console.log(file.toString());
+      if (!file.endsWith(".js")) return;
+      // Load the command file itself
       let props = require(`${path}${file}`);
-    // Get just the command name from the file name
-    let commandName = file.split(".")[0];
-    console.log(`Attempting to load command ${commandName}`);
-    // Here we simply store the whole thing in the command Enmap. We're not running it right now.
-    bot.commands.set(commandName, props);
+      // Get just the command name from the file name
+      let commandName = file.split(".")[0];
+      console.log(`Attempting to load command ${commandName}`);
+      // Here we simply store the whole thing in the command Enmap. We're not running it right now.
+      bot.commands.set(commandName, props);
+    });
   });
-});
 }
-
 
 bot.on("ready", () => {
   Activity();
@@ -105,12 +92,6 @@ bot.on("ready", () => {
 });
 
 bot.login(token);
-
-
-
-bot.on("guildCreate", guild => {
-  return;
-});
 
 /*bot.on("message", message => {
   try {
@@ -404,152 +385,12 @@ bot.on("guildCreate", guild => {
   }
 });*/
 
-bot.on("messageReactionAdd", (reac, lui) => {
-  try {
-    if (reac.message.channel.type != "dm") {
-      if (reac.message === inscr[reac.message.guild.id]) {
-        getRoleInDb("vivants", reac.message);
-        rolevivant = roleDB[reac.message.guild.id];
-        if (gameOn[reac.message.guild.id] === false) {
-          //Si on a atteint le maximum d'inscriptions
-          if (reac.count > maxP[reac.message.guild.id] + 1) {
-            reac.remove(lui);
-            lui.createDM().then(channel => {
-              channel.send(
-                "Inscription refusée, la partie est déjà complète. Essaie la prochaine !"
-              );
-            });
-          } else {
-            //Sinon, et en ignorant la première réaction (celle du bot)
-            if (reac.count > 1) {
-              inscrits[reac.message.guild.id].push(lui.id);
-              reac.message.guild.members.get(lui.id).addRole(rolevivant);
-              inscrep[reac.message.guild.id].push(lui);
 
-              reac.message.edit(
-                new Discord.RichEmbed()
-                  .setTitle("Inscriptions pour les parties de loup Garou")
-                  .setDescription(
-                    "Inscrivez-vous en appuyant sur la réaction ci-dessous. Inscriptions limitées à **" +
-                    maxP[reac.message.guild.id] +
-                    "** et impossibles lorsque la partie est lancée. \n Attention. Si vous retirez votre réaction, cela sera pris comme une désinscription."
-                  )
-                  .addField(
-                    "Joueurs inscrits :",
-                    inscrep[reac.message.guild.id]
-                  )
-              );
-            }
-          }
-        } else {
-          lui.createDM().then(channel => {
-            reac.remove(lui);
-            channel.send(
-              "Une partie est déjà en cours, il est impossible de s'inscrire !"
-            );
-          });
-        }
-
-      } else if (votes[reac.message.guild.id].includes(reac.message)) {
-        //Vérifie que celui qui vote est bien vivant et que c'est un vote du jour
-
-
-        getRoleInDb("vivants", reac.message);
-        rolevivant = roleDB[reac.message.guild.id];
-        if (!lui.bot) {
-          var item = findObjectInList(distribRoles[reac.message.guild.id], "GuildMember", lui)
-          var luiroles = reac.message.guild.members
-            .get(lui.id)
-            .roles.map(r => r.id);
-          if (banniDeVote[reac.message.guild.id].includes(item)) {
-            avote[reac.message.guild.id].push(item.User)
-          }
-          if (
-            luiroles.includes(rolevivant) &&
-            votedejour[reac.message.guild.id]
-          ) {
-            if (!avote[reac.message.guild.id].includes(lui)) {
-              avote[reac.message.guild.id].push(lui);
-            } else {
-              avote[reac.message.guild.id].push(lui);
-              reac.remove(lui);
-            }
-            var membre = reac.message.content.split("<@!");
-            if (membre[1] === undefined)
-              membre = reac.message.content.split("<@")
-            membre = membre[1].split(">")
-            var item2 = findObjectInList(voted[reac.message.guild.id], "contenu", reac.message.guild.members.get(membre[0]))
-            item2.votes += 1;
-          } else {
-            if (votedejour[reac.message.guild.id]) {
-              reac.remove(lui);
-            }
-          }
-        }
-      }
-    }
-  } catch (e) {
-    reac.message.reply(e.message);
-    console.log(e);
-  }
-});
-
-bot.on("messageReactionRemove", (reac, lui) => {
-  try {
-    if (reac.message.channel.type != "dm") {
-      if (reac.message === inscr[reac.message.guild.id]) {
-        getRoleInDb("vivants", reac.message);
-        role = roleDB[reac.message.guild.id];
-        if (inscrep[reac.message.guild.id].includes(lui)) {
-          inscrep[reac.message.guild.id].splice(
-            inscrep[reac.message.guild.id].indexOf(lui),
-            1
-          );
-          inscrits[reac.message.guild.id].splice(
-            inscrits[reac.message.guild.id].indexOf(lui.id),
-            1
-          );
-          reac.message.guild.members.get(lui.id).removeRole(role);
-          reac.message.edit(
-            new Discord.RichEmbed()
-              .setTitle("Inscriptions pour les parties de loup Garou")
-              .setDescription(
-                "Inscrivez  -vous en appuyant sur la réaction ci-dessous. Inscriptions limitées à **" +
-                maxP[reac.message.guild.id] +
-                "** et impossibles lorsque la partie est lancée. \n Attention. Si vous retirez votre réaction, cela sera pris comme une désinscription."
-              )
-              .addField(
-                "Joueurs inscrits :",
-                "." + inscrep[reac.message.guild.id]
-              )
-          );
-        }
-      } else if (votes[reac.message.guild.id].includes(reac.message)) {
-        if (avote[reac.message.guild.id].includes(lui)) {
-          avote[reac.message.guild.id].splice(
-            avote[reac.message.guild.id].indexOf(lui),
-            1
-          );
-          var item = findObjectInList(voted[reac.message.guild.id], "contenu", reac.message.content)
-          item.votes -= 1;
-        }
-      }
-    }
-  } catch (e) {
-    reac.message.channel.send(
-      e.message + "\n A ```" + reac.message.content + "```."
-    );
-  }
-});
-
-function UsePotMort(){
+function UsePotMort() {
   return;
 }
 
-
-
-
-function Charme(){
+function Charme() {
   return;
 }
 
@@ -566,8 +407,7 @@ function reviveAll(message) {
       role2 = roleDB[message.guild.id];
       lui.addRole(role2);
     }, 500);
-    if (vocal.members.includes(lui))
-      lui.setMute(false);
+    if (vocal.members.includes(lui)) lui.setMute(false);
     //Retirer le rôle en deuxième pour éviter de déco les joueurs portable
     setTimeout(() => {
       lui.removeRole(role);
@@ -584,18 +424,16 @@ function unmute(role, message) {
   return;
 }
 
-
-
 function Kill(message, lui) {
   return;
 }
 
-function endVote(){
+function endVote() {
   return;
 }
 
 function deathBE(message, item) {
-  return
+  return;
 }
 
 function voteJour(message, egalite = null) {
@@ -603,9 +441,8 @@ function voteJour(message, egalite = null) {
 }
 
 function prolongations(message, finpouet) {
-  return
+  return;
 }
-
 
 function findItemInList(list, item) {
   var fail = 0;
@@ -625,7 +462,6 @@ function findItemInList(list, item) {
 }
 
 function Distribution(message) {
-
   getPlaceInDb("logs", message);
   var logs = message.guild.channels.get(lieuDB[message.guild.id]);
 
@@ -633,7 +469,7 @@ function Distribution(message) {
   var lieuLG = lieuDB[message.guild.id];
 
   //Garde en mémoire le message dans la guilde
-  var mess = message
+  var mess = message;
   var number = comp
     .get("composition")
     .map("id")
@@ -644,15 +480,8 @@ function Distribution(message) {
   var distribText = "";
   compo[message.guild.id].forEach(role => {
     var item = findObjectInList(compo[message.guild.id], "Name", role.Name);
-    for (
-      let i = 0;
-      i <
-      item.Quantite;
-      i++
-    ) {
-      distribution[message.guild.id].push(
-        item.Name
-      );
+    for (let i = 0; i < item.Quantite; i++) {
+      distribution[message.guild.id].push(item.Name);
     }
     comp
       .get("composition")
@@ -684,37 +513,38 @@ function Distribution(message) {
     joueur.createDM().then(channel => {
       channel.send(
         "Tu es " +
-        roleRND +
-        " ! Merci de renvoyer un message ici (peu importe quoi) pour confirmer. \nSi tu veux savoir en quoi consiste ton rôle, fait ``/ask " +
-        roleRND +
-        "``, ou bien envoie un message à l'un des MJs."
+          roleRND +
+          " ! Merci de renvoyer un message ici (peu importe quoi) pour confirmer. \nSi tu veux savoir en quoi consiste ton rôle, fait ``/ask " +
+          roleRND +
+          "``, ou bien envoie un message à l'un des MJs."
       );
       collector = channel.createCollector(filter2);
       collector.on("collect", message => {
         if (!valides.includes(message.channel)) {
           valides.push(message.channel);
-          var item = findObjectInList(distribRoles[mess.guild.id], "GuildMember", joueur)
+          var item = findObjectInList(
+            distribRoles[mess.guild.id],
+            "GuildMember",
+            joueur
+          );
           if (item.Role === LG[mess.guild.id]) {
-            mess.guild.channels
-              .get(lieuLG)
-              .overwritePermissions(item.User, {
-                VIEW_CHANNEL: true,
-                SEND_MESSAGES: true
-              });
+            mess.guild.channels.get(lieuLG).overwritePermissions(item.User, {
+              VIEW_CHANNEL: true,
+              SEND_MESSAGES: true
+            });
             joueursLG[mess.guild.id].push(item.User);
           }
           logs.send(item.User.username + ", " + item.Role + " validé.");
         }
-        if (
-          valides.length === inscrits[mess.guild.id].length &&
-          once
-        ) {
+        if (valides.length === inscrits[mess.guild.id].length && once) {
           collector.stop();
           once = false;
           mess.guild.channels
             .get(lieuLG)
             .send(
-              "Ce salon est destiné aux discussions nocturnes entre " + LG[mess.guild.id] + " !"
+              "Ce salon est destiné aux discussions nocturnes entre " +
+                LG[mess.guild.id] +
+                " !"
             );
         }
       });
@@ -762,7 +592,11 @@ function helpGen(message, lui) {
 }
 
 function cleanArray(array) {
-  var i, j, len = array.length, out = [], obj = {};
+  var i,
+    j,
+    len = array.length,
+    out = [],
+    obj = {};
   for (i = 0; i < len; i++) {
     obj[array[i]] = 0;
   }
@@ -775,187 +609,186 @@ function cleanArray(array) {
 let poem =
   "Quand la lune blanche \nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir,\nFol alors qui livre\nA la nuit son livre\nSavant,\nSon pied aux collines,\nEt ses mandolines\nAu vent ;\nFol qui dit un conte,\nCar minuit qui compte\nLe temps,\nPasse avec le prince\nDes sabbats qui grince\nDes dents.\nL’amant qui compare\nQuelque beauté rare\nAu jour,\nTire une ballade\nDe son coeur malade\nD’amour.\nMais voici dans l’ombre\nQu’une ronde sombre\nSe fait,\nL’enfer autour danse,\nTous dans un silence\nParfait.\nTout pendu de Grève,\nTout Juif mort soulève\nSon front,\nTous noyés des havres\nPressent leurs cadavres\nEn rond.\nEt les âmes feues\nJoignent leurs mains bleues\nSans os ;\nLui tranquille chante\nD’une voix touchante\nSes maux.\nMais lorsque sa harpe,\nOù flotte une écharpe,\nSe tait,\nIl veut fuir… La danse\nL’entoure en silence\nParfait.\nLe cercle l’embrasse,\nSon pied s’entrelace\nAux morts,\nSa tête se brise\nSur la terre grise !\nAlors\nLa ronde contente,\nEn ris éclatante,\nLe prend ;\nTout mort sans rancune\nTrouve au clair de lune\nSon rang.\nCar la lune blanche\nS’accroche à la branche\nPour voir\nSi quelque feu rouge\nDans l’horizon bouge\nLe soir.\nAlfred de Musset, Poésies posthumes";
 
+var admin = {};
+var mini = {};
+var gameOn = {};
+var messCompo = {};
+var compoDone = {};
+var inscrEmbed = {};
 
-  var admin = {};
-  var mini = {};
-  var gameOn = {};
-  var messCompo = {};
-  var compoDone = {};
-  var inscrEmbed = {};
+var maxP = {};
+var inscr = {};
 
-  var maxP = {};
-  var inscr = {};
+var nbRole = {};
+var inscrits = {};
+var inscrep = {};
+//{GuildMember,Role,User,Victoire}
+var distribRoles = {};
+var distribRolMorts = {};
+var charmes = {};
+var votes = {};
+var avote = {};
+//{user,votes,contenu}
+var voted = {};
+var joueursLG = {};
+var Listvivants = {};
+var vivants = {};
+var win = {};
+var embedRecap = {};
 
-  var nbRole = {};
-  var inscrits = {};
-  var inscrep = {};
-  //{GuildMember,Role,User,Victoire}
-  var distribRoles = {};
-  var distribRolMorts = {};
-  var charmes = {};
-  var votes = {};
-  var avote = {};
-  //{user,votes,contenu}
-  var voted = {};
-  var joueursLG = {};
-  var Listvivants = {};
-  var vivants = {};
-  var win = {};
-  var embedRecap = {};
+var distribution = {};
+//Représente l'état de la partie, avec nuit ou jour en première clef, le nombre en deuxième
+var StateOfTheGame = {};
 
-  var distribution = {};
-  //Représente l'état de la partie, avec nuit ou jour en première clef, le nombre en deuxième
-  var StateOfTheGame = {}
+var listeRoles = {};
 
-  var listeRoles = {}
+let theme = {};
 
-  let theme = {};
+let IDlg = {};
+let LG = {};
+let emoteLG = {};
+let IDcupi = {};
+let Cupi = {};
+let emoteCupi = {};
+let IDsoso = {};
+let Soso = {};
+let emoteSoso = {};
+let IDvovo = {};
+let Vovo = {};
+let emoteVovo = {};
+let IDchassou = {};
+let Chassou = {};
+let emoteChassou = {};
+let IDidv = {};
+let IDV = {};
+let emoteIDV = {};
+let Ancien = {};
+let emoteAncien = {};
+let IDancien = {};
+let IDjdf = {};
+let JDF = {};
+let emoteJDF = {};
+let IDsalva = {};
+let Salva = {};
+let emoteSalva = {};
+let IDsv = {};
+let SV = {};
+let emoteSV = {};
+let BE = {};
+let IDbe = {};
+let emoteBE = {};
+let PF = {};
+let IDpf = {};
+let emotePF = {};
 
-  let IDlg = {}
-  let LG = {}
-  let emoteLG = {}
-  let IDcupi = {}
-  let Cupi = {}
-  let emoteCupi = {}
-  let IDsoso = {}
-  let Soso = {}
-  let emoteSoso = {};
-  let IDvovo = {}
-  let Vovo = {}
-  let emoteVovo = {}
-  let IDchassou = {}
-  let Chassou = {}
-  let emoteChassou = {}
-  let IDidv = {}
-  let IDV = {}
-  let emoteIDV = {}
-  let Ancien = {}
-  let emoteAncien = {}
-  let IDancien = {}
-  let IDjdf = {}
-  let JDF = {}
-  let emoteJDF = {}
-  let IDsalva = {}
-  let Salva = {}
-  let emoteSalva = {}
-  let IDsv = {}
-  let SV = {}
-  let emoteSV = {}
-  let BE = {}
-  let IDbe = {}
-  let emoteBE = {}
-  let PF = {}
-  let IDpf = {}
-  let emotePF = {}
+var rolesDeNuit = {};
+var potVie = {};
+var potMort = {};
+var Lovers = {};
 
-  var rolesDeNuit = {};
-  var potVie = {};
-  var potMort = {};
-  var Lovers = {};
+//{Name,Quantite,Emote}
+var compo = {};
 
-  //{Name,Quantite,Emote}
-  var compo = {};
+var banniDeVote = {};
+let IDVcache = {};
+var jourBE = {};
 
-  var banniDeVote = {};
-  let IDVcache = {};
-  var jourBE = {};
+//Cupidon messages
+let eux = {};
+var ConfCupi = {};
 
+//Sorcière messages
+var ConfSoso = {};
+var victime = {};
+var next = {};
+var salonLog = {};
+var guildId = {};
+
+var votedejour = {};
+
+var roleDB = {};
+var lieuDB = {};
+var x = {};
+var y = {};
+var z = {};
+var pouet = {};
+
+function init(id) {
+  mini[id] = false;
+  gameOn[id] = false;
+  compoDone[id] = false;
+  nbRole[id] = 0;
+  inscrits[id] = [];
+  inscrep[id] = [];
+  distribRoles[id] = [];
+  distribRolMorts[id] = [];
+  charmes[id] = [];
+  votes[id] = [];
+  avote[id] = [];
+  voted[id] = [];
+  joueursLG[id] = [];
+  vivants[id] = "";
+  win[id] = null;
+
+  distribution[id] = [];
+  StateOfTheGame[id] = ["", 0];
+
+  theme[id] = "classique";
+  rolesDeNuit[id] = [];
+  potVie[id] = true;
+  potMort[id] = true;
+  Lovers[id] = [];
+  compo[id] = [];
+
+  listeRoles[id] = [];
+
+  IDlg[id] = [];
+  LG[id] = "";
+  emoteLG[id] = "";
+  IDcupi[id] = [];
+  Cupi[id] = "";
+  emoteCupi[id] = "";
+  IDsoso[id] = [];
+  Soso[id] = "";
+  emoteSoso[id] = "";
+  IDvovo[id] = [];
+  Vovo[id] = "";
+  emoteVovo[id] = "";
+  IDchassou[id] = [];
+  Chassou[id] = "";
+  emoteChassou[id] = "";
+  IDidv[id] = [];
+  IDV[id] = "";
+  emoteIDV[id] = "";
+  Ancien[id] = "";
+  emoteAncien[id] = "";
+  IDancien[id] = [];
+  IDjdf[id] = [];
+  JDF[id] = "";
+  emoteJDF[id] = "";
+  IDsalva[id] = [];
+  Salva[id] = "";
+  emoteSalva[id] = [];
+  IDsv[id] = [];
+  SV[id] = "";
+  emoteSV[id] = "";
+  BE[id] = "";
+  IDbe[id] = [];
+  emoteBE[id] = "";
+  PF[id] = "";
+  IDpf[id] = [];
+  emotePF[id] = "";
+
+  banniDeVote[id] = [];
+  IDVcache[id] = true;
+  jourBE[id] = false;
   //Cupidon messages
-  let eux = {};
-  var ConfCupi = {};
+  eux[id] = [];
 
   //Sorcière messages
-  var ConfSoso = {};
-  var victime = {};
-  var next = {};
-  var salonLog = {};
-  var guildId = {};
+  victime[id] = "";
+  next[id] = false;
+  guildId[id] = id;
 
-  var votedejour = {};
-
-  var roleDB = {};
-  var lieuDB = {};
-  var x = {};
-  var y = {};
-  var z = {};
-  var pouet = {};
-
-  function init(id) {
-      mini[id] = false;
-      gameOn[id] = false;
-      compoDone[id] = false;
-      nbRole[id] = 0;
-      inscrits[id] = [];
-      inscrep[id] = [];
-      distribRoles[id] = [];
-      distribRolMorts[id] = [];
-      charmes[id] = [];
-      votes[id] = [];
-      avote[id] = [];
-      voted[id] = [];
-      joueursLG[id] = [];
-      vivants[id] = "";
-      win[id] = null;
-
-      distribution[id] = [];
-      StateOfTheGame[id] = ["", 0];
-
-      theme[id] = "classique";
-      rolesDeNuit[id] = [];
-      potVie[id] = true;
-      potMort[id] = true;
-      Lovers[id] = [];
-      compo[id] = [];
-
-      listeRoles[id] = [];
-
-      IDlg[id] = []
-      LG[id] = ""
-      emoteLG[id] = ""
-      IDcupi[id] = []
-      Cupi[id] = ""
-      emoteCupi[id] = ""
-      IDsoso[id] = []
-      Soso[id] = ""
-      emoteSoso[id] = ""
-      IDvovo[id] = []
-      Vovo[id] = ""
-      emoteVovo[id] = ""
-      IDchassou[id] = []
-      Chassou[id] = ""
-      emoteChassou[id] = ""
-      IDidv[id] = []
-      IDV[id] = ""
-      emoteIDV[id] = ""
-      Ancien[id] = ""
-      emoteAncien[id] = ""
-      IDancien[id] = []
-      IDjdf[id] = []
-      JDF[id] = ""
-      emoteJDF[id] = ""
-      IDsalva[id] = []
-      Salva[id] = ""
-      emoteSalva[id] = []
-      IDsv[id] = []
-      SV[id] = ""
-      emoteSV[id] = ""
-      BE[id] = ""
-      IDbe[id] = []
-      emoteBE[id] = ""
-      PF[id] = ""
-      IDpf[id] = []
-      emotePF[id] = ""
-
-      banniDeVote[id] = [];
-      IDVcache[id] = true;
-      jourBE[id] = false;
-      //Cupidon messages
-      eux[id] = [];
-
-      //Sorcière messages
-      victime[id] = "";
-      next[id] = false;
-      guildId[id] = id;
-
-      votedejour[id] = false;
-  }
+  votedejour[id] = false;
+}

@@ -1,9 +1,6 @@
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("adminrole.json");
-const db = low(adapter);
 const identifiers = require("../../identifiers.json");
 const utils = require("../../Utils/Utils.js");
+const dbUtils = require("../../Utils/dbUtils.js");
 
 module.exports = {
   name: "addsalon",
@@ -18,6 +15,11 @@ module.exports = {
     if (identifiers.salons.split(",").includes(args[1])) {
       //Récupère le lieu dans la base de données s'il est présent
       var lieu = utils.getPlaceInDb(args[1], message);
+      var obj = {
+        guild: message.guild.id,
+        id: args[1],
+        story_value: args[0]
+      };
       //Si c'est le cas
       if (lieu != null) {
         //Demande si le salon doit être remplacé
@@ -35,22 +37,15 @@ module.exports = {
             message.content.toLowerCase() === "oui" ||
             message.content.toLowerCase() === "o"
           ) {
-            db.get("salons")
-              .push({
-                guild: message.guild.id,
-                id: args[1],
-                story_value: args[0]
-              })
-              .write();
-            db.get("salons")
-              .remove({
-                guild: message.guild.id,
-                id: args[1],
-                story_value: lieu
-              })
-              .write();
+            dbUtils.writeInDb("db", "salons", obj);
+            var obj2 = {
+              guild: message.guild.id,
+              id: args[1],
+              story_value: lieu
+            };
+            dbUtils.removeFromDb("db", "salons", obj2);
             message.channel.send(
-              "<#" + args[1] + ">" + " remplacé comme salons " + args[2]
+              "<#" + args[0] + ">" + " remplacé comme salons " + args[1]
             );
             collector.stop();
           } else if (
@@ -72,13 +67,7 @@ module.exports = {
           }
         });
       } else {
-        db.get("salons")
-          .push({
-            guild: message.guild.id,
-            id: args[1],
-            story_value: args[0]
-          })
-          .write();
+        dbUtils.writeInDb("db", "salons", obj);
         message.channel.send(
           "<#" + args[0] + ">" + " ajouté comme salons " + args[1]
         );
