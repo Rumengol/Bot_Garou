@@ -23,9 +23,9 @@ module.exports = {
 
     message.delete();
     var vivantID = dbutils.getRoleInDb("vivants", message);
-    var vivantRole = message.guild.role.get(vivantID);
+    var vivantRole = message.guild.roles.get(vivantID);
 
-    message.channel.overwritePermissions(vivant, { SEND_MESSAGES: true });
+    message.channel.overwritePermissions(vivantRole, { SEND_MESSAGES: true });
     utils.unmute(vivantRole, message);
     message.channel.send(
       "Une nouvelle journée commence. (" +

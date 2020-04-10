@@ -1,6 +1,6 @@
 const datas = require("../global.js");
 const utils = require("./Utils.js");
-const dbUtils = require("./dbUtils.js");
+const dbutils = require("./dbUtils.js");
 
 var methods = {
   Distribution: function(message) {
@@ -12,7 +12,7 @@ var methods = {
 
     //Garde en mémoire le message dans la guilde
     var mess = message;
-    var number = dbUtils.getAllValuesInDb("comp", "composition", "id").length();
+    var number = dbutils.getAllValuesInDb("comp", "composition", "id").length;
     var valides = [];
     var once = true;
 
@@ -31,7 +31,7 @@ var methods = {
         id: number,
         compo: datas.distribution[message.guild.id]
       };
-      dbUtils.writeInDb("comp", "composition", obj);
+      dbutils.writeInDb("comp", "composition", obj);
     });
     datas.inscrits[message.guild.id].forEach(inscrit => {
       var rnd = Math.floor(
@@ -70,7 +70,7 @@ var methods = {
               joueur
             );
             if (item.Role === datas.LG[mess.guild.id]) {
-              mess.guild.channels.get(lieuLG).overwritePermissions(item.User, {
+              lieuLG.overwritePermissions(item.User, {
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
               });
@@ -81,13 +81,11 @@ var methods = {
           if (valides.length === datas.inscrits[mess.guild.id].length && once) {
             collector.stop();
             once = false;
-            mess.guild.channels
-              .get(lieuLG)
-              .send(
-                "Ce salon est destiné aux discussions nocturnes entre " +
-                  LG[mess.guild.id] +
-                  " !"
-              );
+            lieuLG.send(
+              "Ce salon est destiné aux discussions nocturnes entre " +
+                datas.LG[mess.guild.id] +
+                " !"
+            );
           }
         });
       });

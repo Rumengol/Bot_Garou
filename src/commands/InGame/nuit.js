@@ -49,7 +49,7 @@ module.exports = {
 
     village.overwritePermissions(vivantRole, { SEND_MESSAGES: false });
     vivantRole.members.forEach(mute => {
-      if (vocal.members.has(mute)) mute.setMute(true);
+      if (vocalChan.members.has(mute)) mute.setMute(true);
     });
 
     datas.vivants[message.guild.id] = "";
@@ -594,7 +594,7 @@ module.exports = {
     collector.on("end", collected => {
       message.channel.send("Collecteur terminé.");
       datas.joueursLG[message.guild.id].forEach(joueur => {
-        lieu.overwritePermissions(joueur, { SEND_MESSAGES: false });
+        loupChan.overwritePermissions(joueur, { SEND_MESSAGES: false });
       });
       if (collectorLG != undefined) {
         collectorLG.stop();

@@ -13,7 +13,7 @@ var methods = {
   },
 
   mute: function(role, message) {
-    var vocalID = this.getPlaceInDb("vocal", message);
+    var vocalID = dbUtils.getPlaceInDb("vocal", message);
     var vocal = message.guild.channels.get(vocalID);
     role.members.forEach(membre => {
       if (vocal.members.has(membre)) membre.setMute(true);
@@ -21,7 +21,7 @@ var methods = {
   },
 
   unmute: function(role, message) {
-    var vocalID = this.getPlaceInDb("vocal", message);
+    var vocalID = dbUtils.getPlaceInDb("vocal", message);
     var vocal = message.guild.channels.get(vocalID);
     role.members.forEach(membre => {
       if (vocal.members.has(membre)) membre.setMute(false);

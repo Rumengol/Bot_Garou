@@ -15,7 +15,7 @@ module.exports = {
     message.delete();
     voteUtils.endVote(message);
     var vivantID = dbutils.getRoleInDb("vivants", message);
-    var vivantRole = message.guild.role.get(vivantID);
+    var vivantRole = message.guild.roles.get(vivantID);
     var voteID = dbutils.getPlaceInDb("votes", message);
     var voteChan = message.guild.channels.get(voteID);
 
@@ -23,8 +23,8 @@ module.exports = {
     clearTimeout(datas.y[message.guild.id]);
     clearTimeout(datas.z[message.guild.id]);
     message.channel.overwritePermissions(vivantRole, { SEND_MESSAGES: false });
-    voteChan.overwritePermissions(role, { VIEW_CHANNEL: false });
-    utils.mute(role, message);
+    voteChan.overwritePermissions(vivantRole, { VIEW_CHANNEL: false });
+    utils.mute(vivantRole, message);
     message.channel.send("La journée s'achève. Bonne nuit.");
     if (datas.jourBE[message.guild.id]) {
       var item;

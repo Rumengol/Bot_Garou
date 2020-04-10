@@ -3,25 +3,26 @@ const datas = require("../global.js");
 const Presets = require("../../themes/Presets.json");
 const dbutils = require("./dbUtils.js");
 const Discord = require("discord.js");
+const voteUtils = require("./voteUtils.js");
 
 var methods = {
   Kill: function(message, lui) {
-    var roleID = dbutils.getRoleInDb("vivants", message);
-    var role = message.guild.roles.get(roleID);
+    var vivantID = dbutils.getRoleInDb("vivants", message);
+    var vivantRole = message.guild.roles.get(vivantID);
     setTimeout(() => {
-      var roleID2 = dbutils.getRoleInDb("morts", message);
-      var role2 = message.guild.roles.get(roleID2);
-      lui.addRole(role2);
+      var mortID = dbutils.getRoleInDb("morts", message);
+      var mortRole = message.guild.roles.get(mortID);
+      lui.addRole(mortRole);
     }, 500);
 
     setTimeout(() => {
-      lui.removeRole(role);
+      lui.removeRole(vivantRole);
     }, 3000);
-    var lieuID = dbutils.getPlaceInDb("village", message);
-    var lieu = message.guild.channels.get(lieuID);
+    var townID = dbutils.getPlaceInDb("village", message);
+    var village = message.guild.channels.get(townID);
 
-    var lieuID2 = dbutils.getPlaceInDb("vocal", message);
-    var vocal = message.guild.channels.get(lieuID2);
+    var vocalID = dbutils.getPlaceInDb("vocal", message);
+    var vocal = message.guild.channels.get(vocalID);
 
     var item = utils.findObjectInList(
       datas.distribRoles[message.guild.id],
@@ -46,20 +47,19 @@ var methods = {
     }
 
     if (vocal.members.has(lui)) lui.setMute(true);
-    message.guild.channels.get(lieu).send(lui + " est mort" + rolmort);
-    var lieuID3 = dbutils.getPlaceInDb("charmed", message);
-    var charmeChannel = message.guild.channels.get(lieuID3);
+    village.send(lui + " est mort" + rolmort);
+    var charmeID = dbutils.getPlaceInDb("charmed", message);
+    var charmeChannel = message.guild.channels.get(charmeID);
 
-    message.guild.channels
-      .get(charmeChannel)
-      .overwritePermissions(lui, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
+    charmeChannel.overwritePermissions(lui, {
+      VIEW_CHANNEL: false,
+      SEND_MESSAGES: false
+    });
 
     if (datas.joueursLG[message.guild.id].includes(lui)) {
-      var lieuID4 = dbutils.getPlaceInDb("loups", message);
-      var loupChannel = message.guild.channels.get(lieuID4);
-      message.guild.channels
-        .get(loupChannel)
-        .overwrittePermissions(lui, { SEND_MESSAGES: false });
+      var loupID = dbutils.getPlaceInDb("loups", message);
+      var loupChannel = message.guild.channels.get(loupID);
+      loupChannel.overwrittePermissions(lui, { SEND_MESSAGES: false });
     }
 
     if (datas.Lovers[message.guild.id].includes(item)) {
@@ -70,8 +70,7 @@ var methods = {
         datas.Lovers[message.guild.id].indexOf(item),
         1
       );
-      message.guild.channels
-        .get(lieu)
+      village
         .send(dead[0] + datas.Lovers[message.guild.id][0].User + dead[1])
         .then(mess => {
           var amorreux = datas.Lovers[message.guild.id][0].GuildMember;
@@ -88,6 +87,7 @@ var methods = {
     var roleViv = message.guild.roles.get(roleVivID);
 
     var vocalID = dbutils.getPlaceInDb("vocal", message);
+    var vocal = message.guild.channels.get(vocalID);
 
     eux = roleMort.members;
     eux.forEach(lui => {
@@ -119,14 +119,14 @@ var methods = {
       limite -= 30;
     }, 30000);
     datas.z[message.guild.id] = setTimeout(function() {
-      message.channel.overwritePermissions(role, {
+      message.channel.overwritePermissions(vivantRole, {
         SEND_MESSAGES: false
       });
       message.channel.send("La journée s'achève. Bonne nuit.");
-      voteChan.overwritePermissions(role, { VIEW_CHANNEL: false });
+      voteChan.overwritePermissions(vivantRole, { VIEW_CHANNEL: false });
       utils.mute(vivantRole, message);
       clearInterval(datas.x[message.guild.id]);
-      this.endVote(message);
+      voteUtils.endVote(message);
     }, finpouet);
   },
 

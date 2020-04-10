@@ -108,9 +108,7 @@ module.exports = {
     var vivants;
 
     if (egalite === null) {
-      vivants = Array.from(
-        message.guild.roles.get(vivantRole).members.values()
-      );
+      vivants = Array.from(vivantRole.members.values());
       //console.log(vivants)
     } else {
       egalite.forEach(user => {
@@ -124,7 +122,7 @@ module.exports = {
         votes: 0,
         contenu: message.guild.members.get(temp.id)
       });
-      vote.send(" " + vivants[i]).then(function(mess) {
+      voteChan.send(" " + vivants[i]).then(function(mess) {
         mess.react("👎");
         datas.votes[message.guild.id].push(mess);
       });

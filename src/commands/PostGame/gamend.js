@@ -21,7 +21,7 @@ module.exports = {
     var charmeID = dbutils.getPlaceInDb("charmed", message);
     var charmeChan = message.guild.channels.get(charmeID);
 
-    var townID = getPlaceInDb("village", message);
+    var townID = dbutils.getPlaceInDb("village", message);
     var village = message.guild.channels.get(townID);
 
     if (win[message.guild.id] != null) gameUtils.Recap(village);
