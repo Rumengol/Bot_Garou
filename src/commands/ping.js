@@ -11,6 +11,5 @@ module.exports = {
   aliases: [],
   execute(client, message, args) {
     message.channel.send("Pong !");
-    console.log(dbutils.getRoleInDb("vivants", message));
   }
 };

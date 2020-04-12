@@ -11,6 +11,9 @@ var methods = {
           datas.vivants[guild.id] +
           "*N'indiquez que le numéro du joueur, par exemple ``0`` pour ne tuer personne.*"
       );
+      var lieu = dbutils.getPlaceInDb("logs", message);
+      var salonLog = message.guild.channels.get(lieu);
+
       var filter = m => datas.inscrits[guild.id].includes(m.author.id);
       var collector2 = message.channel.createCollector(filter);
       collector2.on("collect", mess => {
@@ -27,7 +30,7 @@ var methods = {
           } else {
             var meurtre = theme.potions.Kill.split("|");
             mess.channel.send(meurtre[0] + lui[0].User.username + meurtre[1]);
-            datas.salonLog[guild.id].send(
+            salonLog.send(
               datas.Soso[guild.id] +
                 " a décidé de tuer **" +
                 lui[0].User.username +
@@ -40,9 +43,7 @@ var methods = {
           mess.channel.send(
             "Tu décides que ce n'est pas encore le moment. Peut être une prochaine fois."
           );
-          datas.salonLog[guild.id].send(
-            datas.Soso[guild.id] + " n'a voulu tuer personne."
-          );
+          salonLog.send(datas.Soso[guild.id] + " n'a voulu tuer personne.");
           collector2.stop();
         }
       });

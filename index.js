@@ -138,7 +138,7 @@ bot.login(token);
         else if (
           spliteMessage[0] == prefix + "supadmin" &&
           spliteMessage[1] != null
-        ) {
+        ) {/in
           return;
         }
         //initialisation des rôles admins sur un serveur unique
@@ -384,7 +384,6 @@ bot.login(token);
     console.error(e);
   }
 });*/
-
 
 function UsePotMort() {
   return;

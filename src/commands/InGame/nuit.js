@@ -16,10 +16,10 @@ module.exports = {
   execute(client, message, args) {
     const filter = m =>
       m.author === message.author || datas.adminlist.includes(m.author);
-    const filter2 = m => inscrits[message.guild.id].includes(m.author.id);
+    const filter2 = m => datas.inscrits[message.guild.id].includes(m.author.id);
     const filterSoso = reac =>
       reac.emoji.name === "✅" || reac.emoji.name === "❌";
-    const filterLG = m => joueursLG[message.guild.id].includes(m.author);
+    const filterLG = m => datas.joueursLG[message.guild.id].includes(m.author);
 
     var theme = Presets[datas.theme[message.guild.id]];
     datas.StateOfTheGame[message.guild.id][0] =
@@ -36,6 +36,9 @@ module.exports = {
 
     var vocalID = dbutils.getPlaceInDb("vocal", message);
     var vocalChan = message.guild.channels.get(vocalID);
+
+    var lieu = dbutils.getPlaceInDb("logs", message);
+    var salonLog = message.guild.channels.get(lieu);
 
     var townID = dbutils.getPlaceInDb("village", message);
     var village = message.guild.channels.get(townID);
@@ -98,8 +101,8 @@ module.exports = {
     collector = message.channel.createCollector(filter);
     collector.on(
       "collect",
-      message => {
-        contenu = message.content.toLowerCase();
+      messag => {
+        contenu = messag.content.toLowerCase();
         var spliteMessage = contenu.split(" ");
 
         var embed2 = new Discord.RichEmbed()
@@ -194,14 +197,14 @@ module.exports = {
                     datas.eux[message.guild.id][1].User.username +
                     " sont désormais liés pour la vie... et la mort."
                 );
-                datas.salonLog[message.guild.id].send(
+                salonLog.send(
                   "Les amoureux sont : " +
                     datas.eux[message.guild.id][1].User.username +
                     " et " +
                     datas.eux[message.guild.id][0].User.username +
                     "."
                 );
-                var amour = themeuh.amour.OnLove.split("|");
+                var amour = theme.amour.OnLove.split("|");
                 var chan2 = datas.eux[message.guild.id][0].User.dmChannel;
                 chan2.send(
                   amour[0] +
@@ -275,7 +278,7 @@ module.exports = {
               mess.channel.send(
                 lui[0].User.username + " est **" + lui[0].Role + "**!"
               );
-              logs.send(
+              salonLog.send(
                 item.User +
                   " a observé le joueur " +
                   lui[0].User +
@@ -331,15 +334,15 @@ module.exports = {
                 datas.victime[message.guild.id] +
                 "**, _veux tu la sauver ?_";
               if (datas.potMort[message.guild.id]) {
-                pots = themeuh.potions.Vie + " et " + themeuh.potions.Mort;
+                pots = theme.potions.Vie + " et " + theme.potions.Mort;
               } else {
-                pots = themeuh.potions.Vie;
+                pots = theme.potions.Vie;
               }
             } else if (
               datas.potMort[message.guild.id] &&
               !datas.potVie[message.guild.id]
             ) {
-              pots = themeuh.potions.Mort;
+              pots = theme.potions.Mort;
             }
             chan
               .send(
@@ -369,20 +372,20 @@ module.exports = {
                             datas.victime[message.guild.id] +
                             "** mourra."
                         );
-                        datas.salonLog[message.guild.id].send(
+                        salonLog.send(
                           datas.Soso[message.guild.id] +
                             " n'a protégé personne."
                         );
                         datas.next[message.guild.id] = true;
                         collectorSoso.stop();
                       } else if (reac.emoji.name === "✅") {
-                        var sauvetage = themeuh.potions.Save.split("|");
+                        var sauvetage = theme.potions.Save.split("|");
                         reac.message.channel.send(
                           sauvetage[0] +
                             datas.victime[message.guild.id] +
                             sauvetage[1]
                         );
-                        datas.salonLog[message.guild.id].send(
+                        salonLog.send(
                           datas.Soso[message.guild.id] +
                             " a protégé **" +
                             datas.victime[message.guild.id] +
@@ -397,9 +400,9 @@ module.exports = {
                     }
                   });
                   collectorSoso.on("end", c => {
-                    nightUtils.UsePotMort(mess, message.guild, themeuh);
+                    nightUtils.UsePotMort(mess, message.guild, theme);
                   });
-                } else nightUtils.UsePotMort(mess, message.guild, themeuh);
+                } else nightUtils.UsePotMort(mess, message.guild, theme);
               });
           }
         }
@@ -443,7 +446,7 @@ module.exports = {
                   datas.LG[message.guild.id] +
                   " ne pourra lui faire du mal."
               );
-              logs.send(item.User + " a protégé le joueur " + lui[0].User);
+              salonLog.send(item.User + " a protégé le joueur " + lui[0].User);
               collector2.stop();
             } else {
               mess.channel.send(
@@ -466,7 +469,7 @@ module.exports = {
           var chan = item.User.dmChannel;
           var acharme = [];
           var acharmer = "";
-          var welcome = themeuh.flute.Welcome.split("|");
+          var welcome = theme.flute.Welcome.split("|");
           var distribTemp = [];
           if (datas.charmes[message.guild.id].length === 0) {
             datas.charmes[message.guild.id].push(item.GuildMember);
@@ -522,8 +525,8 @@ module.exports = {
               mess.channel.send(
                 "Personne ne sera " + welcome[1] + " cette nuit."
               );
-              datas.salonLog[message.guild.id].send(
-                item[2] + " n'a " + welcome[1] + " personne cette nuit."
+              salonLog.send(
+                item.User + " n'a " + welcome[1] + " personne cette nuit."
               );
               collector2.stop();
             }
@@ -547,10 +550,10 @@ module.exports = {
                   eux[0].User.username +
                   "** et **" +
                   eux2 +
-                  themeuh.flute.Charme
+                  theme.flute.Charme
               );
-              logs.send(
-                item[2] +
+              salonLog.send(
+                item.User +
                   " a " +
                   welcome[2] +
                   " les joueurs " +

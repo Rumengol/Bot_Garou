@@ -10,7 +10,7 @@ module.exports = {
   canDo: ["All"],
   aliases: [],
   execute(client, message, args) {
-    var contenu = args.join(" ");
+    var contenu = args.join(" ").toLowerCase();
 
     for (var theme in Presets) {
       var role = Presets[theme].roles;

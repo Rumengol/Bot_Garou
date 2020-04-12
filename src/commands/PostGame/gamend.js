@@ -24,7 +24,7 @@ module.exports = {
     var townID = dbutils.getPlaceInDb("village", message);
     var village = message.guild.channels.get(townID);
 
-    if (win[message.guild.id] != null) gameUtils.Recap(village);
+    if (datas.win[message.guild.id] != null) gameUtils.Recap(village);
     else
       message.channel.send(
         "La victoire n'a pas été déclarée, le récapitulatif de la partie ne sera pas affiché."
