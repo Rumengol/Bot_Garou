@@ -309,7 +309,9 @@ module.exports = {
               rolajouer.indexOf(datas.Soso[message.guild.id]),
               1
             );
-            var previct = message.guild.member(message.mentions.users.first());
+            var previct = message.guild.members.get(
+              message.mentions.users.first()
+            );
             //Si previct contient une valeur et non pas "personne"
             if (spliteMessage[1] != "personne" && previct != null) {
               //La victime est désignée par son nom d'utilisateur
@@ -400,9 +402,9 @@ module.exports = {
                     }
                   });
                   collectorSoso.on("end", c => {
-                    nightUtils.UsePotMort(mess, message.guild, theme);
+                    nightUtils.UsePotMort(mess, message.guild, theme, salonLog);
                   });
-                } else nightUtils.UsePotMort(mess, message.guild, theme);
+                } else nightUtils.UsePotMort(mess, message.guild, theme, salonLog);
               });
           }
         }

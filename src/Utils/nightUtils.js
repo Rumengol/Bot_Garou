@@ -2,7 +2,7 @@ const datas = require("../global.js");
 const dbutils = require("./dbUtils.js");
 
 var methods = {
-  UsePotMort: function(message, guild, theme) {
+  UsePotMort: function(message, guild, theme, salonLog) {
     if (datas.potMort[guild.id]) {
       message.channel.send(
         "Sur qui souhaites-tu utiliser " +
@@ -11,8 +11,6 @@ var methods = {
           datas.vivants[guild.id] +
           "*N'indiquez que le numéro du joueur, par exemple ``0`` pour ne tuer personne.*"
       );
-      var lieu = dbutils.getPlaceInDb("logs", message);
-      var salonLog = message.guild.channels.get(lieu);
 
       var filter = m => datas.inscrits[guild.id].includes(m.author.id);
       var collector2 = message.channel.createCollector(filter);
