@@ -50,8 +50,6 @@ module.exports = (client, reac, user) => {
       }
     }
   } catch (e) {
-    reac.message.channel.send(
-      e.message + "\n A ```" + reac.message.content + "```."
-    );
+    console.log(e);
   }
 };

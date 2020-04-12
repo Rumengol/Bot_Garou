@@ -2,6 +2,7 @@ const utils = require("../../Utils/Utils.js");
 const datas = require("../../global.js");
 const Presets = require("../../../themes/Presets.json");
 const dbutils = require("../../Utils/dbUtils.js");
+const voteUtils = require("../../Utils/voteUtils.js");
 
 module.exports = {
   name: "daystart",
@@ -58,7 +59,7 @@ module.exports = {
         message.channel.send("La journée s'achève. Bonne nuit.");
         voteChan.overwritePermissions(vivantRole, { VIEW_CHANNEL: false });
         utils.mute(vivantRole, message);
-        gameUtils.endVote(message);
+        voteUtils.endVote(message);
       }, finpouet);
     }
   }

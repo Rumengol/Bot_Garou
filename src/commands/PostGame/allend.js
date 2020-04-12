@@ -23,7 +23,6 @@ module.exports = {
     var generalID = dbutils.getPlaceInDb("general", message);
     var generalChan = message.guild.channels.get(generalID);
 
-    datas.eux[message.guild.id] = vivantRole.members;
     if (vocalChan === generalChan) {
       message.channel.send(
         "Session terminée, merci d'avoir joué ! A la prochaine fois !"
@@ -33,8 +32,8 @@ module.exports = {
         "Session terminée, merci d'avoir joué ! Les participants seront déplacés dans le salon vocal général d'ici 3 secondes..."
       );
       blep = setTimeout(function() {
-        datas.eux[message.guild.id].forEach(lui => {
-          if (vocalChan.members.has(lui)) lui.setVoiceChannel(generalChan);
+        vivantRole.members.forEach(lui => {
+          if (vocalChan.members.has(lui.id)) lui.setVoiceChannel(generalChan);
           lui.removeRole(vivantRole);
         });
       }, 3000);

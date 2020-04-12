@@ -68,7 +68,7 @@ module.exports = (client, reac, user) => {
             datas.avote[reac.message.guild.id].push(item.User);
           }
           if (
-            luiroles.includes(vivantRole) &&
+            luiroles.includes(vivantID) &&
             datas.votedejour[reac.message.guild.id]
           ) {
             if (!datas.avote[reac.message.guild.id].includes(user)) {
