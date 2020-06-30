@@ -89,6 +89,12 @@ var methods = {
     var vocalID = dbutils.getPlaceInDb("vocal", message);
     var vocal = message.guild.channels.get(vocalID);
 
+    datas.distribRoles[message.guild.id].push(item);
+    datas.distribRolMorts[message.guild.id].splice(
+      datas.distribRolMorts[message.guild.id].indexOf(item),
+      1
+    );
+
     eux = roleMort.members;
     eux.forEach(lui => {
       setTimeout(() => {
@@ -188,14 +194,19 @@ var methods = {
     datas.distribRoles[channel.guild.id].forEach(role => {
       embedRecap.addField(
         role.Victoire,
-        role.User + " était **" + role.Role + "** *(vivant)*."
+        role.User +
+          " était **" +
+          role.Role +
+          "** *(vivant)*. *+" +
+          role.Score +
+          " points*"
       );
     });
 
     datas.distribRolMorts[channel.guild.id].forEach(mort => {
       embedRecap.addField(
         "Perdant",
-        mort.User + " était **" + mort.Role + "** *(mort)*."
+        mort.User + " était **" + mort.Role + "** *(mort)*. *0 point*"
       );
     });
 

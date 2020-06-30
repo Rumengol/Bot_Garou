@@ -46,7 +46,8 @@ var methods = {
         GuildMember: joueur,
         Role: roleRND,
         User: joueur.user,
-        Victoire: "Partie toujours en cours"
+        Victoire: "Partie toujours en cours",
+        Score: 0
       });
       datas.distribution[message.guild.id].splice(
         datas.distribution[message.guild.id].indexOf(roleRND),

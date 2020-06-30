@@ -18,7 +18,9 @@ module.exports = {
     var player = dbUtils.getObjectInDb("ldb", "leaderboard", id);
 
     if (player == undefined)
-      return message.reply("On dirait que tu n'es pas encore classé !");
+      if (args[0] == undefined)
+        return message.reply("cn dirait que tu n'es pas encore classé !");
+      else return message.reply("cet utilisateur n'est pas encore classé !");
 
     var dude = message.guild.members.get(player.id);
     var allRanks = dbUtils.sortByColumn("ldb", "leaderboard", "score");
