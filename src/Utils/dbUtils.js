@@ -103,6 +103,13 @@ var methods = {
       }
     });
     return roleDB;
+  },
+
+  sortByColumn: function(database, table, column) {
+    return this.bases[database]
+      .get(table)
+      .sortBy(column)
+      .value();
   }
 };
 

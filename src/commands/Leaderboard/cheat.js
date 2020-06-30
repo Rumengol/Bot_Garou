@@ -12,7 +12,7 @@ module.exports = {
   execute(client, message, args) {
     rankUtils.scoreUp(message.author.id, parseInt(args[0]));
     message.channel.send(
-      `Score de ${message.author} augmenté de ${args[0]}. C'est triché btw.`
+      `Score de ${message.author} augmenté de ${args[0]}. C'est tricher btw.`
     );
   }
 };

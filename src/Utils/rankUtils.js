@@ -14,7 +14,6 @@ var methods = {
     player.title = this.checkTitle(player);
 
     dbUtils.updateDB("ldb", "leaderboard", player, playerId);
-    console.log("Score up ! Nouveau score : " + player.score);
   },
 
   addNewPlayer: function(playerId) {
