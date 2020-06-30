@@ -1,4 +1,5 @@
 const dbutils = require("../../Utils/dbUtils.js");
+const datas = require("../global.js");
 
 module.exports = {
   name: "revive",
@@ -14,10 +15,26 @@ module.exports = {
     var roleMort = message.guild.roles.get(roleMortID);
     var roleVivID = dbutils.getRoleInDb("vivants", message);
     var roleViv = message.guild.roles.get(roleVivID);
+
+    var item = utils.findObjectInList(
+      datas.distribRolMort[message.guild.id],
+      "GuildMember",
+      lui
+    );
+
+    if (item != undefined) {
+      datas.distribRoles[message.guild.id].push(item);
+      datas.distribRolMort[message.guild.id].splice(
+        datas.distribRolMort[message.guild.id].indexOf(item),
+        1
+      );
+    }
+
     lui.addRole(roleViv);
     setTimeout(() => {
       lui.removeRole(roleMort);
     }, 1000);
+
     var townID = dbutils.getPlaceInDb("village", message);
     var town = message.guild.channels.get(townID);
     town.send(lui + " a ressuscité !");

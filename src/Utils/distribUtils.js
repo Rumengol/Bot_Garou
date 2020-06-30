@@ -26,12 +26,12 @@ var methods = {
       for (let i = 0; i < item.Quantite; i++) {
         datas.distribution[message.guild.id].push(item.Name);
       }
-      var obj = {
-        guild: message.guild.id,
-        id: number,
-        compo: datas.distribution[message.guild.id]
-      };
-      dbutils.writeInDb("comp", "composition", obj);
+      // var obj = {
+      //   guild: message.guild.id,
+      //   id: number,
+      //   compo: datas.distribution[message.guild.id]
+      // };
+      // dbutils.writeInDb("comp", "composition", obj);
     });
     datas.inscrits[message.guild.id].forEach(inscrit => {
       var rnd = Math.floor(
