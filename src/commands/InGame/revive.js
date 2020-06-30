@@ -1,5 +1,5 @@
 const dbutils = require("../../Utils/dbUtils.js");
-const datas = require("../global.js");
+const datas = require("../../global.js");
 
 module.exports = {
   name: "revive",

@@ -3,24 +3,24 @@ const FileSync = require("lowdb/adapters/FileSync");
 const adapter = new FileSync("adminrole.json");
 const db = low(adapter);
 
-const adeupter = new FileSync("composition.json");
-const comp = low(adeupter);
+const adeupter = new FileSync("leaderboard.json");
+const ldb = low(adeupter);
 
 db.defaults({ administrateurs: [] }).write();
 db.defaults({ ministrateurs: [] }).write();
 db.defaults({ salons: [] }).write();
 db.defaults({ roles: [] }).write();
 
-comp.defaults({ composition: [] }).write();
+ldb.defaults({ leaderboard: [] }).write();
 
 var methods = {
   bases: {
     db,
-    comp
+    ldb
   },
   /**
    * Récupère toutes les valeurs d'une colonne de la lowdb
-   * @param {string} database La base de données à utiliser, entre db et comp
+   * @param {string} database La base de données à utiliser, entre db et ldb
    * @param {string} table La table à utiliser
    * @param {string} colonne La colonne à récupérer
    */
@@ -28,6 +28,13 @@ var methods = {
     return this.bases[database]
       .get(table)
       .map(colonne)
+      .value();
+  },
+
+  getObjectInDb: function(database, table, objectId) {
+    return this.bases[database]
+      .get(table)
+      .find({ id: objectId })
       .value();
   },
 
@@ -42,6 +49,15 @@ var methods = {
     this.bases[database]
       .get(table)
       .remove(object)
+      .write();
+  },
+
+  updateDB: function(database, table, object, id) {
+    var origin = this.getObjectInDb(database, table, id);
+    this.bases[database]
+      .get(table)
+      .find(origin)
+      .assign(object)
       .write();
   },
 
