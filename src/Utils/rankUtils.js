@@ -29,7 +29,7 @@ var methods = {
   },
 
   checkTitle: function(player) {
-    switch (player.score) {
+    switch (player.xp) {
       case 1:
         return "Agneau";
       case 11:

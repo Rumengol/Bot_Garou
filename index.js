@@ -3,7 +3,7 @@
 //Rajouter une image au début du jour avec les joueurs vivants & morts (sous forme de tombe) avec pseudos : c'pas demain la veille
 //Permettre une configuration personnalisée
 //LE SITE
-//Système de leveling
+//Système de leveling :> Prémices
 
 //TODO URGENT :
 //Le bot donne plus accès à la tanière :> strange

@@ -168,9 +168,12 @@ var methods = {
           datas.BE[message.guild.id]
         } a choisi dans son dernier souffle. Seuls ${annonce} pourront voter demain.`
       );
+      //Ajoute les rôles choisis à la liste des bannis de vote
       datas.banniDeVote[message.guild.id].concat(choix);
-      //console.log(banniDeVote[message.guild.id]);
-      //console.log(choix)
+
+      console.log(banniDeVote[message.guild.id]);
+      console.log(choix);
+
       datas.jourBE[message.guild.id] = true;
       collector.stop();
     });

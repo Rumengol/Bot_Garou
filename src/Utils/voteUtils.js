@@ -90,6 +90,23 @@ module.exports = {
         return;
       }
       gameUtils.Kill(message, item.GuildMember);
+
+      if (datas.jourBE[message.guild.id]) {
+        datas.jourBE[message.guild.id] = false;
+        datas.banniDeVote[message.guild.id] = [];
+
+        if (!datas.IDVcache[message.guild.id]) {
+          var item = utils.findObjectInList(
+            datas.distribRoles[message.guild.id],
+            "Role",
+            datas.IDV[message.guild.id]
+          );
+
+          if (item != undefined) {
+            datas.banniDeVote[message.guild.id].push(item);
+          }
+        }
+      }
     }
   },
 
